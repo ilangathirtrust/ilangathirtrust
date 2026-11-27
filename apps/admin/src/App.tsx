@@ -64,6 +64,7 @@ const MOBILE_BOTTOM_IDS = new Set(['overview', 'pages', 'events', 'gallery', 'do
 export default function App() {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [authError, setAuthError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toast, setToast] = useState<{ text: string; isErr?: boolean } | null>(null);
@@ -74,6 +75,7 @@ export default function App() {
   };
 
   async function verifySession() {
+    setAuthError('');
     if (!isSupabaseConfigured()) {
       setCheckingAuth(false);
       return;
@@ -86,9 +88,11 @@ export default function App() {
         return;
       }
       const res = await adminApi<{ admin: AdminUser }>('/me');
+      setAuthError('');
       setAdminUser(res.admin);
-    } catch {
+    } catch (err) {
       setAdminUser(null);
+      setAuthError(err instanceof Error ? err.message : 'Unable to verify admin access.');
     } finally {
       setCheckingAuth(false);
     }
@@ -123,7 +127,7 @@ export default function App() {
   }
 
   if (!adminUser) {
-    return <LoginPage onSuccess={verifySession} />;
+    return <LoginPage onSuccess={verifySession} externalError={authError} />;
   }
 
   const currentNav = NAV_ITEMS.find((n) => n.id === activeTab) || NAV_ITEMS[0];

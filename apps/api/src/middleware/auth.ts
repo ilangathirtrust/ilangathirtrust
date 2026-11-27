@@ -44,8 +44,23 @@ export async function requireAdminAuth(req: Request, res: Response, next: NextFu
       .eq('id', userData.user.id)
       .maybeSingle();
 
-    if (roleError || !adminRecord || !adminRecord.is_active) {
-      res.status(403).json({ error: 'Account is not authorized for admin portal access.' });
+    if (roleError) {
+      console.error('[Auth] Failed querying admin_users:', roleError.code, roleError.message);
+      res.status(403).json({
+        error: `Admin role check failed (${roleError.code || 'db_error'}). Verify SUPABASE_SERVICE_ROLE_KEY and v009 grants.`
+      });
+      return;
+    }
+
+    if (!adminRecord) {
+      res.status(403).json({
+        error: 'Signed-in user is not registered in public.admin_users.'
+      });
+      return;
+    }
+
+    if (!adminRecord.is_active) {
+      res.status(403).json({ error: 'Admin account is deactivated.' });
       return;
     }
 

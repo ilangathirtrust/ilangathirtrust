@@ -2,7 +2,7 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import cors from 'cors';
 import * as helmetModule from 'helmet';
 import multer from 'multer';
-import { env, isRazorpayConfigured, isSupabaseConfigured } from './config/env.js';
+import { env, isRazorpayConfigured, isServiceRoleKeyLikelyValid, isSupabaseConfigured } from './config/env.js';
 import { getSupabaseAdmin } from './config/supabase.js';
 import { adminRouter } from './routes/admin.js';
 import { donationsRouter } from './routes/donations.js';
@@ -81,6 +81,7 @@ export function createApp() {
         hasSupabaseUrl: Boolean(env.SUPABASE_URL),
         hasSupabaseAnonKey: Boolean(env.SUPABASE_ANON_KEY),
         hasSupabaseServiceRoleKey: Boolean(env.SUPABASE_SERVICE_ROLE_KEY),
+        serviceRoleKeyValid: isServiceRoleKeyLikelyValid(),
         hasRazorpayKeyId: Boolean(env.RAZORPAY_KEY_ID),
         hasRazorpayKeySecret: Boolean(env.RAZORPAY_KEY_SECRET),
         hasRazorpayWebhookSecret: Boolean(env.RAZORPAY_WEBHOOK_SECRET)

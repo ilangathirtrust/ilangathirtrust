@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { AlertCircle, Eye, EyeOff, Loader2, Lock } from 'lucide-react';
 import { getSupabaseClient, isSupabaseConfigured, PUBLIC_SITE_URL } from '../lib/supabase';
 
-export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
+export function LoginPage({ onSuccess, externalError }: { onSuccess: () => void; externalError?: string }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const displayError = error || externalError || '';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -87,10 +88,10 @@ export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
             </div>
           </label>
 
-          {error && (
+          {displayError && (
             <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{error}</span>
+              <span>{displayError}</span>
             </div>
           )}
 

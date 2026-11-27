@@ -64,3 +64,20 @@ export function isRazorpayConfigured(): boolean {
     !env.RAZORPAY_KEY_ID.includes('your_key_id')
   );
 }
+
+export function isServiceRoleKeyLikelyValid(): boolean {
+  const key = env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) return false;
+  if (key.startsWith('sb_secret_')) return true;
+  if (key.startsWith('sb_publishable_')) return false;
+  const parts = key.split('.');
+  if (parts.length === 3) {
+    try {
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')) as { role?: string };
+      return payload.role === 'service_role';
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
