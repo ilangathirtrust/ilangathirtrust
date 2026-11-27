@@ -10,7 +10,6 @@ import {
   HeartHandshake,
   MapPin,
   ShieldCheck,
-  Sparkles,
   Target,
   Users
 } from 'lucide-react';
@@ -80,19 +79,19 @@ export default async function HomePage({
 
   const heroEyebrow =
     (homePage && pickLocalized(homePage as unknown as Record<string, unknown>, 'hero_eyebrow', lang)) ||
-    (lang === 'ta' ? 'செயலில் கருணை • திண்டுக்கல், தமிழ்நாடு' : 'COMPASSION IN ACTION • DINDIGUL, TAMIL NADU');
+    (lang === 'ta' ? 'V. கல்லுப்பட்டி, திண்டுக்கல் • தமிழ்நாடு' : 'V. Kallupatti, Dindigul • Tamil Nadu');
 
   const heroTitle =
     (homePage && pickLocalized(homePage as unknown as Record<string, unknown>, 'hero_title', lang)) ||
     (lang === 'ta'
-      ? 'ஒன்றிணைந்து, அக்கறையும் வலிமையும் கொண்ட நாளையை உருவாக்குவோம்.'
-      : 'Together, we build a caring & empowered tomorrow.');
+      ? 'நலமான சமுதாயத்தை உருவாக்க, அனைவரும் இணைந்து செயல்படுவோம்.'
+      : 'Serving communities with care and responsibility.');
 
   const heroSubtitle =
     (homePage && pickLocalized(homePage as unknown as Record<string, unknown>, 'hero_subtitle', lang)) ||
     (lang === 'ta'
-      ? 'கல்வி உதவி, மருத்துவ முகாம்கள், சுற்றுச்சூழல் பாதுகாப்பு மற்றும் தன்னார்வப் பணிகள் மூலம் தமிழ்நாடு முழுவதும் உள்ள மக்களுக்கு இளங்கதிர் அறக்கட்டளை சேவை செய்கிறது.'
-      : 'Ilangathir Trust serves communities across Tamil Nadu through education support, medical outreach, environmental care, and collective volunteer action.');
+      ? 'கல்வி உதவி, இலவச மருத்துவ முகாம், மரம் நடுதல் மற்றும் சமூக நலப் பணிகளில் இளங்கதிர் அறக்கட்டளை தொடர்ந்து செயல்பட்டு வருகிறது.'
+      : 'Ilangathir Trust works across Tamil Nadu to support student education, medical outreach, tree planting, and timely relief for families in need.');
 
   const heroImage = homePage?.hero_image_url || '/assets/herosection.png';
   const primaryCtaLabel =
@@ -129,21 +128,20 @@ export default async function HomePage({
         />
       )}
 
-      {/* 1. EDITORIAL HERO SECTION (Asymmetric Ivory & Navy Craft) */}
-      <section className="relative overflow-hidden border-b border-stone-200 bg-ivory-100">
-        <div className="container-max py-12 sm:py-16 lg:py-20">
+      {/* 1. CLEAN INSTITUTIONAL HERO */}
+      <section className="border-b border-slate-200 bg-white">
+        <div className="container-max py-10 sm:py-14 lg:py-16">
           <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
-            <div className="animate-fadeInUp space-y-6 lg:col-span-7">
-              <span className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-brand-900 shadow-xs">
-                <span className="h-2 w-2 rounded-full bg-amberwarm-500" />
-                <span>{heroEyebrow}</span>
-              </span>
+            <div className="space-y-6 lg:col-span-7">
+              <p className="text-xs font-bold uppercase tracking-wider text-brand-700">
+                {heroEyebrow}
+              </p>
 
               <h1
-                className={`font-heading font-extrabold text-brand-950 ${
+                className={`font-heading font-extrabold text-slate-900 ${
                   lang === 'ta'
-                    ? 'text-2xl leading-[1.42] sm:text-4xl lg:text-[42px]'
-                    : 'text-3xl leading-[1.14] tracking-tight sm:text-5xl lg:text-[52px]'
+                    ? 'text-2xl leading-[1.38] sm:text-4xl lg:text-[42px]'
+                    : 'text-3xl leading-[1.15] tracking-tight sm:text-5xl lg:text-[50px]'
                 }`}
               >
                 {heroTitle}
@@ -153,87 +151,78 @@ export default async function HomePage({
                 {heroSubtitle}
               </p>
 
-              <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
                 <Link
                   href={primaryCtaHref}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-brand-600/20 transition hover:-translate-y-0.5 hover:bg-brand-700"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-brand-700"
                 >
                   <Heart className="h-4 w-4 shrink-0" />
                   <span>{primaryCtaLabel}</span>
                 </Link>
                 <Link
                   href={secondaryCtaHref}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-900 shadow-xs transition hover:border-brand-300 hover:bg-ivory-200"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:border-brand-400 hover:text-brand-700"
                 >
                   <span>{secondaryCtaLabel}</span>
                   <ArrowRight className="h-4 w-4 shrink-0" />
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 border-t border-stone-200 pt-6 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-5 border-t border-slate-200 pt-6 sm:grid-cols-3">
                 <div>
-                  <p className="font-heading text-lg font-extrabold text-brand-900">100%</p>
-                  <p className="text-xs font-medium text-slate-600">
-                    {lang === 'ta' ? 'வெளிப்படையான சேவை' : 'Community-Focused'}
+                  <p className="font-heading text-base font-bold text-slate-900">
+                    {lang === 'ta' ? 'பதிவு பெற்ற அறக்கட்டளை' : 'Registered Trust'}
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-slate-600">
+                    {lang === 'ta' ? 'திண்டுக்கல், தமிழ்நாடு' : 'V. Kallupatti, Dindigul'}
                   </p>
                 </div>
                 <div>
-                  <p className="font-heading text-lg font-extrabold text-brand-900">V. Kallupatti</p>
-                  <p className="text-xs font-medium text-slate-600">
-                    {lang === 'ta' ? 'திண்டுக்கல், தமிழ்நாடு' : 'Dindigul, Tamil Nadu'}
+                  <p className="font-heading text-base font-bold text-slate-900">
+                    {lang === 'ta' ? 'முக்கியப் பணிகள்' : 'Core Focus'}
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-slate-600">
+                    {lang === 'ta' ? 'கல்வி • மருத்துவம் • உதவி' : 'Education • Health • Relief'}
                   </p>
                 </div>
                 <div className="col-span-2 sm:col-span-1">
-                  <p className="font-heading text-lg font-extrabold text-amberwarm-700">Razorpay</p>
-                  <p className="text-xs font-medium text-slate-600">
-                    {lang === 'ta' ? 'பாதுகாப்பான நன்கொடை' : 'Verified Online Giving'}
+                  <p className="font-heading text-base font-bold text-slate-900">
+                    {lang === 'ta' ? 'முறையான ரசீது' : 'Direct Receipts'}
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-slate-600">
+                    {lang === 'ta' ? 'பாதுகாப்பான ஆன்லைன் உதவி' : 'Verified Online Donations'}
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="lg:col-span-5">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                <div className="overflow-hidden rounded-[28px] border-[6px] border-white bg-ivory-200 shadow-[0_24px_60px_rgba(14,27,77,0.12)]">
-                  <img
-                    src={heroImage}
-                    alt={heroTitle}
-                    className="h-72 w-full object-cover sm:h-[420px]"
-                  />
-                </div>
-                <div className="mt-4 flex items-center gap-3.5 rounded-2xl border border-stone-200 bg-white p-4 shadow-lg sm:absolute sm:-bottom-5 sm:-left-5 sm:mt-0 sm:max-w-xs">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amberwarm-100 text-amberwarm-700">
-                    <HeartHandshake className="h-5 w-5" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-heading text-sm font-bold text-slate-900">
-                      {lang === 'ta' ? 'மனிதநேயப் பணி' : 'Human Dignity First'}
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      {lang === 'ta' ? 'கல்வி • மருத்துவம் • நலன்' : 'Education • Health • Relief'}
-                    </p>
-                  </div>
-                </div>
+              <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm lg:max-w-none">
+                <img
+                  src={heroImage}
+                  alt={heroTitle}
+                  className="h-72 w-full object-cover sm:h-[420px]"
+                />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. FOUR PILLARS BAR */}
-      <section className="border-b border-stone-200 bg-white py-10">
+      {/* 2. FOUR PRINCIPLES */}
+      <section className="border-b border-slate-200 bg-white py-10">
         <div className="container-max">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: Heart, color: 'bg-tealcare-50 text-tealcare-700', title: ui.valCompassionTitle, desc: ui.valCompassionDesc },
-              { icon: ShieldCheck, color: 'bg-amberwarm-50 text-amberwarm-700', title: ui.valEqualityTitle, desc: ui.valEqualityDesc },
-              { icon: Users, color: 'bg-brand-50 text-brand-700', title: ui.valCommunityTitle, desc: ui.valCommunityDesc },
-              { icon: Sparkles, color: 'bg-ivory-200 text-brand-900', title: ui.valTransparencyTitle, desc: ui.valTransparencyDesc }
+              { icon: Heart, title: ui.valCompassionTitle, desc: ui.valCompassionDesc },
+              { icon: ShieldCheck, title: ui.valEqualityTitle, desc: ui.valEqualityDesc },
+              { icon: Users, title: ui.valCommunityTitle, desc: ui.valCommunityDesc },
+              { icon: HeartHandshake, title: ui.valTransparencyTitle, desc: ui.valTransparencyDesc }
             ].map((val, i) => {
               const Icon = val.icon;
               return (
-                <div key={i} className="flex items-start gap-3.5 rounded-2xl border border-stone-100 bg-ivory-50 p-4">
-                  <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${val.color}`}>
+                <div key={i} className="flex items-start gap-3.5 rounded-2xl border border-slate-200 bg-white p-5">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
                     <Icon className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
@@ -247,38 +236,35 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* 3. DYNAMIC MARQUEE SHOWCASE */}
+      {/* 3. MARQUEE SHOWCASE */}
       <ActivityMarquee items={marquee} />
 
-      {/* 4. FOUNDER, VISION & MISSION (Editorial Split) */}
-      <section className="bg-ivory-100 py-16 lg:py-20">
+      {/* 4. FOUNDER, VISION & MISSION */}
+      <section className="border-b border-slate-200 bg-white py-14 lg:py-16">
         <div className="container-max">
           <div className="grid items-center gap-10 lg:grid-cols-12">
             <div className="lg:col-span-5">
-              <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white p-3 shadow-md">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-3">
                 <img
                   src={founderImg}
                   alt={founderName}
                   loading="lazy"
-                  className="h-80 w-full rounded-2xl object-cover object-top sm:h-96"
+                  className="h-80 w-full rounded-xl object-cover object-top sm:h-96"
                 />
-                <div className="mt-3 rounded-2xl bg-brand-950 p-4 text-white">
-                  <p className="font-heading text-base font-bold">{founderName}</p>
-                  <p className="text-xs font-medium text-amberwarm-300">{founderRole}</p>
+                <div className="mt-3 px-2 pb-1">
+                  <p className="font-heading text-base font-bold text-slate-900">{founderName}</p>
+                  <p className="text-xs font-semibold text-brand-700">{founderRole}</p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-6 lg:col-span-7">
               <div>
-                <span className="section-kicker">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amberwarm-500" />
-                  {ui.founderEyebrow}
-                </span>
-                <h2 className="mt-2 font-heading text-2xl font-bold text-brand-950 sm:text-4xl">
+                <span className="section-kicker">{ui.founderEyebrow}</span>
+                <h2 className="mt-2 font-heading text-2xl font-bold text-slate-900 sm:text-3xl">
                   {ui.founderTitle}
                 </h2>
-                <p className="mt-4 text-base leading-relaxed text-slate-600">{founderBio}</p>
+                <p className="mt-3 text-base leading-relaxed text-slate-600">{founderBio}</p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -290,7 +276,7 @@ export default async function HomePage({
                   <p className="mt-1.5 flex-1 text-sm text-slate-600">{vision}</p>
                 </div>
                 <div className="editorial-card flex flex-col p-5">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amberwarm-50 text-amberwarm-700">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-800">
                     <Target className="h-5 w-5" />
                   </span>
                   <h3 className="mt-3 font-heading text-base font-bold text-slate-900">{ui.missionTitle}</h3>
@@ -311,26 +297,23 @@ export default async function HomePage({
       </section>
 
       {/* 5. ACTIVITIES PREVIEW */}
-      <section className="border-y border-stone-200 bg-white py-16 lg:py-20">
+      <section className="border-b border-slate-200 bg-white py-14 lg:py-16">
         <div className="container-max">
-          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <span className="section-kicker">
-                <span className="h-1.5 w-1.5 rounded-full bg-amberwarm-500" />
-                {ui.activitiesEyebrow}
-              </span>
-              <h2 className="mt-2 font-heading text-2xl font-bold text-brand-950 sm:text-3xl">
+              <span className="section-kicker">{ui.activitiesEyebrow}</span>
+              <h2 className="mt-1.5 font-heading text-2xl font-bold text-slate-900 sm:text-3xl">
                 {ui.activitiesTitle}
               </h2>
             </div>
-            <Link href="/activities" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
+            <Link href="/activities" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 hover:text-brand-900">
               <span>{ui.viewAll}</span>
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
 
           {activitiesRes.items.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-ivory-50 p-10 text-center text-sm text-slate-600">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-600">
               {ui.emptyActivities}
             </div>
           ) : (
@@ -344,19 +327,19 @@ export default async function HomePage({
                 return (
                   <article key={act.id} className="editorial-card flex h-full flex-col overflow-hidden">
                     {act.image_url && (
-                      <div className="h-48 overflow-hidden bg-ivory-200">
+                      <div className="h-48 overflow-hidden bg-slate-100">
                         <img src={act.image_url} alt={title} loading="lazy" className="h-full w-full object-cover" />
                       </div>
                     )}
                     <div className="flex flex-1 flex-col p-5">
-                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-amberwarm-700">
+                      <span className="text-xs font-bold uppercase tracking-wider text-brand-700">
                         {act.category}
                       </span>
                       <h3 className="mt-2 font-heading text-lg font-bold text-slate-900">{title}</h3>
                       <p className="mt-2 line-clamp-3 flex-1 text-sm text-slate-600">{summary}</p>
                       {location && (
                         <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                          <MapPin className="h-3.5 w-3.5 shrink-0 text-amberwarm-600" />
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                           <span>{location}</span>
                         </p>
                       )}
@@ -370,26 +353,23 @@ export default async function HomePage({
       </section>
 
       {/* 6. EVENTS PREVIEW */}
-      <section className="bg-ivory-100 py-16 lg:py-20">
+      <section className="border-b border-slate-200 bg-white py-14 lg:py-16">
         <div className="container-max">
-          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <span className="section-kicker">
-                <span className="h-1.5 w-1.5 rounded-full bg-amberwarm-500" />
-                {ui.eventsEyebrow}
-              </span>
-              <h2 className="mt-2 font-heading text-2xl font-bold text-brand-950 sm:text-3xl">
+              <span className="section-kicker">{ui.eventsEyebrow}</span>
+              <h2 className="mt-1.5 font-heading text-2xl font-bold text-slate-900 sm:text-3xl">
                 {ui.eventsTitle}
               </h2>
             </div>
-            <Link href="/events" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
+            <Link href="/events" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 hover:text-brand-900">
               <span>{ui.viewAll}</span>
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
 
           {eventsRes.items.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-10 text-center text-sm text-slate-600">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-600">
               {ui.emptyUpcomingEvents}
             </div>
           ) : (
@@ -403,7 +383,7 @@ export default async function HomePage({
                     href={`/events/${ev.slug}`}
                     className="editorial-card group flex h-full flex-col overflow-hidden"
                   >
-                    <div className="relative h-48 overflow-hidden bg-ivory-200">
+                    <div className="relative h-48 overflow-hidden bg-slate-100">
                       {ev.banner_url ? (
                         <img src={ev.banner_url} alt={title} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                       ) : (
@@ -411,7 +391,7 @@ export default async function HomePage({
                           <Calendar className="h-10 w-10" />
                         </div>
                       )}
-                      <span className="absolute left-3 top-3 rounded-lg bg-white/95 px-2.5 py-1 text-xs font-bold text-brand-900 shadow">
+                      <span className="absolute left-3 top-3 rounded-lg bg-white/95 px-2.5 py-1 text-xs font-bold text-slate-900 shadow-xs">
                         {ev.event_date}
                       </span>
                     </div>
@@ -428,26 +408,23 @@ export default async function HomePage({
       </section>
 
       {/* 7. GALLERY FOLDERS PREVIEW */}
-      <section className="border-y border-stone-200 bg-white py-16 lg:py-20">
+      <section className="border-b border-slate-200 bg-white py-14 lg:py-16">
         <div className="container-max">
-          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <span className="section-kicker">
-                <span className="h-1.5 w-1.5 rounded-full bg-amberwarm-500" />
-                {ui.galleryEyebrow}
-              </span>
-              <h2 className="mt-2 font-heading text-2xl font-bold text-brand-950 sm:text-3xl">
+              <span className="section-kicker">{ui.galleryEyebrow}</span>
+              <h2 className="mt-1.5 font-heading text-2xl font-bold text-slate-900 sm:text-3xl">
                 {ui.galleryTitle}
               </h2>
             </div>
-            <Link href="/gallery" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
+            <Link href="/gallery" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 hover:text-brand-900">
               <span>{ui.viewAll}</span>
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
 
           {galleryRes.items.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-ivory-50 p-10 text-center text-sm text-slate-600">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-600">
               {ui.emptyGalleryFolders}
             </div>
           ) : (
@@ -461,26 +438,23 @@ export default async function HomePage({
       </section>
 
       {/* 8. BLOG PREVIEW */}
-      <section className="bg-ivory-100 py-16 lg:py-20">
+      <section className="bg-white py-14 lg:py-16">
         <div className="container-max">
-          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <span className="section-kicker">
-                <span className="h-1.5 w-1.5 rounded-full bg-amberwarm-500" />
-                {ui.blogEyebrow}
-              </span>
-              <h2 className="mt-2 font-heading text-2xl font-bold text-brand-950 sm:text-3xl">
+              <span className="section-kicker">{ui.blogEyebrow}</span>
+              <h2 className="mt-1.5 font-heading text-2xl font-bold text-slate-900 sm:text-3xl">
                 {ui.blogTitle}
               </h2>
             </div>
-            <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
+            <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 hover:text-brand-900">
               <span>{ui.viewAll}</span>
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
 
           {blogsRes.items.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-10 text-center text-sm text-slate-600">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-600">
               {ui.emptyBlogs}
             </div>
           ) : (
@@ -494,7 +468,7 @@ export default async function HomePage({
                     href={`/blog/${post.slug}`}
                     className="editorial-card group flex h-full flex-col overflow-hidden"
                   >
-                    <div className="h-48 overflow-hidden bg-ivory-200">
+                    <div className="h-48 overflow-hidden bg-slate-100">
                       {post.featured_image_url ? (
                         <img src={post.featured_image_url} alt={title} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                       ) : (
@@ -518,32 +492,30 @@ export default async function HomePage({
       {/* 9. AEO FAQ */}
       <FaqSection faqs={faqs} />
 
-      {/* 10. EDITORIAL DONATION CTA BANNER */}
-      <section className="bg-brand-950 py-16 text-white">
+      {/* 10. CLEAN CTA SECTION */}
+      <section className="border-t border-slate-200 bg-white py-14">
         <div className="container-max">
-          <div className="flex flex-col items-start justify-between gap-8 rounded-3xl border border-white/10 bg-brand-900/70 p-8 sm:p-12 lg:flex-row lg:items-center">
+          <div className="flex flex-col items-start justify-between gap-8 rounded-2xl border border-slate-200 bg-slate-50 p-8 sm:p-12 lg:flex-row lg:items-center">
             <div className="max-w-2xl">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-amberwarm-300">
-                {ui.ctaBannerEyebrow}
-              </span>
-              <h2 className="mt-2 font-heading text-2xl font-bold text-white sm:text-4xl">
+              <span className="section-kicker">{ui.ctaBannerEyebrow}</span>
+              <h2 className="mt-2 font-heading text-2xl font-bold text-slate-900 sm:text-3xl">
                 {ui.ctaBannerTitle}
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-300 sm:text-base">
+              <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
                 {ui.ctaBannerSubtitle}
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="/donate"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amberwarm-500 px-6 py-3.5 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-amberwarm-400"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-brand-700"
               >
                 <Heart className="h-4 w-4 shrink-0" />
                 <span>{ui.donateNow}</span>
               </Link>
               <Link
                 href="/contact#volunteer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/20"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:border-brand-400 hover:text-brand-700"
               >
                 <span>{ui.volunteer}</span>
                 <ArrowRight className="h-4 w-4 shrink-0" />

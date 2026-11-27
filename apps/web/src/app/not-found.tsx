@@ -3,8 +3,8 @@ import { ArrowRight, Compass, Home } from 'lucide-react';
 
 export default function NotFoundPage() {
   return (
-    <section className="mx-auto flex min-h-[60vh] max-w-2xl items-center justify-center px-4 py-16">
-      <div className="w-full rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm sm:p-12">
+    <section className="container-max flex min-h-[60vh] items-center justify-center py-16">
+      <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-12">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
           <Compass className="h-7 w-7" />
         </div>

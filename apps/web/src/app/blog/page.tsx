@@ -48,7 +48,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
         icon={BookOpen}
       />
 
-      <section className="bg-ivory-100 py-14 lg:py-20">
+      <section className="bg-white py-14 lg:py-16">
         <div className="container-max">
           <BlogExplorer initialData={blogsData} />
         </div>

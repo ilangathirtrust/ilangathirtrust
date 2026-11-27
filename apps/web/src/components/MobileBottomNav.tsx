@@ -74,8 +74,8 @@ export function MobileBottomNav({ navItems }: { navItems: NavigationItem[] }) {
                       ? 'bg-brand-700 text-white shadow-sm'
                       : 'bg-brand-600 text-white shadow-sm'
                     : isActive
-                    ? 'bg-ivory-200 text-brand-900 font-bold'
-                    : 'text-slate-600 hover:bg-ivory-100 hover:text-slate-900'
+                    ? 'bg-brand-50 text-brand-700 font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 <IconComponent className="h-4 w-4 shrink-0" strokeWidth={2.2} />

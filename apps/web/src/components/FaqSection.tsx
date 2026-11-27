@@ -14,19 +14,16 @@ export function FaqSection({ faqs }: { faqs: BilingualFaq[] }) {
   if (!faqs || !faqs.length) return null;
 
   return (
-    <section className="border-t border-stone-200 bg-ivory-200/50 py-16 lg:py-20">
+    <section className="border-t border-slate-200 bg-white py-14 lg:py-16">
       <div className="container-max">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="section-kicker">
-            <span className="h-1.5 w-1.5 rounded-full bg-amberwarm-500" />
-            {ui.faqEyebrow}
-          </span>
-          <h2 className="mt-2 font-heading text-2xl font-bold text-brand-950 sm:text-3xl">
+        <div className="mx-auto max-w-4xl text-center">
+          <span className="section-kicker">{ui.faqEyebrow}</span>
+          <h2 className="mt-2 font-heading text-2xl font-bold text-slate-900 sm:text-3xl">
             {ui.faqTitle}
           </h2>
         </div>
 
-        <div className="mx-auto mt-10 max-w-3xl space-y-3">
+        <div className="mx-auto mt-10 max-w-4xl space-y-3">
           {faqs.map((faq, idx) => {
             const isOpen = openIdx === idx;
             const q = lang === 'ta' && faq.question_ta ? faq.question_ta : faq.question_en;

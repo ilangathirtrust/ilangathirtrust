@@ -93,8 +93,8 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
       if (!window.Razorpay) {
         throw new Error(
           lang === 'ta'
-            ? 'Razorpay கட்டண சாளரம் ஏற்றப்படவில்லை. மீண்டும் முயற்சிக்கவும்.'
-            : 'Razorpay checkout script failed to load. Please refresh and try again.'
+            ? 'ஆன்லைன் கட்டணப் பக்கம் திறக்கப்படவில்லை. மீண்டும் முயற்சிக்கவும்.'
+            : 'Online payment checkout could not load. Please refresh and try again.'
         );
       }
 
@@ -254,9 +254,9 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
             <h2 className="font-heading text-2xl font-bold text-slate-900">{ui.donateTitle}</h2>
             <p className="mt-1 text-sm text-slate-600">{ui.donateSubtitle}</p>
           </div>
-          <span className="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 sm:inline-flex">
-            <ShieldCheck className="h-4 w-4" />
-            Razorpay Secured
+          <span className="hidden items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 sm:inline-flex">
+            <ShieldCheck className="h-4 w-4 text-brand-700" />
+            {lang === 'ta' ? 'பாதுகாப்பான கட்டணம்' : 'Encrypted Payment'}
           </span>
         </div>
 

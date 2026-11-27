@@ -15,48 +15,25 @@ export function PageHeader({
   eyebrow,
   title,
   subtitle,
-  icon: Icon,
-  dark = false
+  icon: Icon
 }: PageHeaderProps) {
   return (
-    <section
-      className={
-        dark
-          ? 'border-b border-brand-900/20 bg-brand-950 py-12 text-white lg:py-16'
-          : 'border-b border-stone-200/90 bg-ivory-200/70 py-12 text-slate-900 lg:py-16'
-      }
-    >
+    <section className="border-b border-slate-200 bg-white py-10 text-slate-900 lg:py-14">
       <div className="container-max">
-        <div className={dark ? '[&_a]:text-slate-300 [&_span]:text-white [&_svg]:text-slate-400' : ''}>
-          <Breadcrumbs items={crumbs} />
-        </div>
+        <Breadcrumbs items={crumbs} />
 
-        <div className="mt-2 max-w-3xl">
-          <span
-            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider ${
-              dark
-                ? 'border border-white/15 bg-white/10 text-amberwarm-300'
-                : 'border border-stone-300/80 bg-white text-amberwarm-700'
-            }`}
-          >
+        <div className="mt-2 max-w-4xl">
+          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-700">
             {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
             <span>{eyebrow}</span>
           </span>
 
-          <h1
-            className={`mt-4 font-heading text-3xl font-extrabold sm:text-4xl lg:text-[46px] lg:leading-[1.18] ${
-              dark ? 'text-white' : 'text-brand-950'
-            }`}
-          >
+          <h1 className="mt-3 font-heading text-3xl font-extrabold text-slate-900 sm:text-4xl lg:text-[42px] lg:leading-[1.18]">
             {title}
           </h1>
 
           {subtitle && (
-            <p
-              className={`mt-4 text-base leading-relaxed sm:text-lg ${
-                dark ? 'text-slate-300' : 'text-slate-600'
-              }`}
-            >
+            <p className="mt-3 text-base leading-relaxed text-slate-600 sm:text-lg">
               {subtitle}
             </p>
           )}

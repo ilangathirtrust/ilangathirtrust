@@ -10,10 +10,10 @@
   }
 
   body {
-    @apply bg-ivory-100 text-slate-900 antialiased;
+    @apply bg-white text-slate-900 antialiased;
     overflow-x: clip;
     font-family: var(--font-inter), var(--font-tamil), system-ui, sans-serif;
-    line-height: 1.68;
+    line-height: 1.65;
   }
 
   h1, h2, h3, h4 {
@@ -24,27 +24,27 @@
   /* Dedicated Tamil Typography & Proportional Layout Stability */
   html[lang='ta'] body {
     font-family: var(--font-tamil), var(--font-inter), system-ui, sans-serif;
-    line-height: 1.85;
-    font-size: 0.96rem;
+    line-height: 1.78;
+    font-size: 0.97rem;
   }
 
   html[lang='ta'] h1 {
     font-family: var(--font-tamil), var(--font-jakarta), system-ui, sans-serif;
-    line-height: 1.42 !important;
-    letter-spacing: -0.005em !important;
+    line-height: 1.38 !important;
+    letter-spacing: 0 !important;
   }
 
   html[lang='ta'] h2,
   html[lang='ta'] h3,
   html[lang='ta'] h4 {
     font-family: var(--font-tamil), var(--font-jakarta), system-ui, sans-serif;
-    line-height: 1.48 !important;
+    line-height: 1.45 !important;
     letter-spacing: 0 !important;
   }
 
   html[lang='ta'] p,
   html[lang='ta'] li {
-    line-height: 1.85;
+    line-height: 1.78;
   }
 
   html[lang='ta'] button,
@@ -54,23 +54,23 @@
 }
 
 .container-max {
-  @apply mx-auto w-full max-w-[1220px] px-4 sm:px-6 lg:px-8;
+  @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10;
 }
 
 .editorial-card {
-  @apply rounded-2xl border border-stone-200/90 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.04)] transition duration-300;
+  @apply rounded-2xl border border-slate-200 bg-white transition duration-200;
 }
 
 .editorial-card:hover {
-  @apply border-stone-300 shadow-[0_14px_34px_rgba(14,27,77,0.08)];
+  @apply border-slate-300 shadow-sm;
 }
 
 .section-kicker {
-  @apply inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-amberwarm-700;
+  @apply inline-block text-xs font-bold uppercase tracking-[0.14em] text-brand-700;
 }
 
 html[lang='ta'] .section-kicker {
-  @apply tracking-[0.04em] text-xs;
+  @apply tracking-[0.03em] text-xs;
 }
 
 .skeleton-box {

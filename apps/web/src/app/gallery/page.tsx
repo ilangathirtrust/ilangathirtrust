@@ -48,7 +48,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
         icon={Images}
       />
 
-      <section className="bg-ivory-100 py-14 lg:py-20">
+      <section className="bg-white py-14 lg:py-16">
         <div className="container-max">
           <GalleryExplorer initialData={foldersData} />
         </div>

@@ -8,8 +8,8 @@ export default function GlobalError({
 }) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen items-center justify-center bg-[#FAF8F4] p-4 font-sans text-slate-900">
-        <div className="w-full max-w-md rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-lg">
+      <body className="flex min-h-screen items-center justify-center bg-white p-4 font-sans text-slate-900">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <h1 className="text-xl font-extrabold text-slate-900">Unable to display page</h1>
           <p className="mt-2 text-sm text-slate-600">
             A temporary application error occurred. Click below to reload Ilangathir Trust.

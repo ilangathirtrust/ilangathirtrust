@@ -49,7 +49,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
         icon={CalendarDays}
       />
 
-      <section className="bg-ivory-100 py-14 lg:py-20">
+      <section className="bg-white py-14 lg:py-16">
         <div className="container-max">
           <EventsExplorer initialUpcoming={upcoming} initialPast={past} />
         </div>

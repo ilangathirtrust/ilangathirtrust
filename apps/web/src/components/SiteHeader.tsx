@@ -43,21 +43,21 @@ export function SiteHeader({
       </a>
 
       {/* Top utility strip */}
-      <div className="hidden border-b border-stone-200/80 bg-brand-950 text-xs text-slate-200 md:block">
+      <div className="hidden border-b border-slate-200 bg-slate-50 text-xs text-slate-600 md:block">
         <div className="container-max flex h-9 items-center justify-between gap-4">
-          <p className="truncate font-medium text-slate-300">
+          <p className="truncate font-medium text-slate-600">
             {lang === 'ta'
-              ? 'கருணையுடன் கூடிய சமூக சேவை • திண்டுக்கல், தமிழ்நாடு'
-              : 'Serving communities with dignity & compassion • Dindigul, Tamil Nadu'}
+              ? 'மக்கள் நலப் பணிகளில் • திண்டுக்கல், தமிழ்நாடு'
+              : 'Community Welfare Trust • Dindigul, Tamil Nadu'}
           </p>
           <div className="flex items-center gap-4 shrink-0">
-            <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="inline-flex items-center gap-1.5 hover:text-white">
-              <Phone className="h-3.5 w-3.5 text-amberwarm-400" />
+            <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="inline-flex items-center gap-1.5 hover:text-brand-700">
+              <Phone className="h-3.5 w-3.5 text-brand-700" />
               <span>{phone}</span>
             </a>
-            <span className="text-slate-600">|</span>
-            <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 hover:text-white">
-              <Mail className="h-3.5 w-3.5 text-amberwarm-400" />
+            <span className="text-slate-300">|</span>
+            <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 hover:text-brand-700">
+              <Mail className="h-3.5 w-3.5 text-brand-700" />
               <span>{email}</span>
             </a>
           </div>
@@ -65,7 +65,7 @@ export function SiteHeader({
       </div>
 
       {/* Main Sticky Header */}
-      <header className="sticky top-0 z-40 border-b border-stone-200/90 bg-ivory-100/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md">
         <div className="container-max">
           {/* Mobile Header (< lg): Left Menu | Center Logo | Right Lang + Donate */}
           <div className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-1 lg:hidden">
@@ -155,8 +155,8 @@ export function SiteHeader({
                       lang === 'ta' ? 'text-[12.5px]' : 'text-[13.5px]'
                     } ${
                       isActive
-                        ? 'bg-white text-brand-700 shadow-xs ring-1 ring-stone-200'
-                        : 'text-slate-700 hover:bg-white/70 hover:text-brand-700'
+                        ? 'bg-brand-50 text-brand-700'
+                        : 'text-slate-700 hover:bg-slate-100 hover:text-brand-700'
                     }`}
                   >
                     {label}
@@ -224,7 +224,7 @@ export function SiteHeader({
                     href={item.href}
                     onClick={() => setDrawerOpen(false)}
                     className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                      isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-ivory-100'
+                      isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-slate-50'
                     }`}
                   >
                     {label}

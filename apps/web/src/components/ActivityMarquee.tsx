@@ -16,14 +16,11 @@ export function ActivityMarquee({ items }: { items: MarqueeItem[] }) {
   const trackItems = [...items, ...items];
 
   return (
-    <section className="overflow-hidden border-y border-stone-200 bg-white py-14">
+    <section className="overflow-hidden border-b border-slate-200 bg-white py-14">
       <div className="container-max mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <span className="section-kicker">
-            <span className="h-1.5 w-1.5 rounded-full bg-amberwarm-500" />
-            {ui.marqueeEyebrow}
-          </span>
-          <h2 className="mt-2 font-heading text-2xl font-bold text-brand-950 sm:text-3xl">
+          <span className="section-kicker">{ui.marqueeEyebrow}</span>
+          <h2 className="mt-1.5 font-heading text-2xl font-bold text-slate-900 sm:text-3xl">
             {ui.marqueeTitle}
           </h2>
         </div>

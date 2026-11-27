@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Calendar, MapPin, Sparkles } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import { pickLocalized } from '@ilangathir/shared';
 import { getActivities, getPageContent } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
@@ -51,13 +51,12 @@ export default async function ActivitiesPage({
         eyebrow={ui.activitiesEyebrow}
         title={heroTitle}
         subtitle={heroSub}
-        icon={Sparkles}
       />
 
-      <section className="bg-ivory-100 py-14 lg:py-20">
+      <section className="bg-white py-14 lg:py-16">
         <div className="container-max">
           {activitiesRes.items.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-12 text-center text-sm text-slate-600">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center text-sm text-slate-600">
               {ui.emptyActivities}
             </div>
           ) : (
@@ -70,7 +69,7 @@ export default async function ActivitiesPage({
                   return (
                     <article key={act.id} className="editorial-card flex h-full flex-col overflow-hidden">
                       {act.image_url && (
-                        <div className="h-52 overflow-hidden bg-ivory-200">
+                        <div className="h-52 overflow-hidden bg-slate-100">
                           <img src={act.image_url} alt={title} loading="lazy" className="h-full w-full object-cover" />
                         </div>
                       )}

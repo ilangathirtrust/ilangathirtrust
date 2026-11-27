@@ -54,7 +54,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
         icon={Mail}
       />
 
-      <section className="bg-ivory-100 py-14 lg:py-20">
+      <section className="bg-white py-14 lg:py-16">
         <div className="container-max space-y-12">
           <div className="grid gap-8 lg:grid-cols-12">
             <div className="space-y-4 lg:col-span-5">
