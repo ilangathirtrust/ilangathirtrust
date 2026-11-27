@@ -1,6 +1,6 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
+import * as helmetModule from 'helmet';
 import multer from 'multer';
 import { env, isRazorpayConfigured, isSupabaseConfigured } from './config/env.js';
 import { getSupabaseAdmin } from './config/supabase.js';
@@ -14,8 +14,13 @@ export function createApp() {
 
   app.set('trust proxy', 1);
 
+  const helmetFn = (
+    (helmetModule as unknown as { default?: (...args: unknown[]) => express.RequestHandler }).default ??
+    (helmetModule as unknown as (...args: unknown[]) => express.RequestHandler)
+  );
+
   app.use(
-    helmet({
+    helmetFn({
       crossOriginResourcePolicy: { policy: 'cross-origin' }
     })
   );
@@ -98,9 +103,11 @@ export function createApp() {
   return app;
 }
 
+const app = createApp();
+export default app;
+
 const isMainModule = process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/').split('/').pop() || '');
-if (isMainModule || process.env.START_API_SERVER === 'true') {
-  const app = createApp();
+if (process.env.VERCEL !== '1' && (isMainModule || process.env.START_API_SERVER === 'true')) {
   app.listen(env.API_PORT, () => {
     console.log(`[Ilangathir API] Listening on http://localhost:${env.API_PORT}`);
     console.log(`[Ilangathir API] Supabase configured: ${isSupabaseConfigured()} | Razorpay configured: ${isRazorpayConfigured()}`);
