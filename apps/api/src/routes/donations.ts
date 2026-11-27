@@ -209,6 +209,40 @@ donationsRouter.post('/mark-failed', donationOrderLimiter, async (req, res, next
   }
 });
 
+donationsRouter.get('/status/:orderId', donationOrderLimiter, async (req, res, next) => {
+  try {
+    const orderId = String(req.params.orderId || '').trim();
+    if (!orderId) {
+      res.status(400).json({ error: 'Order ID is required.' });
+      return;
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from('donations')
+      .select('status, receipt_number, amount_paise, purpose, paid_at, razorpay_payment_id')
+      .eq('razorpay_order_id', orderId)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) {
+      res.status(404).json({ error: 'Order not found.' });
+      return;
+    }
+
+    res.json({
+      status: data.status,
+      receipt_number: data.receipt_number,
+      amount_inr: data.amount_paise / 100,
+      purpose: data.purpose,
+      paid_at: data.paid_at,
+      razorpay_payment_id: data.razorpay_payment_id
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 donationsRouter.post('/webhook', async (req, res, next) => {
   try {
     const signature = String(req.headers['x-razorpay-signature'] || '');

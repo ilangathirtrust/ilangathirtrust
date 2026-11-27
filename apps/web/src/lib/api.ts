@@ -10,8 +10,17 @@ import type {
   TeamMember
 } from '@ilangathir/shared';
 
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/+$/, '');
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ilangathirtrust.com').replace(/\/+$/, '');
+export const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === 'production' ? 'https://ilangathir-api.vercel.app' : 'http://localhost:4000')
+).replace(/\/+$/, '');
+
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : 'https://www.ilangathirtrust.com')
+).replace(/\/+$/, '');
 
 async function fetchApi<T>(path: string, revalidateSeconds = 120): Promise<T | null> {
   try {

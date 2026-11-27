@@ -801,6 +801,120 @@ adminRouter.get('/media', async (req, res, next) => {
   }
 });
 
+adminRouter.post('/media/signed-upload', async (req, res, next) => {
+  try {
+    const fileName = String(req.body?.file_name || '').trim();
+    const mimeType = String(req.body?.mime_type || '').trim();
+    const fileSize = Number(req.body?.file_size_bytes || 0);
+    const bucket = ALLOWED_BUCKETS.has(String(req.body?.bucket)) ? String(req.body.bucket) : 'media';
+    const folderName = slugify(String(req.body?.folder_name || 'general'));
+
+    if (!fileName || !mimeType) {
+      res.status(400).json({ error: 'file_name and mime_type are required.' });
+      return;
+    }
+
+    const isImage = ALLOWED_IMAGE_MIME.has(mimeType);
+    const isVideo = ALLOWED_VIDEO_MIME.has(mimeType);
+    const isDoc = ALLOWED_DOC_MIME.has(mimeType);
+    if (!isImage && !isVideo && !isDoc) {
+      res.status(400).json({ error: 'Unsupported file type. Allowed: JPG, PNG, WEBP, AVIF, SVG, MP4, WEBM, PDF.' });
+      return;
+    }
+
+    const maxBytes = (isVideo ? env.MAX_UPLOAD_VIDEO_MB : env.MAX_UPLOAD_IMAGE_MB) * 1024 * 1024;
+    if (fileSize > maxBytes) {
+      res.status(400).json({
+        error: `File "${fileName}" exceeds ${isVideo ? env.MAX_UPLOAD_VIDEO_MB : env.MAX_UPLOAD_IMAGE_MB}MB limit.`
+      });
+      return;
+    }
+
+    const ext = path.extname(fileName).toLowerCase() || (isVideo ? '.mp4' : isDoc ? '.pdf' : '.jpg');
+    const base = slugify(path.basename(fileName, ext));
+    const storagePath = `${folderName}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${base}${ext}`;
+
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase.storage.from(bucket).createSignedUploadUrl(storagePath);
+    if (error || !data) throw error || new Error('Failed to create signed upload URL.');
+
+    res.json({
+      bucket,
+      folder_name: folderName,
+      storage_path: storagePath,
+      signed_url: data.signedUrl,
+      token: data.token,
+      public_url: bucket === 'documents' ? storagePath : getPublicStorageUrl(bucket, storagePath),
+      media_type: isVideo ? 'video' : isDoc ? 'document' : 'image'
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/media/confirm-upload', async (req, res, next) => {
+  try {
+    const bucket = ALLOWED_BUCKETS.has(String(req.body?.bucket)) ? String(req.body.bucket) : 'media';
+    const storagePath = String(req.body?.storage_path || '').trim();
+    const folderName = slugify(String(req.body?.folder_name || 'general'));
+    const category = String(req.body?.category || 'General');
+    const fileName = String(req.body?.file_name || path.basename(storagePath));
+    const mimeType = String(req.body?.mime_type || 'application/octet-stream');
+    const fileSize = Number(req.body?.file_size_bytes || 0);
+    const mediaType = ['image', 'video', 'document'].includes(String(req.body?.media_type))
+      ? String(req.body.media_type)
+      : 'image';
+
+    if (!storagePath) {
+      res.status(400).json({ error: 'storage_path is required.' });
+      return;
+    }
+
+    const publicUrl = bucket === 'documents' ? storagePath : getPublicStorageUrl(bucket, storagePath);
+    const base = path.basename(fileName, path.extname(fileName));
+
+    const supabase = getSupabaseAdmin();
+    const { data: asset, error } = await supabase
+      .from('media_assets')
+      .insert({
+        bucket,
+        storage_path: storagePath,
+        public_url: publicUrl,
+        folder_name: folderName,
+        category,
+        media_type: mediaType,
+        file_name: fileName,
+        mime_type: mimeType,
+        file_size_bytes: fileSize,
+        title_en: String(req.body?.title_en || base),
+        title_ta: String(req.body?.title_ta || ''),
+        alt_text_en: String(req.body?.alt_text_en || base),
+        alt_text_ta: String(req.body?.alt_text_ta || ''),
+        description_en: String(req.body?.description_en || ''),
+        description_ta: String(req.body?.description_ta || ''),
+        uploaded_by: req.admin?.id ?? null
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    await recordAuditLog({
+      actorId: req.admin?.id,
+      actorEmail: req.admin?.email,
+      action: 'upload_media',
+      entityType: 'media_assets',
+      entityId: String(asset.id),
+      details: { bucket, folderName, storagePath },
+      req
+    });
+
+    res.status(201).json(asset);
+  } catch (err) {
+    next(err);
+  }
+});
+
 adminRouter.post('/media/upload', upload.array('files', 20), async (req, res, next) => {
   try {
     const files = (req.files as Express.Multer.File[]) || [];

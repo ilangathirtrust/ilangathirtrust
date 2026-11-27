@@ -36,36 +36,71 @@ export async function adminApi<T = unknown>(path: string, options: RequestInit =
   return json as T;
 }
 
+/**
+ * Direct-to-Supabase-Storage signed upload flow.
+ * Bypasses Vercel's 4.5MB serverless body limit so large images and 50MB videos upload reliably.
+ */
 export async function uploadMediaWithProgress(
   formData: FormData,
   onProgress: (percent: number) => void
 ): Promise<{ items: Array<Record<string, unknown>> }> {
-  const token = await getAccessToken();
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${API_URL}/api/admin/media/upload`);
-    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+  const files = formData.getAll('files').filter((f): f is File => f instanceof File);
+  if (!files.length) throw new Error('No files selected for upload.');
 
-    xhr.upload.onprogress = (ev) => {
-      if (ev.lengthComputable) {
-        onProgress(Math.round((ev.loaded / ev.total) * 100));
-      }
-    };
+  const bucket = String(formData.get('bucket') || 'media');
+  const folderName = String(formData.get('folder_name') || 'general');
+  const category = String(formData.get('category') || 'General');
+  const supabase = getSupabaseClient();
 
-    xhr.onload = () => {
-      try {
-        const parsed = JSON.parse(xhr.responseText || '{}');
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve(parsed);
-        } else {
-          reject(new Error(parsed.error || `Upload failed (${xhr.status})`));
-        }
-      } catch {
-        reject(new Error('Invalid server response during upload.'));
-      }
-    };
+  const uploadedItems: Array<Record<string, unknown>> = [];
+  onProgress(5);
 
-    xhr.onerror = () => reject(new Error('Network error during file upload.'));
-    xhr.send(formData);
-  });
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+
+    const signed = await adminApi<{
+      bucket: string;
+      folder_name: string;
+      storage_path: string;
+      token: string;
+      media_type: string;
+    }>('/media/signed-upload', {
+      method: 'POST',
+      body: JSON.stringify({
+        bucket,
+        folder_name: folderName,
+        file_name: file.name,
+        mime_type: file.type || 'application/octet-stream',
+        file_size_bytes: file.size
+      })
+    });
+
+    const { error: uploadErr } = await supabase.storage
+      .from(signed.bucket)
+      .uploadToSignedUrl(signed.storage_path, signed.token, file, {
+        contentType: file.type || undefined,
+        cacheControl: '31536000'
+      });
+
+    if (uploadErr) throw new Error(uploadErr.message || `Failed to upload ${file.name}`);
+
+    const asset = await adminApi<Record<string, unknown>>('/media/confirm-upload', {
+      method: 'POST',
+      body: JSON.stringify({
+        bucket: signed.bucket,
+        folder_name: signed.folder_name,
+        category,
+        storage_path: signed.storage_path,
+        media_type: signed.media_type,
+        file_name: file.name,
+        mime_type: file.type || 'application/octet-stream',
+        file_size_bytes: file.size
+      })
+    });
+
+    uploadedItems.push(asset);
+    onProgress(Math.round(((i + 1) / files.length) * 100));
+  }
+
+  return { items: uploadedItems };
 }

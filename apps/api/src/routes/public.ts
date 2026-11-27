@@ -73,7 +73,7 @@ publicRouter.get('/bootstrap', async (_req, res, next) => {
       };
     });
 
-    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.json(payload);
   } catch (err) {
     next(err);
@@ -99,7 +99,7 @@ publicRouter.get('/pages/:slug', async (req, res, next) => {
       res.status(404).json({ error: 'Page not found.' });
       return;
     }
-    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.json(page);
   } catch (err) {
     next(err);
@@ -142,7 +142,7 @@ publicRouter.get('/activities', async (req, res, next) => {
       };
     });
 
-    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.json(result);
   } catch (err) {
     next(err);
@@ -220,7 +220,7 @@ publicRouter.get('/events', async (req, res, next) => {
       };
     });
 
-    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.json(result);
   } catch (err) {
     next(err);
@@ -260,7 +260,7 @@ publicRouter.get('/events/:slug', async (req, res, next) => {
       res.status(404).json({ error: 'Event not found.' });
       return;
     }
-    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.json(event);
   } catch (err) {
     next(err);
@@ -318,7 +318,7 @@ publicRouter.get('/gallery/folders', async (req, res, next) => {
       };
     });
 
-    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.json(result);
   } catch (err) {
     next(err);
@@ -370,7 +370,7 @@ publicRouter.get('/gallery/folders/:slug', async (req, res, next) => {
       res.status(404).json({ error: 'Gallery folder not found.' });
       return;
     }
-    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.json(result);
   } catch (err) {
     next(err);
@@ -442,7 +442,7 @@ publicRouter.get('/blogs', async (req, res, next) => {
       };
     });
 
-    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.json(result);
   } catch (err) {
     next(err);
@@ -491,7 +491,7 @@ publicRouter.get('/blogs/:slug', async (req, res, next) => {
       res.status(404).json({ error: 'Blog post not found.' });
       return;
     }
-    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.json(result);
   } catch (err) {
     next(err);
