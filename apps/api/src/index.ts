@@ -25,11 +25,15 @@ export function createApp() {
     })
   );
 
+  const vercelOriginPattern = /^https:\/\/ilangathir-(?:[a-z0-9-]+-)?(web|admin)(?:-ilangathir-trust)?\.vercel\.app$/i;
+
   app.use(
     cors({
       origin(origin, callback) {
         if (!origin) return callback(null, true);
-        if (env.ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+        if (env.ALLOWED_ORIGINS.includes(origin) || vercelOriginPattern.test(origin)) {
+          return callback(null, true);
+        }
         return callback(new Error(`Origin ${origin} is not allowed by CORS policy.`));
       },
       credentials: true,
