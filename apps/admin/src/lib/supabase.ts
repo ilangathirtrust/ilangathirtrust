@@ -16,7 +16,7 @@ export const SUPABASE_ANON_KEY = (
 
 export const API_URL = (
   import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? 'https://ilangathir-api.vercel.app' : 'http://localhost:4000')
+  (import.meta.env.PROD ? 'https://api.ilangathirtrust.org' : 'http://localhost:4000')
 ).replace(/\/+$/, '');
 
 export const PUBLIC_SITE_URL = (

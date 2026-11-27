@@ -10,17 +10,17 @@ const config: Config = {
     extend: {
       colors: {
         sand: {
-          50: '#FAF7F2',
-          100: '#F4EFE6',
-          200: '#EAE1D0',
-          300: '#DDD0B8',
-          400: '#C4B294'
+          50: '#FFFFFF',
+          100: '#F4F7FB',
+          200: '#E2E8F0',
+          300: '#CBD5E1',
+          400: '#94A3B8'
         },
         ivory: {
-          50: '#FAF7F2',
-          100: '#F4EFE6',
-          200: '#EAE1D0',
-          300: '#DDD0B8'
+          50: '#FFFFFF',
+          100: '#F4F7FB',
+          200: '#E2E8F0',
+          300: '#CBD5E1'
         },
         brand: {
           50: '#EEF2F8',

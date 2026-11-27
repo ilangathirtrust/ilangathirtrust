@@ -42,7 +42,7 @@ export function SiteFooter(props: SiteFooterProps) {
               <img
                 src={STATIC_ASSETS.logoWhite}
                 alt={`${props.trustNameEn} | ${props.trustNameTa}`}
-                className="hidden h-12 w-auto object-contain object-left lg:block"
+                className="hidden h-16 w-auto object-contain object-left lg:block xl:h-[72px]"
               />
             </Link>
             <p className="max-w-md text-sm leading-relaxed text-sand-200/85">

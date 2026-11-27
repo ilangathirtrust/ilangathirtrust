@@ -261,6 +261,8 @@ export default async function HomePage({
                 <LazyImage
                   src={founderImg}
                   alt={founderName}
+                  loading="eager"
+                  fetchPriority="high"
                   wrapperClassName="h-64 w-full rounded-2xl min-[360px]:h-72 sm:h-96"
                   className="h-full w-full object-cover object-top"
                 />

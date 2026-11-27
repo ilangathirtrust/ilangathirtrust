@@ -86,6 +86,8 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
               <LazyImage
                 src={founderImg}
                 alt={founderName}
+                loading="eager"
+                fetchPriority="high"
                 wrapperClassName="h-80 w-full rounded-2xl sm:h-96"
                 className="h-full w-full object-cover object-top"
               />

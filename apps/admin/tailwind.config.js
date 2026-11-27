@@ -5,10 +5,10 @@ export default {
     extend: {
       colors: {
         sand: {
-          50: '#F7F5F0',
-          100: '#EFECE4',
-          200: '#E3DDD0',
-          300: '#D2C8B6'
+          50: '#F8FAFC',
+          100: '#F1F5F9',
+          200: '#E2E8F0',
+          300: '#CBD5E1'
         },
         brand: {
           50: '#EEF2F8',

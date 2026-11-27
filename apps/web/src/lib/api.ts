@@ -12,7 +12,7 @@ import type {
 
 export const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'production' ? 'https://ilangathir-api.vercel.app' : 'http://localhost:4000')
+  (process.env.NODE_ENV === 'production' ? 'https://api.ilangathirtrust.org' : 'http://localhost:4000')
 ).replace(/\/+$/, '');
 
 export const SITE_URL = (
@@ -91,7 +91,7 @@ export const DEFAULT_BOOTSTRAP: BootstrapPayload = {
 };
 
 export async function getBootstrap(): Promise<BootstrapPayload> {
-  const data = await fetchApi<BootstrapPayload>('/api/public/bootstrap', 0);
+  const data = await fetchApi<BootstrapPayload>('/api/public/bootstrap', 30);
   if (!data) return DEFAULT_BOOTSTRAP;
   return {
     settings: { ...DEFAULT_BOOTSTRAP.settings, ...(data.settings || {}) },

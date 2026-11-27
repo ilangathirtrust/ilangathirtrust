@@ -5,7 +5,7 @@
 @layer base {
   html, body {
     font-family: 'Inter', 'Noto Sans Tamil', system-ui, sans-serif;
-    background-color: #F7F5F0;
+    background-color: #F8FAFC;
     overflow-x: clip;
   }
 
@@ -27,7 +27,7 @@
 }
 
 .admin-skeleton {
-  background: linear-gradient(90deg, #ece6da 25%, #e1d9c9 50%, #ece6da 75%);
+  background: linear-gradient(90deg, #eef2f6 25%, #e2e8f0 50%, #eef2f6 75%);
   background-size: 200% 100%;
   animation: adminShimmer 1.6s ease-in-out infinite;
 }

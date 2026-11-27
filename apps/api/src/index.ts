@@ -68,6 +68,18 @@ export function createApp() {
   );
   app.use(express.urlencoded({ extended: false, limit: '2mb' }));
 
+  app.get('/', (_req, res) => {
+    res.json({
+      status: 'ok',
+      service: 'Ilangathir Trust API',
+      health: '/api/health'
+    });
+  });
+
+  app.get('/favicon.ico', (_req, res) => {
+    res.status(204).end();
+  });
+
   app.get('/api/health', async (_req, res) => {
     const supabaseReady = isSupabaseConfigured();
     const razorpayReady = isRazorpayConfigured();
