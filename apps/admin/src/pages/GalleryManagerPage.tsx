@@ -165,20 +165,43 @@ export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleCreateFolder} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-900">Create Event / Programme Gallery Folder</h2>
+      <form onSubmit={handleCreateFolder} className="admin-card p-5 sm:p-6">
+        <h2 className="text-lg font-bold text-brand-900">Create Event / Programme Gallery Folder</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <input required placeholder="Folder Title (EN)" value={newFolder.title_en} onChange={(e) => setNewFolder({ ...newFolder, title_en: e.target.value })} className="admin-input" />
-          <input required placeholder="Folder Title (TA)" value={newFolder.title_ta} onChange={(e) => setNewFolder({ ...newFolder, title_ta: e.target.value })} className="admin-input" />
-          <input placeholder="Category (e.g. Health Camp, Education)" value={newFolder.category} onChange={(e) => setNewFolder({ ...newFolder, category: e.target.value })} className="admin-input" />
-          <input type="date" value={newFolder.event_date} onChange={(e) => setNewFolder({ ...newFolder, event_date: e.target.value })} className="admin-input" />
-          <input placeholder="Location (EN)" value={newFolder.location_en} onChange={(e) => setNewFolder({ ...newFolder, location_en: e.target.value })} className="admin-input" />
-          <input placeholder="Location (TA)" value={newFolder.location_ta} onChange={(e) => setNewFolder({ ...newFolder, location_ta: e.target.value })} className="admin-input" />
-          <textarea placeholder="Description (EN)" rows={2} value={newFolder.description_en} onChange={(e) => setNewFolder({ ...newFolder, description_en: e.target.value })} className="admin-input sm:col-span-2" />
-          <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700">
-            <Plus className="h-4 w-4" />
-            <span>Create Folder</span>
-          </button>
+          <label className="admin-label">
+            <span>Folder Title (EN) *</span>
+            <input required placeholder="Folder Title (EN)" value={newFolder.title_en} onChange={(e) => setNewFolder({ ...newFolder, title_en: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Folder Title (TA) *</span>
+            <input required placeholder="Folder Title (TA)" value={newFolder.title_ta} onChange={(e) => setNewFolder({ ...newFolder, title_ta: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Category</span>
+            <input placeholder="e.g. Health Camp, Education" value={newFolder.category} onChange={(e) => setNewFolder({ ...newFolder, category: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Event Date</span>
+            <input type="date" value={newFolder.event_date} onChange={(e) => setNewFolder({ ...newFolder, event_date: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Location (EN)</span>
+            <input placeholder="Location (EN)" value={newFolder.location_en} onChange={(e) => setNewFolder({ ...newFolder, location_en: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Location (TA)</span>
+            <input placeholder="Location (TA)" value={newFolder.location_ta} onChange={(e) => setNewFolder({ ...newFolder, location_ta: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label sm:col-span-2">
+            <span>Description (EN)</span>
+            <textarea placeholder="Description (EN)" rows={2} value={newFolder.description_en} onChange={(e) => setNewFolder({ ...newFolder, description_en: e.target.value })} className="admin-input" />
+          </label>
+          <div className="flex items-end">
+            <button type="submit" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-800">
+              <Plus className="h-4 w-4" />
+              <span>Create Folder</span>
+            </button>
+          </div>
         </div>
       </form>
 

@@ -6,6 +6,7 @@ import { pickLocalized, type GalleryItem } from '@ilangathir/shared';
 import { useLanguage } from './LanguageProvider';
 import { getUi } from '@/lib/i18n';
 import { MediaLightbox } from './MediaLightbox';
+import { LazyImage } from './LazyPrimitives';
 
 export function FolderItemsViewer({ items }: { items: GalleryItem[] }) {
   const { lang } = useLanguage();
@@ -14,8 +15,8 @@ export function FolderItemsViewer({ items }: { items: GalleryItem[] }) {
 
   if (!items.length) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
-        <Images className="mx-auto h-12 w-12 text-slate-400" />
+      <div className="rounded-2xl border border-dashed border-sand-300 bg-white p-10 text-center sm:p-12">
+        <Images className="mx-auto h-11 w-11 text-slate-400" />
         <p className="mt-4 text-sm font-medium text-slate-600">{ui.emptyGalleryItems}</p>
       </div>
     );
@@ -23,7 +24,7 @@ export function FolderItemsViewer({ items }: { items: GalleryItem[] }) {
 
   return (
     <>
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {items.map((item, idx) => {
           const title = pickLocalized(item as unknown as Record<string, unknown>, 'title', lang);
           const caption = pickLocalized(item as unknown as Record<string, unknown>, 'caption', lang);
@@ -35,7 +36,7 @@ export function FolderItemsViewer({ items }: { items: GalleryItem[] }) {
               key={item.id}
               type="button"
               onClick={() => setActiveIndex(idx)}
-              className="group relative flex aspect-[4/3] w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="group relative flex aspect-[4/3] w-full overflow-hidden rounded-2xl border border-sand-200 bg-white text-left shadow-xs transition duration-300 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-700"
             >
               {item.media_type === 'video' && !item.thumbnail_url ? (
                 <video
@@ -45,18 +46,18 @@ export function FolderItemsViewer({ items }: { items: GalleryItem[] }) {
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 />
               ) : (
-                <img
+                <LazyImage
                   src={thumb}
                   alt={alt}
-                  loading="lazy"
+                  wrapperClassName="h-full w-full"
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 />
               )}
 
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent opacity-80 transition group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-950/75 via-transparent to-transparent opacity-80 transition group-hover:opacity-100" />
 
               {item.media_type === 'video' ? (
-                <span className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-600/90 text-white shadow-md">
+                <span className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-saffron-600/95 text-white shadow-md">
                   <Play className="h-4 w-4 fill-current" />
                 </span>
               ) : (
@@ -66,7 +67,7 @@ export function FolderItemsViewer({ items }: { items: GalleryItem[] }) {
               )}
 
               {(title || caption) && (
-                <div className="absolute inset-x-0 bottom-0 p-3.5">
+                <div className="absolute inset-x-0 bottom-0 p-3">
                   <p className="line-clamp-2 text-xs font-semibold text-white">
                     {title || caption}
                   </p>

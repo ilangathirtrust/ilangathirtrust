@@ -104,7 +104,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
         currency: orderData.currency,
         name: 'Ilangathir Trust',
         description: `Donation — ${purpose}`,
-        image: '/assets/ilangathir-logo.jpg',
+        image: '/assets/logo.webp',
         order_id: orderData.order_id,
         prefill: {
           name: donorName,
@@ -121,7 +121,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
                 razorpay_order_id: orderData.order_id,
                 reason: 'Donor closed checkout modal'
               })
-            }).catch(() => {});
+            }).catch(() => { });
             setLoading(false);
           }
         },
@@ -182,7 +182,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ razorpay_order_id: orderData.order_id, reason: desc })
-        }).catch(() => {});
+        }).catch(() => { });
         setError(desc);
         setLoading(false);
       });
@@ -247,15 +247,15 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
       <form
         id="donation-checkout"
         onSubmit={handleCheckout}
-        className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8"
+        className="rounded-3xl border border-sand-200 bg-white p-5 shadow-sm sm:p-8"
       >
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="font-heading text-2xl font-bold text-slate-900">{ui.donateTitle}</h2>
+          <div className="min-w-0">
+            <h2 className="font-heading text-xl font-bold text-brand-900 sm:text-2xl">{ui.donateTitle}</h2>
             <p className="mt-1 text-sm text-slate-600">{ui.donateSubtitle}</p>
           </div>
-          <span className="hidden items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 sm:inline-flex">
-            <ShieldCheck className="h-4 w-4 text-brand-700" />
+          <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-sand-200 bg-sand-50 px-3 py-1.5 text-xs font-bold text-brand-900 sm:inline-flex">
+            <ShieldCheck className="h-4 w-4 text-forest-600" />
             {lang === 'ta' ? 'பாதுகாப்பான கட்டணம்' : 'Encrypted Payment'}
           </span>
         </div>
@@ -268,11 +268,10 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
                 key={amt}
                 type="button"
                 onClick={() => setAmountInr(amt)}
-                className={`rounded-xl border py-3 text-sm font-bold transition ${
-                  amountInr === amt
-                    ? 'border-brand-600 bg-brand-600 text-white shadow-md'
-                    : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-brand-300 hover:bg-brand-50'
-                }`}
+                className={`rounded-xl border py-3 text-sm font-bold transition ${amountInr === amt
+                    ? 'border-saffron-600 bg-saffron-600 text-white shadow-sm'
+                    : 'border-sand-200 bg-sand-50 text-brand-900 hover:border-saffron-300 hover:bg-saffron-50'
+                  }`}
               >
                 ₹{amt.toLocaleString('en-IN')}
               </button>
@@ -289,7 +288,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
                 required
                 value={amountInr}
                 onChange={(e) => setAmountInr(Number(e.target.value))}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-base font-bold text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+                className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-base font-bold text-brand-900 outline-none focus:border-brand-700 focus:bg-white"
               />
             </label>
 
@@ -298,7 +297,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               <select
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+                className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
               >
                 {purposes.map((p) => (
                   <option key={p} value={p}>{p}</option>
@@ -318,7 +317,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               maxLength={160}
               value={donorName}
               onChange={(e) => setDonorName(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+              className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
             />
           </label>
 
@@ -330,7 +329,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               maxLength={190}
               value={donorEmail}
               onChange={(e) => setDonorEmail(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+              className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
             />
           </label>
 
@@ -343,7 +342,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               maxLength={30}
               value={donorPhone}
               onChange={(e) => setDonorPhone(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+              className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
             />
           </label>
 
@@ -353,7 +352,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               maxLength={20}
               value={donorPan}
               onChange={(e) => setDonorPan(e.target.value.toUpperCase())}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal uppercase text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+              className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal uppercase text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
             />
           </label>
 
@@ -363,7 +362,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               maxLength={400}
               value={donorAddress}
               onChange={(e) => setDonorAddress(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+              className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
             />
           </label>
 
@@ -372,7 +371,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               type="checkbox"
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.target.checked)}
-              className="h-4 w-4 rounded accent-brand-600"
+              className="h-4 w-4 rounded accent-saffron-600"
             />
             <span>{ui.anonymousLabel}</span>
           </label>
@@ -388,7 +387,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
         <button
           type="submit"
           disabled={loading}
-          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-brand-600/25 transition hover:bg-brand-700 disabled:opacity-60"
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-saffron-600 px-6 py-4 text-sm font-bold text-white shadow-md transition hover:bg-saffron-700 disabled:opacity-60"
         >
           {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Heart className="h-5 w-5" />}
           <span>{loading ? ui.submitting : `${ui.proceedToPay} (₹${Number(amountInr || 0).toLocaleString('en-IN')})`}</span>

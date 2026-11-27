@@ -5,7 +5,7 @@
 @layer base {
   html, body {
     font-family: 'Inter', 'Noto Sans Tamil', system-ui, sans-serif;
-    background-color: #ffffff;
+    background-color: #F7F5F0;
     overflow-x: clip;
   }
 
@@ -15,7 +15,7 @@
 }
 
 .admin-input {
-  @apply w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15;
+  @apply w-full min-w-0 rounded-xl border border-sand-200 bg-sand-50/70 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-700 focus:bg-white focus:ring-2 focus:ring-brand-700/15;
 }
 
 .admin-label {
@@ -23,5 +23,16 @@
 }
 
 .admin-card {
-  @apply rounded-2xl border border-stone-200/90 bg-white shadow-[0_2px_10px_rgba(15,23,42,0.03)];
+  @apply rounded-2xl border border-sand-200 bg-white shadow-[0_2px_12px_rgba(11,24,46,0.03)];
+}
+
+.admin-skeleton {
+  background: linear-gradient(90deg, #ece6da 25%, #e1d9c9 50%, #ece6da 75%);
+  background-size: 200% 100%;
+  animation: adminShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes adminShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }

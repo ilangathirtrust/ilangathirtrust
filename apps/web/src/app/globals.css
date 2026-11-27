@@ -5,12 +5,12 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 96px;
+    scroll-padding-top: 88px;
     overflow-x: clip;
   }
 
   body {
-    @apply bg-white text-slate-900 antialiased;
+    @apply bg-sand-50 text-slate-900 antialiased;
     overflow-x: clip;
     font-family: var(--font-inter), var(--font-tamil), system-ui, sans-serif;
     line-height: 1.65;
@@ -19,13 +19,14 @@
   h1, h2, h3, h4 {
     font-family: var(--font-jakarta), var(--font-tamil), system-ui, sans-serif;
     overflow-wrap: break-word;
+    word-break: normal;
   }
 
-  /* Dedicated Tamil Typography & Proportional Layout Stability */
+  /* Dedicated Tamil Typography & Mobile (300px+) Stability */
   html[lang='ta'] body {
     font-family: var(--font-tamil), var(--font-inter), system-ui, sans-serif;
-    line-height: 1.78;
-    font-size: 0.97rem;
+    line-height: 1.82;
+    font-size: 0.96rem;
   }
 
   html[lang='ta'] h1 {
@@ -38,13 +39,13 @@
   html[lang='ta'] h3,
   html[lang='ta'] h4 {
     font-family: var(--font-tamil), var(--font-jakarta), system-ui, sans-serif;
-    line-height: 1.45 !important;
+    line-height: 1.46 !important;
     letter-spacing: 0 !important;
   }
 
   html[lang='ta'] p,
   html[lang='ta'] li {
-    line-height: 1.78;
+    line-height: 1.82;
   }
 
   html[lang='ta'] button,
@@ -54,27 +55,37 @@
 }
 
 .container-max {
-  @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10;
+  @apply mx-auto w-full max-w-[1360px] px-3.5 min-[360px]:px-4 sm:px-6 lg:px-10;
+}
+
+.trust-card {
+  @apply rounded-2xl border border-sand-200 bg-white shadow-[0_2px_14px_rgba(19,41,75,0.04)] transition duration-300;
+}
+
+.trust-card:hover {
+  @apply border-sand-300 shadow-[0_10px_30px_rgba(19,41,75,0.08)];
 }
 
 .editorial-card {
-  @apply rounded-2xl border border-slate-200 bg-white transition duration-200;
+  @apply rounded-2xl border border-sand-200 bg-white shadow-[0_2px_14px_rgba(19,41,75,0.04)] transition duration-300;
 }
 
 .editorial-card:hover {
-  @apply border-slate-300 shadow-sm;
+  @apply border-sand-300 shadow-[0_10px_28px_rgba(19,41,75,0.08)];
 }
 
 .section-kicker {
-  @apply inline-block text-xs font-bold uppercase tracking-[0.14em] text-brand-700;
+  @apply inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-saffron-600;
 }
 
 html[lang='ta'] .section-kicker {
-  @apply tracking-[0.03em] text-xs;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 0.78rem;
 }
 
 .skeleton-box {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, #ede6d8 25%, #e2d8c5 50%, #ede6d8 75%);
   background-size: 200% 100%;
   @apply animate-shimmer rounded-xl;
 }
@@ -86,6 +97,12 @@ html[lang='ta'] .section-kicker {
 
 .marquee-track:hover {
   animation-play-state: paused;
+}
+
+@media (max-width: 359px) {
+  html[lang='ta'] body {
+    font-size: 0.9rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

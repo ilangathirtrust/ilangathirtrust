@@ -9,6 +9,7 @@ import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildEventJsonLd, buildPageMetadata } from '@/lib/seo';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { FolderItemsViewer } from '@/components/FolderItemsViewer';
+import { LazyImage } from '@/components/LazyPrimitives';
 
 export async function generateMetadata({
   params,
@@ -69,48 +70,51 @@ export default async function EventDetailPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <article className="bg-white py-12 lg:py-16">
+      <article className="bg-sand-50 py-10 sm:py-14 lg:py-16">
         <div className="container-max">
           <Breadcrumbs items={[{ label: ui.events, href: '/events' }, { label: title }]} />
 
-          <Link href="/events" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-600 hover:text-brand-700">
+          <Link href="/events" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-800 hover:text-saffron-600">
             <ArrowLeft className="h-4 w-4" />
             <span>{ui.backToEvents}</span>
           </Link>
 
           <div className="mt-6 grid gap-8 lg:grid-cols-12">
-            <div className="lg:col-span-8">
-              <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700">
+            <div className="min-w-0 rounded-3xl border border-sand-200 bg-white p-5 shadow-xs sm:p-8 lg:col-span-8">
+              <span className="rounded-full bg-saffron-50 px-3 py-1 text-xs font-bold text-saffron-700">
                 {event.category}
               </span>
-              <h1 className="mt-3 font-heading text-3xl font-extrabold text-slate-900 sm:text-4xl">
+              <h1 className="mt-3 font-heading text-2xl font-extrabold text-brand-900 min-[360px]:text-3xl sm:text-4xl">
                 {title}
               </h1>
 
               {event.banner_url && (
-                <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm">
-                  <img src={event.banner_url} alt={title} className="max-h-[460px] w-full object-cover" />
-                </div>
+                <LazyImage
+                  src={event.banner_url}
+                  alt={title}
+                  wrapperClassName="mt-6 rounded-2xl border border-sand-200 bg-sand-100"
+                  className="max-h-[460px] w-full object-cover"
+                />
               )}
 
-              <div className="prose prose-slate mt-8 max-w-none whitespace-pre-line text-base leading-relaxed text-slate-700">
+              <div className="mt-7 whitespace-pre-line text-sm leading-relaxed text-slate-700 sm:text-base">
                 {description}
               </div>
             </div>
 
-            <aside className="lg:col-span-4">
-              <div className="sticky top-28 space-y-4 rounded-3xl border border-slate-200 bg-slate-50 p-6">
-                <h2 className="font-heading text-lg font-bold text-slate-900">
+            <aside className="min-w-0 lg:col-span-4">
+              <div className="sticky top-28 space-y-4 rounded-3xl border border-sand-200 bg-white p-5 shadow-xs sm:p-6">
+                <h2 className="font-heading text-lg font-bold text-brand-900">
                   {lang === 'ta' ? 'நிகழ்வு விவரங்கள்' : 'Event Information'}
                 </h2>
                 <div className="space-y-3 text-sm text-slate-700">
                   <div className="flex items-start gap-2.5">
-                    <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
+                    <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" />
                     <span>{event.event_date}</span>
                   </div>
                   {event.start_time && (
                     <div className="flex items-start gap-2.5">
-                      <Clock className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
+                      <Clock className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" />
                       <span>
                         {event.start_time.slice(0, 5)}
                         {event.end_time ? ` - ${event.end_time.slice(0, 5)}` : ''}
@@ -119,7 +123,7 @@ export default async function EventDetailPage({
                   )}
                   {location && (
                     <div className="flex items-start gap-2.5">
-                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-amberwarm-600" />
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-saffron-600" />
                       <span>{location}</span>
                     </div>
                   )}
@@ -128,7 +132,7 @@ export default async function EventDetailPage({
                 {event.registration_enabled && (
                   <Link
                     href="/contact#volunteer"
-                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-700"
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-saffron-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-saffron-700"
                   >
                     <span>{ui.participate}</span>
                     <ArrowUpRight className="h-4 w-4" />
@@ -138,9 +142,9 @@ export default async function EventDetailPage({
                 {folderMeta?.slug && (
                   <Link
                     href={`/gallery/${folderMeta.slug}`}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-100"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-sand-200 bg-sand-50 px-5 py-3 text-sm font-bold text-brand-900 transition hover:bg-sand-100"
                   >
-                    <Images className="h-4 w-4 text-brand-600" />
+                    <Images className="h-4 w-4 text-saffron-600" />
                     <span>{ui.openGalleryFolder}</span>
                   </Link>
                 )}
@@ -149,11 +153,11 @@ export default async function EventDetailPage({
           </div>
 
           {event.gallery_preview_items && event.gallery_preview_items.length > 0 && (
-            <div className="mt-14 border-t border-slate-200 pt-12">
-              <div className="mb-6 flex items-center justify-between gap-4">
-                <h2 className="font-heading text-2xl font-bold text-slate-900">{ui.linkedGallery}</h2>
+            <div className="mt-14 border-t border-sand-200 pt-10">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                <h2 className="font-heading text-xl font-bold text-brand-900 sm:text-2xl">{ui.linkedGallery}</h2>
                 {folderMeta?.slug && (
-                  <Link href={`/gallery/${folderMeta.slug}`} className="inline-flex items-center gap-1 text-sm font-bold text-brand-600">
+                  <Link href={`/gallery/${folderMeta.slug}`} className="inline-flex items-center gap-1 text-sm font-bold text-brand-800 hover:text-saffron-600">
                     <span>{ui.openGalleryFolder}</span>
                     <ArrowUpRight className="h-4 w-4" />
                   </Link>

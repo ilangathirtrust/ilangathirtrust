@@ -6,7 +6,7 @@ import { pickLocalized } from '@ilangathir/shared';
 import { getGalleryFolderDetail } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
-import { buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
+import { buildBreadcrumbJsonLd, buildGalleryFolderJsonLd, buildPageMetadata } from '@/lib/seo';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { FolderItemsViewer } from '@/components/FolderItemsViewer';
 
@@ -55,6 +55,7 @@ export default async function GalleryFolderPage({
   const desc = pickLocalized(folder as unknown as Record<string, unknown>, 'description', lang);
   const location = pickLocalized(folder as unknown as Record<string, unknown>, 'location', lang);
 
+  const galleryJsonLd = buildGalleryFolderJsonLd(folder, lang);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: ui.home, path: '/' },
     { name: ui.gallery, path: '/gallery' },
@@ -63,51 +64,52 @@ export default async function GalleryFolderPage({
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(galleryJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <section className="border-b border-slate-200 bg-white py-10 lg:py-14">
+      <section className="border-b border-sand-200 bg-sand-100/70 py-9 sm:py-12 lg:py-14">
         <div className="container-max">
           <Breadcrumbs items={[{ label: ui.gallery, href: '/gallery' }, { label: title }]} />
-          <Link href="/gallery" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-600 hover:text-brand-700">
+          <Link href="/gallery" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-800 hover:text-saffron-600">
             <ArrowLeft className="h-4 w-4" />
             <span>{ui.backToGallery}</span>
           </Link>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700">
+            <span className="rounded-full bg-saffron-50 px-3 py-1 text-xs font-bold text-saffron-700 border border-saffron-200">
               {folder.category}
             </span>
             {folder.event_date && (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600">
-                <Calendar className="h-3.5 w-3.5 text-brand-600" />
+                <Calendar className="h-3.5 w-3.5 text-brand-700" />
                 {folder.event_date}
               </span>
             )}
             {location && (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600">
-                <MapPin className="h-3.5 w-3.5 text-amberwarm-600" />
+                <MapPin className="h-3.5 w-3.5 text-saffron-600" />
                 {location}
               </span>
             )}
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700">
-              <Images className="h-3.5 w-3.5 text-brand-600" />
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand-900">
+              <Images className="h-3.5 w-3.5 text-brand-700" />
               {folder.item_count} {ui.itemsCount}
             </span>
           </div>
 
-          <h1 className="mt-3 font-heading text-3xl font-extrabold text-slate-900 sm:text-4xl">
+          <h1 className="mt-3 font-heading text-2xl font-extrabold text-brand-900 min-[360px]:text-3xl sm:text-4xl">
             {title}
           </h1>
-          {desc && <p className="mt-3 max-w-3xl text-base text-slate-600">{desc}</p>}
+          {desc && <p className="mt-3 max-w-3xl text-sm text-slate-600 sm:text-base">{desc}</p>}
         </div>
       </section>
 
-      <section className="bg-slate-50 py-12 lg:py-16">
+      <section className="bg-sand-50 py-10 sm:py-14">
         <div className="container-max">
           <FolderItemsViewer items={items} />
 
           {totalPages > 1 && (
-            <div className="mt-10 flex justify-center gap-2">
+            <div className="mt-10 flex flex-wrap justify-center gap-2">
               {Array.from({ length: totalPages }).map((_, idx) => {
                 const p = idx + 1;
                 return (
@@ -115,7 +117,7 @@ export default async function GalleryFolderPage({
                     key={p}
                     href={`/gallery/${slug}?page=${p}`}
                     className={`inline-flex h-10 min-w-[40px] items-center justify-center rounded-xl px-3 text-sm font-bold ${
-                      p === page ? 'bg-brand-600 text-white' : 'border border-slate-200 bg-white text-slate-700'
+                      p === page ? 'bg-brand-900 text-white' : 'border border-sand-200 bg-white text-slate-700 hover:bg-sand-100'
                     }`}
                   >
                     {p}

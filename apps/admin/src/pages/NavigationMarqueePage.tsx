@@ -81,30 +81,54 @@ export function NavigationMarqueePage({ onNotify }: { onNotify: (msg: string, is
     load();
   }
 
-  if (loading) return <div className="h-64 animate-pulse rounded-2xl bg-slate-200" />;
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-48 admin-skeleton rounded-3xl" />
+        <div className="h-48 admin-skeleton rounded-3xl" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
       {/* Homepage Marquee Showcase */}
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-900">Homepage Activity Marquee Images</h2>
+      <div className="admin-card p-5 sm:p-6">
+        <h2 className="text-lg font-bold text-brand-900">Homepage Activity Marquee Images</h2>
         <p className="text-xs text-slate-500">Images here scroll smoothly in the homepage highlight marquee.</p>
 
-        <form onSubmit={addMarquee} className="mt-4 grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-3">
-          <input required placeholder="Title (EN)" value={newMarquee.title_en} onChange={(e) => setNewMarquee({ ...newMarquee, title_en: e.target.value })} className="admin-input" />
-          <input required placeholder="Title (TA)" value={newMarquee.title_ta} onChange={(e) => setNewMarquee({ ...newMarquee, title_ta: e.target.value })} className="admin-input" />
-          <div className="flex gap-2">
-            <input required placeholder="Image URL" value={newMarquee.image_url} onChange={(e) => setNewMarquee({ ...newMarquee, image_url: e.target.value })} className="admin-input flex-1" />
-            <button type="button" onClick={() => setPickerOpen(true)} className="rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-brand-600">
-              <ImageIcon className="h-4 w-4" />
+        <form onSubmit={addMarquee} className="mt-4 grid gap-3 rounded-2xl bg-sand-50 p-4 sm:grid-cols-3">
+          <label className="admin-label">
+            <span>Title (EN) *</span>
+            <input required placeholder="Title (EN)" value={newMarquee.title_en} onChange={(e) => setNewMarquee({ ...newMarquee, title_en: e.target.value })} className="admin-input bg-white" />
+          </label>
+          <label className="admin-label">
+            <span>Title (TA) *</span>
+            <input required placeholder="Title (TA)" value={newMarquee.title_ta} onChange={(e) => setNewMarquee({ ...newMarquee, title_ta: e.target.value })} className="admin-input bg-white" />
+          </label>
+          <label className="admin-label">
+            <span>Image URL *</span>
+            <div className="flex gap-2">
+              <input required placeholder="Image URL" value={newMarquee.image_url} onChange={(e) => setNewMarquee({ ...newMarquee, image_url: e.target.value })} className="admin-input flex-1 bg-white" />
+              <button type="button" onClick={() => setPickerOpen(true)} className="rounded-xl border border-sand-200 bg-white px-3 text-xs font-bold text-brand-800 hover:bg-sand-100">
+                <ImageIcon className="h-4 w-4" />
+              </button>
+            </div>
+          </label>
+          <label className="admin-label">
+            <span>Alt Text (EN)</span>
+            <input placeholder="Alt Text (EN)" value={newMarquee.alt_text_en} onChange={(e) => setNewMarquee({ ...newMarquee, alt_text_en: e.target.value })} className="admin-input bg-white" />
+          </label>
+          <label className="admin-label">
+            <span>Link URL</span>
+            <input placeholder="/gallery" value={newMarquee.link_url} onChange={(e) => setNewMarquee({ ...newMarquee, link_url: e.target.value })} className="admin-input bg-white" />
+          </label>
+          <div className="flex items-end">
+            <button type="submit" className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-brand-800">
+              <Plus className="h-4 w-4" />
+              <span>Add Marquee Slide</span>
             </button>
           </div>
-          <input placeholder="Alt Text (EN)" value={newMarquee.alt_text_en} onChange={(e) => setNewMarquee({ ...newMarquee, alt_text_en: e.target.value })} className="admin-input" />
-          <input placeholder="Link URL (e.g. /gallery)" value={newMarquee.link_url} onChange={(e) => setNewMarquee({ ...newMarquee, link_url: e.target.value })} className="admin-input" />
-          <button type="submit" className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-brand-700">
-            <Plus className="h-4 w-4" />
-            <span>Add Marquee Slide</span>
-          </button>
         </form>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-3 lg:grid-cols-4">

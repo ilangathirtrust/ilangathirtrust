@@ -24,10 +24,12 @@ export const SITE_URL = (
 
 async function fetchApi<T>(path: string, revalidateSeconds = 120): Promise<T | null> {
   try {
-    const res = await fetch(`${API_URL}${path}`, {
-      next: { revalidate: revalidateSeconds },
-      signal: AbortSignal.timeout(4500)
-    });
+    const fetchOpts: RequestInit & { next?: { revalidate?: number } } =
+      revalidateSeconds === 0
+        ? { cache: 'no-store', signal: AbortSignal.timeout(4500) }
+        : { next: { revalidate: revalidateSeconds }, signal: AbortSignal.timeout(4500) };
+
+    const res = await fetch(`${API_URL}${path}`, fetchOpts);
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
@@ -44,8 +46,8 @@ export const DEFAULT_BOOTSTRAP: BootstrapPayload = {
       value_ta: 'ஒன்றிணைந்து, நாம் ஒரு ஒளிரும் நாளையை உருவாக்குவோம்.',
       json_value: null
     },
-    logo_url: { value_en: '/assets/ilangathir-logo.jpg', value_ta: '/assets/ilangathir-logo.jpg', json_value: null },
-    favicon_url: { value_en: '/assets/ilangathir-logo.jpg', value_ta: '/assets/ilangathir-logo.jpg', json_value: null },
+    logo_url: { value_en: '/assets/logo.webp', value_ta: '/assets/logo.webp', json_value: null },
+    favicon_url: { value_en: '/assets/logo.webp', value_ta: '/assets/logo.webp', json_value: null },
     phone: { value_en: '+91 93630 15050', value_ta: '+91 93630 15050', json_value: null },
     email: { value_en: 'ilangathirtrust@gmail.com', value_ta: 'ilangathirtrust@gmail.com', json_value: null },
     address: {
@@ -89,7 +91,7 @@ export const DEFAULT_BOOTSTRAP: BootstrapPayload = {
 };
 
 export async function getBootstrap(): Promise<BootstrapPayload> {
-  const data = await fetchApi<BootstrapPayload>('/api/public/bootstrap', 120);
+  const data = await fetchApi<BootstrapPayload>('/api/public/bootstrap', 0);
   if (!data) return DEFAULT_BOOTSTRAP;
   return {
     settings: { ...DEFAULT_BOOTSTRAP.settings, ...(data.settings || {}) },

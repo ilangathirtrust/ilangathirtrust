@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'node:path';
+import { DEFAULT_DONATION_CONFIG } from '@ilangathir/shared';
 import { env } from '../config/env.js';
 import { getPublicStorageUrl, getSupabaseAdmin } from '../config/supabase.js';
 import { requireAdminAuth, requireRole } from '../middleware/auth.js';
@@ -55,7 +56,7 @@ adminRouter.get('/me', (req, res) => {
 adminRouter.get('/dashboard', async (_req, res, next) => {
   try {
     const supabase = getSupabaseAdmin();
-    const [summaryRes, donationsRes, eventsRes, blogsRes, activityRes] = await Promise.all([
+    const [summaryRes, donationsRes, eventsRes, blogsRes, activityRes, donationCfgRes] = await Promise.all([
       supabase.rpc('get_admin_dashboard_summary'),
       supabase
         .from('donations')
@@ -76,13 +77,20 @@ adminRouter.get('/dashboard', async (_req, res, next) => {
         .from('audit_logs')
         .select('id, actor_email, action, entity_type, entity_id, created_at')
         .order('created_at', { ascending: false })
-        .limit(10)
+        .limit(10),
+      supabase
+        .from('site_settings')
+        .select('json_value')
+        .eq('key', 'donation_config')
+        .maybeSingle()
     ]);
 
     if (summaryRes.error) throw summaryRes.error;
+    const donationJson = donationCfgRes.data?.json_value as Record<string, unknown> | null | undefined;
 
     res.json({
       stats: summaryRes.data,
+      donationsEnabled: donationJson?.enabled !== false,
       recentDonations: donationsRes.data || [],
       recentEvents: eventsRes.data || [],
       recentBlogs: blogsRes.data || [],
@@ -1170,21 +1178,77 @@ adminRouter.get('/donations', requireRole(['super_admin', 'admin']), async (req,
       query = query.or(`donor_name.ilike.%${clean}%,donor_email.ilike.%${clean}%,receipt_number.ilike.%${clean}%,razorpay_order_id.ilike.%${clean}%`);
     }
 
-    const [listRes, summaryRes] = await Promise.all([
+    const [listRes, summaryRes, cfgRes] = await Promise.all([
       query,
-      supabase.rpc('get_admin_dashboard_summary')
+      supabase.rpc('get_admin_dashboard_summary'),
+      supabase.from('site_settings').select('json_value').eq('key', 'donation_config').maybeSingle()
     ]);
 
     if (listRes.error) throw listRes.error;
     const total = listRes.count || 0;
+    const cfgJson = cfgRes.data?.json_value as Record<string, unknown> | null | undefined;
     res.json({
       items: listRes.data || [],
       total,
       page,
       pageSize,
       totalPages: Math.max(1, Math.ceil(total / pageSize)),
-      summary: summaryRes.data || {}
+      summary: summaryRes.data || {},
+      donationsEnabled: cfgJson?.enabled !== false
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.patch('/donations/toggle', requireRole(['super_admin', 'admin']), async (req, res, next) => {
+  try {
+    if (typeof req.body?.enabled !== 'boolean') {
+      res.status(400).json({ error: 'Provide boolean "enabled" field.' });
+      return;
+    }
+
+    const enabled = req.body.enabled;
+    const supabase = getSupabaseAdmin();
+    const { data: existing } = await supabase
+      .from('site_settings')
+      .select('json_value')
+      .eq('key', 'donation_config')
+      .maybeSingle();
+
+    const prevJson =
+      existing?.json_value && typeof existing.json_value === 'object'
+        ? (existing.json_value as Record<string, unknown>)
+        : { ...DEFAULT_DONATION_CONFIG };
+
+    const nextJson = { ...DEFAULT_DONATION_CONFIG, ...prevJson, enabled };
+
+    const { error } = await supabase.from('site_settings').upsert(
+      {
+        key: 'donation_config',
+        category: 'donations',
+        value_en: '',
+        value_ta: '',
+        json_value: nextJson,
+        is_public: true,
+        updated_by: req.admin?.id ?? null
+      },
+      { onConflict: 'key' }
+    );
+    if (error) throw error;
+
+    await recordAuditLog({
+      actorId: req.admin?.id,
+      actorEmail: req.admin?.email,
+      action: enabled ? 'enable_donations' : 'disable_donations',
+      entityType: 'site_settings',
+      entityId: 'donation_config',
+      details: { enabled },
+      req
+    });
+
+    invalidatePublic();
+    res.json({ enabled, config: nextJson });
   } catch (err) {
     next(err);
   }

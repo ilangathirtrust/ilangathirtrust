@@ -5,6 +5,8 @@ import http from 'node:http';
 import {
   contactEnquirySchema,
   createDonationOrderSchema,
+  isDonationsEnabled,
+  parseDonationConfig,
   pickLocalized,
   sanitizePlainText,
   volunteerApplicationSchema
@@ -184,4 +186,24 @@ test('Device metadata parser identifies desktop/mobile browsers and geo headers 
   const h1 = extractJwtSessionHash('hdr.eyJzZXNzaW9uX2lkIjoic2VzXzEifQ.sig', 'dev_1');
   const h2 = extractJwtSessionHash('hdr.eyJzZXNzaW9uX2lkIjoic2VzXzIifQ.sig', 'dev_1');
   assert.notEqual(h1, h2);
+});
+
+test('Donation config helper parses enabled flag, amounts, and purposes cleanly', () => {
+  assert.equal(isDonationsEnabled(undefined), true);
+  assert.equal(isDonationsEnabled({ donation_config: { json_value: { enabled: false } } }), false);
+  assert.equal(isDonationsEnabled({ donation_config: { json_value: { enabled: true } } }), true);
+
+  const parsed = parseDonationConfig({
+    donation_config: {
+      json_value: {
+        enabled: false,
+        currency: 'INR',
+        suggested_amounts: [200, 500],
+        purposes: ['Education Support']
+      }
+    }
+  });
+  assert.equal(parsed.enabled, false);
+  assert.deepEqual(parsed.suggested_amounts, [200, 500]);
+  assert.deepEqual(parsed.purposes, ['Education Support']);
 });

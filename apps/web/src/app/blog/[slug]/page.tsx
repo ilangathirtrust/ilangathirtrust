@@ -8,6 +8,7 @@ import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
 import { buildBlogPostingJsonLd, buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { LazyImage } from '@/components/LazyPrimitives';
 
 export async function generateMetadata({
   params,
@@ -34,6 +35,7 @@ export async function generateMetadata({
     description,
     path: `/blog/${slug}`,
     lang,
+    ogType: 'article',
     ogImage: post.featured_image_url || undefined
   });
 }
@@ -71,23 +73,23 @@ export default async function BlogDetailPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <article className="bg-white py-12 lg:py-16">
+      <article className="bg-sand-50 py-10 sm:py-14 lg:py-16">
         <div className="container-max">
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-sand-200 bg-white p-5 shadow-xs sm:p-9">
             <Breadcrumbs items={[{ label: ui.blog, href: '/blog' }, { label: title }]} />
 
-            <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-600 hover:text-brand-700">
+            <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-800 hover:text-saffron-600">
               <ArrowLeft className="h-4 w-4" />
               <span>{ui.backToBlog}</span>
             </Link>
 
             <div className="mt-5 flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500">
               {catName && (
-                <span className="rounded-full bg-brand-50 px-3 py-1 text-brand-700">{catName}</span>
+                <span className="rounded-full bg-saffron-50 px-3 py-1 text-saffron-700">{catName}</span>
               )}
               {post.published_at && (
                 <span className="inline-flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5 text-brand-600" />
+                  <Calendar className="h-3.5 w-3.5 text-brand-700" />
                   {new Date(post.published_at).toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-IN', {
                     year: 'numeric',
                     month: 'long',
@@ -96,40 +98,43 @@ export default async function BlogDetailPage({
                 </span>
               )}
               <span className="inline-flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5 text-amberwarm-600" />
+                <Clock className="h-3.5 w-3.5 text-saffron-600" />
                 {post.reading_time_minutes} {ui.minRead}
               </span>
             </div>
 
-            <h1 className="mt-4 font-heading text-3xl font-extrabold text-slate-900 sm:text-5xl">
+            <h1 className="mt-4 font-heading text-2xl font-extrabold text-brand-900 min-[360px]:text-3xl sm:text-4xl">
               {title}
             </h1>
-            {excerpt && <p className="mt-4 text-lg leading-relaxed text-slate-600">{excerpt}</p>}
+            {excerpt && <p className="mt-3 text-base leading-relaxed text-slate-600 sm:text-lg">{excerpt}</p>}
 
-            <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-slate-700">
-              <User className="h-4 w-4 text-brand-600" />
+            <div className="mt-5 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-700">
+              <User className="h-4 w-4 text-brand-700" />
               <span>{post.author_name}</span>
               {post.author_role && <span className="text-slate-400">• {post.author_role}</span>}
             </div>
 
             {post.featured_image_url && (
-              <div className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-sm">
-                <img src={post.featured_image_url} alt={alt} className="max-h-[480px] w-full object-cover" />
-              </div>
+              <LazyImage
+                src={post.featured_image_url}
+                alt={alt}
+                wrapperClassName="mt-7 rounded-2xl border border-sand-200 bg-sand-100"
+                className="max-h-[480px] w-full object-cover"
+              />
             )}
 
-            <div className="mt-8 space-y-5 whitespace-pre-line text-base leading-relaxed text-slate-700">
+            <div className="mt-8 space-y-5 whitespace-pre-line text-sm leading-relaxed text-slate-700 sm:text-base">
               {content}
             </div>
 
             {post.media_gallery && post.media_gallery.length > 0 && (
               <div className="mt-10 grid gap-4 sm:grid-cols-2">
                 {post.media_gallery.map((m, idx) => (
-                  <div key={idx} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                  <div key={idx} className="overflow-hidden rounded-2xl border border-sand-200 bg-sand-100">
                     {m.type === 'video' ? (
                       <video src={m.url} controls className="w-full" />
                     ) : (
-                      <img src={m.url} alt={m.caption_en || title} loading="lazy" className="h-60 w-full object-cover" />
+                      <LazyImage src={m.url} alt={m.caption_en || title} wrapperClassName="h-60 w-full" className="h-full w-full object-cover" />
                     )}
                   </div>
                 ))}
@@ -137,10 +142,10 @@ export default async function BlogDetailPage({
             )}
 
             {post.tags && post.tags.length > 0 && (
-              <div className="mt-8 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-6">
+              <div className="mt-8 flex flex-wrap items-center gap-2 border-t border-sand-200 pt-6">
                 <Tag className="h-4 w-4 text-slate-400" />
                 {post.tags.map((tag) => (
-                  <span key={tag} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                  <span key={tag} className="rounded-full bg-sand-100 px-3 py-1 text-xs font-semibold text-brand-900">
                     #{tag}
                   </span>
                 ))}
@@ -149,9 +154,9 @@ export default async function BlogDetailPage({
           </div>
 
           {related.length > 0 && (
-            <div className="mt-16 border-t border-slate-200 pt-12">
-              <h2 className="font-heading text-2xl font-bold text-slate-900">{ui.relatedArticles}</h2>
-              <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mx-auto mt-14 max-w-5xl border-t border-sand-200 pt-10">
+              <h2 className="font-heading text-xl font-bold text-brand-900 sm:text-2xl">{ui.relatedArticles}</h2>
+              <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {related.map((rel) => {
                   const rTitle = pickLocalized(rel as unknown as Record<string, unknown>, 'title', lang);
                   const rExcerpt = pickLocalized(rel as unknown as Record<string, unknown>, 'excerpt', lang);
@@ -159,13 +164,13 @@ export default async function BlogDetailPage({
                     <Link
                       key={rel.id}
                       href={`/blog/${rel.slug}`}
-                      className="group overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg"
+                      className="trust-card group overflow-hidden"
                     >
                       {rel.featured_image_url && (
-                        <img src={rel.featured_image_url} alt={rTitle} loading="lazy" className="h-44 w-full object-cover" />
+                        <LazyImage src={rel.featured_image_url} alt={rTitle} wrapperClassName="h-44 w-full" className="h-full w-full object-cover" />
                       )}
                       <div className="p-5">
-                        <h3 className="font-heading text-base font-bold text-slate-900 group-hover:text-brand-600">{rTitle}</h3>
+                        <h3 className="font-heading text-base font-bold text-brand-900 group-hover:text-saffron-600">{rTitle}</h3>
                         <p className="mt-1.5 line-clamp-2 text-xs text-slate-600">{rExcerpt}</p>
                       </div>
                     </Link>

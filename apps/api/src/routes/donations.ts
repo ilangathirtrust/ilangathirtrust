@@ -7,6 +7,7 @@ import {
 import { env } from '../config/env.js';
 import { getSupabaseAdmin } from '../config/supabase.js';
 import { donationOrderLimiter } from '../middleware/rateLimit.js';
+import { withCache } from '../services/cache.js';
 import {
   getRazorpayClient,
   verifyRazorpayPaymentSignature,
@@ -15,8 +16,30 @@ import {
 
 export const donationsRouter = Router();
 
+async function checkDonationsEnabled(): Promise<boolean> {
+  return withCache('public:donations-enabled', async () => {
+    const supabase = getSupabaseAdmin();
+    const { data } = await supabase
+      .from('site_settings')
+      .select('json_value')
+      .eq('key', 'donation_config')
+      .maybeSingle();
+    const json = data?.json_value as Record<string, unknown> | null | undefined;
+    return json?.enabled !== false;
+  }, 60);
+}
+
 donationsRouter.post('/create-order', donationOrderLimiter, async (req, res, next) => {
   try {
+    const enabled = await checkDonationsEnabled();
+    if (!enabled) {
+      res.status(403).json({
+        error: 'Online donations are currently disabled by Ilangathir Trust.',
+        code: 'DONATIONS_DISABLED'
+      });
+      return;
+    }
+
     const parsed = createDonationOrderSchema.safeParse(req.body);
     if (!parsed.success) {
       const firstIssue = parsed.error.issues[0]?.message;

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   contactEnquirySchema,
+  isDonationsEnabled,
   sanitizePlainText,
   volunteerApplicationSchema
 } from '@ilangathir/shared';
@@ -65,9 +66,17 @@ publicRouter.get('/bootstrap', async (_req, res, next) => {
         ])
       );
 
+      const donationsEnabled = isDonationsEnabled(settings);
+      const navigation = (navRes.data || []).filter((item) => {
+        if (!donationsEnabled && typeof item.href === 'string' && item.href.startsWith('/donate')) {
+          return false;
+        }
+        return true;
+      });
+
       return {
         settings,
-        navigation: navRes.data || [],
+        navigation,
         marquee: marqueeRes.data || [],
         homePage: homeRes.data || null
       };

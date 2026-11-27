@@ -1,19 +1,36 @@
 import type { MetadataRoute } from 'next';
-import { getSitemapData, SITE_URL } from '@/lib/api';
+import { isDonationsEnabled } from '@ilangathir/shared';
+import { getBootstrap, getSitemapData, SITE_URL } from '@/lib/api';
 
-export const revalidate = 600;
+export const revalidate = 300;
+
+function bilingualAlternates(path: string) {
+  const clean = path === '/' ? '' : path;
+  return {
+    languages: {
+      en: `${SITE_URL}${clean || '/'}?lang=en`,
+      ta: `${SITE_URL}${clean || '/'}?lang=ta`
+    }
+  };
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticRoutes = ['', '/about', '/activities', '/events', '/gallery', '/blog', '/donate', '/contact'];
-  const now = new Date();
+  const [bootstrap, data] = await Promise.all([getBootstrap(), getSitemapData()]);
+  const donationsEnabled = isDonationsEnabled(bootstrap.settings);
 
-  const data = await getSitemapData();
+  const staticRoutes = ['', '/about', '/activities', '/events', '/gallery', '/blog', '/contact'];
+  if (donationsEnabled) {
+    staticRoutes.push('/donate');
+  }
+
+  const now = new Date();
 
   const entries: MetadataRoute.Sitemap = staticRoutes.map((route) => ({
     url: `${SITE_URL}${route || '/'}`,
     lastModified: now,
     changeFrequency: route === '' ? 'daily' : 'weekly',
-    priority: route === '' ? 1.0 : 0.8
+    priority: route === '' ? 1.0 : 0.85,
+    alternates: bilingualAlternates(route || '/')
   }));
 
   for (const ev of data.events) {
@@ -21,7 +38,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/events/${ev.slug}`,
       lastModified: ev.updated_at ? new Date(ev.updated_at) : now,
       changeFrequency: 'weekly',
-      priority: 0.7
+      priority: 0.75,
+      alternates: bilingualAlternates(`/events/${ev.slug}`)
     });
   }
 
@@ -30,7 +48,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/blog/${post.slug}`,
       lastModified: post.updated_at ? new Date(post.updated_at) : now,
       changeFrequency: 'weekly',
-      priority: 0.75
+      priority: 0.75,
+      alternates: bilingualAlternates(`/blog/${post.slug}`)
     });
   }
 
@@ -39,7 +58,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/gallery/${folder.slug}`,
       lastModified: folder.updated_at ? new Date(folder.updated_at) : now,
       changeFrequency: 'monthly',
-      priority: 0.65
+      priority: 0.65,
+      alternates: bilingualAlternates(`/gallery/${folder.slug}`)
     });
   }
 

@@ -61,7 +61,14 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
     setForm({ ...form, faqs: next });
   }
 
-  if (loading) return <div className="h-64 animate-pulse rounded-2xl bg-slate-200" />;
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-12 admin-skeleton rounded-2xl" />
+        <div className="h-96 admin-skeleton rounded-3xl" />
+      </div>
+    );
+  }
   if (!form) return <p className="text-sm text-slate-500">No page records found.</p>;
 
   return (

@@ -16,12 +16,12 @@ export default function RouteError({
   }, [error]);
 
   return (
-    <section className="container-max flex min-h-[60vh] items-center justify-center py-16">
-      <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-10">
+    <section className="container-max flex min-h-[60vh] items-center justify-center py-12 sm:py-16">
+      <div className="w-full max-w-2xl rounded-3xl border border-sand-200 bg-white p-6 text-center shadow-xs sm:p-10">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
           <AlertTriangle className="h-7 w-7" />
         </div>
-        <h1 className="mt-5 font-heading text-2xl font-extrabold text-slate-900">
+        <h1 className="mt-5 font-heading text-2xl font-extrabold text-brand-900">
           We ran into a temporary issue
         </h1>
         <p className="mt-2.5 text-sm leading-relaxed text-slate-600">
@@ -34,14 +34,14 @@ export default function RouteError({
           <button
             type="button"
             onClick={() => reset()}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand-700"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-900 px-5 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-brand-800"
           >
             <RotateCcw className="h-4 w-4" />
             Try Again
           </button>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-stone-100"
+            className="inline-flex items-center gap-2 rounded-xl border border-sand-200 bg-sand-50 px-5 py-2.5 text-sm font-bold text-brand-900 transition hover:bg-sand-100"
           >
             <Home className="h-4 w-4" />
             Return Home

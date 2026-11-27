@@ -111,29 +111,74 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <input required placeholder="Article Title (EN)" value={form.title_en} onChange={(e) => setForm({ ...form, title_en: e.target.value })} className="admin-input" />
-          <input required placeholder="Article Title (TA)" value={form.title_ta} onChange={(e) => setForm({ ...form, title_ta: e.target.value })} className="admin-input" />
-          <input placeholder="URL Slug (auto-generated if empty)" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="admin-input font-mono text-xs" />
-          <select value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })} className="admin-input">
-            <option value="">Select Category</option>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name_en} / {c.name_ta}</option>)}
-          </select>
-          <textarea rows={2} placeholder="Short Excerpt (EN)" value={form.excerpt_en} onChange={(e) => setForm({ ...form, excerpt_en: e.target.value })} className="admin-input" />
-          <textarea rows={2} placeholder="Short Excerpt (TA)" value={form.excerpt_ta} onChange={(e) => setForm({ ...form, excerpt_ta: e.target.value })} className="admin-input" />
-          <textarea required rows={6} placeholder="Full Article Content (EN)" value={form.content_en} onChange={(e) => setForm({ ...form, content_en: e.target.value })} className="admin-input" />
-          <textarea required rows={6} placeholder="Full Article Content (TA)" value={form.content_ta} onChange={(e) => setForm({ ...form, content_ta: e.target.value })} className="admin-input" />
-          <input placeholder="Tags (comma separated)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="admin-input" />
-          <div className="grid grid-cols-2 gap-2">
-            <input placeholder="Author Name" value={form.author_name} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className="admin-input" />
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="admin-input">
-              <option value="draft">Save as Draft</option>
-              <option value="published">Publish Now</option>
+          <label className="admin-label">
+            <span>Article Title (EN) *</span>
+            <input required placeholder="Article Title (EN)" value={form.title_en} onChange={(e) => setForm({ ...form, title_en: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Article Title (TA) *</span>
+            <input required placeholder="Article Title (TA)" value={form.title_ta} onChange={(e) => setForm({ ...form, title_ta: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>URL Slug</span>
+            <input placeholder="auto-generated if empty" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="admin-input font-mono text-xs" />
+          </label>
+          <label className="admin-label">
+            <span>Category</span>
+            <select value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })} className="admin-input">
+              <option value="">Select Category</option>
+              {categories.map((c) => <option key={c.id} value={c.id}>{c.name_en} / {c.name_ta}</option>)}
             </select>
+          </label>
+          <label className="admin-label">
+            <span>Short Excerpt (EN)</span>
+            <textarea rows={2} placeholder="Short Excerpt (EN)" value={form.excerpt_en} onChange={(e) => setForm({ ...form, excerpt_en: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Short Excerpt (TA)</span>
+            <textarea rows={2} placeholder="Short Excerpt (TA)" value={form.excerpt_ta} onChange={(e) => setForm({ ...form, excerpt_ta: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Full Article Content (EN) *</span>
+            <textarea required rows={6} placeholder="Full Article Content (EN)" value={form.content_en} onChange={(e) => setForm({ ...form, content_en: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Full Article Content (TA) *</span>
+            <textarea required rows={6} placeholder="Full Article Content (TA)" value={form.content_ta} onChange={(e) => setForm({ ...form, content_ta: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>Tags (comma separated)</span>
+            <input placeholder="education, medical camp" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="admin-input" />
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="admin-label">
+              <span>Author Name</span>
+              <input placeholder="Author Name" value={form.author_name} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Status</span>
+              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="admin-input">
+                <option value="draft">Draft</option>
+                <option value="published">Publish Now</option>
+              </select>
+            </label>
           </div>
-          <input placeholder="SEO Title (EN)" value={form.seo_title_en} onChange={(e) => setForm({ ...form, seo_title_en: e.target.value })} className="admin-input" />
-          <input placeholder="SEO Title (TA)" value={form.seo_title_ta} onChange={(e) => setForm({ ...form, seo_title_ta: e.target.value })} className="admin-input" />
-          <input placeholder="SEO Description (EN)" value={form.seo_description_en} onChange={(e) => setForm({ ...form, seo_description_en: e.target.value })} className="admin-input" />
-          <input placeholder="SEO Description (TA)" value={form.seo_description_ta} onChange={(e) => setForm({ ...form, seo_description_ta: e.target.value })} className="admin-input" />
+          <label className="admin-label">
+            <span>SEO Title (EN)</span>
+            <input placeholder="SEO Title (EN)" value={form.seo_title_en} onChange={(e) => setForm({ ...form, seo_title_en: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>SEO Title (TA)</span>
+            <input placeholder="SEO Title (TA)" value={form.seo_title_ta} onChange={(e) => setForm({ ...form, seo_title_ta: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>SEO Description (EN)</span>
+            <input placeholder="SEO Description (EN)" value={form.seo_description_en} onChange={(e) => setForm({ ...form, seo_description_en: e.target.value })} className="admin-input" />
+          </label>
+          <label className="admin-label">
+            <span>SEO Description (TA)</span>
+            <input placeholder="SEO Description (TA)" value={form.seo_description_ta} onChange={(e) => setForm({ ...form, seo_description_ta: e.target.value })} className="admin-input" />
+          </label>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">

@@ -55,13 +55,13 @@ export function ContactEnquiryForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-      <h2 className="font-heading text-xl font-bold text-slate-900">{ui.contactFormTitle}</h2>
+    <form onSubmit={handleSubmit} className="rounded-3xl border border-sand-200 bg-white p-5 shadow-xs sm:p-8">
+      <h2 className="font-heading text-lg font-bold text-brand-900 sm:text-xl">{ui.contactFormTitle}</h2>
 
       {/* Honeypot */}
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <label className="block space-y-1.5 text-xs font-bold text-slate-700">
           <span>{ui.contactName}</span>
           <input
@@ -69,7 +69,7 @@ export function ContactEnquiryForm() {
             required
             minLength={2}
             maxLength={160}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
@@ -80,7 +80,7 @@ export function ContactEnquiryForm() {
             type="email"
             required
             maxLength={190}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
@@ -90,7 +90,7 @@ export function ContactEnquiryForm() {
             name="phone"
             type="tel"
             maxLength={30}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
@@ -101,7 +101,7 @@ export function ContactEnquiryForm() {
             required
             minLength={2}
             maxLength={220}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
@@ -113,7 +113,7 @@ export function ContactEnquiryForm() {
             minLength={10}
             maxLength={5000}
             rows={4}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
       </div>
@@ -139,7 +139,7 @@ export function ContactEnquiryForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-md transition hover:bg-brand-700 disabled:opacity-60 sm:w-auto"
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-brand-800 disabled:opacity-60 sm:w-auto"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         <span>{submitting ? ui.submitting : ui.contactSubmit}</span>
@@ -207,12 +207,12 @@ export function VolunteerForm() {
   }
 
   return (
-    <form id="volunteer" onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm sm:p-8">
-      <h2 className="font-heading text-xl font-bold text-slate-900">{ui.volunteerFormTitle}</h2>
+    <form id="volunteer" onSubmit={handleSubmit} className="rounded-3xl border border-sand-200 bg-white p-5 text-slate-900 shadow-xs sm:p-8">
+      <h2 className="font-heading text-lg font-bold text-brand-900 sm:text-xl">{ui.volunteerFormTitle}</h2>
 
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <label className="block space-y-1.5 text-xs font-bold text-slate-700">
           <span>{ui.contactName}</span>
           <input
@@ -220,7 +220,7 @@ export function VolunteerForm() {
             required
             minLength={2}
             maxLength={160}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
@@ -231,7 +231,7 @@ export function VolunteerForm() {
             type="email"
             required
             maxLength={190}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
@@ -243,7 +243,7 @@ export function VolunteerForm() {
             required
             minLength={7}
             maxLength={30}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
@@ -254,7 +254,7 @@ export function VolunteerForm() {
             required
             minLength={2}
             maxLength={120}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
@@ -263,7 +263,7 @@ export function VolunteerForm() {
           <select
             name="interest"
             required
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           >
             <option value="">{lang === 'ta' ? 'பிரிவைத் தேர்ந்தெடுக்கவும்' : 'Select an area'}</option>
             <option value="Education Support">{lang === 'ta' ? 'கல்வி உதவி' : 'Education Support'}</option>
@@ -278,7 +278,7 @@ export function VolunteerForm() {
           <input
             name="availability"
             maxLength={120}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
@@ -288,12 +288,12 @@ export function VolunteerForm() {
             name="message"
             rows={3}
             maxLength={3000}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-500 focus:bg-white"
+            className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
           />
         </label>
 
         <label className="flex items-start gap-2.5 text-xs font-medium text-slate-600 sm:col-span-2">
-          <input type="checkbox" name="consent" required className="mt-0.5 h-4 w-4 rounded accent-brand-600" />
+          <input type="checkbox" name="consent" required className="mt-0.5 h-4 w-4 rounded accent-brand-900" />
           <span>{ui.volunteerConsent}</span>
         </label>
       </div>
@@ -319,7 +319,7 @@ export function VolunteerForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-700 disabled:opacity-60 sm:w-auto"
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-saffron-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-saffron-700 disabled:opacity-60 sm:w-auto"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         <span>{submitting ? ui.submitting : ui.volunteerSubmit}</span>

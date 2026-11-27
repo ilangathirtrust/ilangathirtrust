@@ -5,6 +5,7 @@ import { Calendar, FolderOpen, Images, MapPin } from 'lucide-react';
 import { pickLocalized, type GalleryFolder } from '@ilangathir/shared';
 import { useLanguage } from './LanguageProvider';
 import { getUi } from '@/lib/i18n';
+import { LazyImage } from './LazyPrimitives';
 
 export function GalleryFolderCard({ folder }: { folder: GalleryFolder }) {
   const { lang } = useLanguage();
@@ -22,66 +23,61 @@ export function GalleryFolderCard({ folder }: { folder: GalleryFolder }) {
   return (
     <Link
       href={`/gallery/${folder.slug}`}
-      className="editorial-card group flex h-full flex-col overflow-hidden"
+      className="trust-card group flex h-full flex-col overflow-hidden"
     >
-      {/* Multi-image Folder Collage Preview */}
-      <div className="relative h-56 overflow-hidden bg-slate-100 p-2">
+      <div className="relative h-56 overflow-hidden bg-sand-100 p-2">
         {previews.length >= 3 ? (
           <div className="grid h-full grid-cols-2 grid-rows-2 gap-1.5 overflow-hidden rounded-xl">
             {previews.slice(0, 4).map((src, i) => (
-              <div key={i} className="overflow-hidden bg-slate-200">
-                <img
-                  src={src}
-                  alt={`${title} preview ${i + 1}`}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                />
-              </div>
+              <LazyImage
+                key={i}
+                src={src}
+                alt={`${title} preview ${i + 1}`}
+                wrapperClassName="h-full w-full bg-sand-200"
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
             ))}
           </div>
         ) : previews.length === 2 ? (
           <div className="grid h-full grid-cols-2 gap-1.5 overflow-hidden rounded-xl">
             {previews.map((src, i) => (
-              <div key={i} className="overflow-hidden bg-slate-200">
-                <img
-                  src={src}
-                  alt={`${title} preview ${i + 1}`}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                />
-              </div>
+              <LazyImage
+                key={i}
+                src={src}
+                alt={`${title} preview ${i + 1}`}
+                wrapperClassName="h-full w-full bg-sand-200"
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
             ))}
           </div>
         ) : previews.length === 1 ? (
-          <div className="h-full w-full overflow-hidden rounded-xl bg-slate-200">
-            <img
-              src={previews[0]}
-              alt={title}
-              loading="lazy"
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-            />
-          </div>
+          <LazyImage
+            src={previews[0]}
+            alt={title}
+            wrapperClassName="h-full w-full rounded-xl bg-sand-200"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          />
         ) : (
-          <div className="flex h-full w-full items-center justify-center rounded-xl bg-brand-50 text-brand-400">
+          <div className="flex h-full w-full items-center justify-center rounded-xl bg-brand-50 text-brand-700">
             <FolderOpen className="h-12 w-12" />
           </div>
         )}
 
-        <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-slate-950/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
+        <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-brand-950/80 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
           <span>{folder.category}</span>
         </div>
 
-        <div className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-slate-900 shadow-md">
-          <Images className="h-3.5 w-3.5 text-brand-600" />
+        <div className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-brand-900 shadow-md">
+          <Images className="h-3.5 w-3.5 text-saffron-600" />
           <span>{folder.item_count} {ui.itemsCount}</span>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4 min-[360px]:p-5">
         <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-500">
           {folder.event_date && (
             <span className="inline-flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5 text-brand-600" />
+              <Calendar className="h-3.5 w-3.5 text-brand-700" />
               {new Date(folder.event_date).toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-IN', {
                 year: 'numeric',
                 month: 'short',
@@ -91,13 +87,13 @@ export function GalleryFolderCard({ folder }: { folder: GalleryFolder }) {
           )}
           {location && (
             <span className="inline-flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5 text-amberwarm-600" />
-              {location}
+              <MapPin className="h-3.5 w-3.5 text-saffron-600" />
+              <span className="truncate">{location}</span>
             </span>
           )}
         </div>
 
-        <h3 className="mt-2.5 font-heading text-lg font-bold text-slate-900 transition group-hover:text-brand-600">
+        <h3 className="mt-2.5 font-heading text-base font-bold text-brand-900 transition group-hover:text-saffron-600 sm:text-lg">
           {title}
         </h3>
         {desc && <p className="mt-2 line-clamp-2 text-sm text-slate-600">{desc}</p>}

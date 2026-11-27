@@ -1,8 +1,9 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import { Sparkles } from 'lucide-react';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
-import { buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
+import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from '@/lib/seo';
 import { PERMANENT_PAGES } from '@/lib/site-content';
 import { PageHeader } from '@/components/PageHeader';
 import { ActivitiesListSection } from '@/components/DynamicSections';
@@ -14,6 +15,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   return buildPageMetadata({
     title: lang === 'ta' ? p.seo_title_ta : p.seo_title_en,
     description: lang === 'ta' ? p.seo_description_ta : p.seo_description_en,
+    keywords: lang === 'ta' ? p.keywords_ta : p.keywords_en,
     path: '/activities',
     lang
   });
@@ -30,6 +32,13 @@ export default async function ActivitiesPage({
   const p = PERMANENT_PAGES.activities;
   const currentPage = Math.max(1, Number(sp.page) || 1);
 
+  const webPageJsonLd = buildWebPageJsonLd({
+    title: lang === 'ta' ? p.seo_title_ta : p.seo_title_en,
+    description: lang === 'ta' ? p.seo_description_ta : p.seo_description_en,
+    path: '/activities',
+    lang,
+    type: 'CollectionPage'
+  });
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: ui.home, path: '/' },
     { name: ui.activities, path: '/activities' }
@@ -37,6 +46,7 @@ export default async function ActivitiesPage({
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       <PageHeader
@@ -44,9 +54,10 @@ export default async function ActivitiesPage({
         eyebrow={lang === 'ta' ? p.eyebrow_ta : p.eyebrow_en}
         title={lang === 'ta' ? p.title_ta : p.title_en}
         subtitle={lang === 'ta' ? p.subtitle_ta : p.subtitle_en}
+        icon={Sparkles}
       />
 
-      <section className="bg-white py-14 lg:py-16">
+      <section className="bg-sand-50 py-12 sm:py-14 lg:py-16">
         <div className="container-max">
           <Suspense key={currentPage} fallback={<CardGridSkeleton count={6} />}>
             <ActivitiesListSection lang={lang} page={currentPage} />

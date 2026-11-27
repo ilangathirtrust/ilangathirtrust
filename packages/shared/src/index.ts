@@ -262,6 +262,46 @@ export const verifyDonationSchema = z.object({
   razorpay_signature: z.string().trim().min(16)
 });
 
+export interface DonationConfig {
+  enabled: boolean;
+  currency: string;
+  suggested_amounts: number[];
+  purposes: string[];
+}
+
+export const DEFAULT_DONATION_CONFIG: DonationConfig = {
+  enabled: true,
+  currency: 'INR',
+  suggested_amounts: [500, 1000, 2500, 5000, 10000],
+  purposes: ['General Welfare', 'Education Support', 'Medical Relief', 'Environmental Care']
+};
+
+export function parseDonationConfig(
+  settings: Record<string, { json_value?: Record<string, unknown> | null }> | null | undefined
+): DonationConfig {
+  const raw = settings?.donation_config?.json_value as Record<string, unknown> | null | undefined;
+  if (!raw || typeof raw !== 'object') return DEFAULT_DONATION_CONFIG;
+  const suggested = Array.isArray(raw.suggested_amounts)
+    ? raw.suggested_amounts.map((n) => Number(n)).filter((n) => Number.isFinite(n) && n >= 100)
+    : DEFAULT_DONATION_CONFIG.suggested_amounts;
+  const purposes = Array.isArray(raw.purposes)
+    ? raw.purposes.map((p) => String(p).trim()).filter(Boolean)
+    : DEFAULT_DONATION_CONFIG.purposes;
+
+  return {
+    enabled: raw.enabled !== false,
+    currency: typeof raw.currency === 'string' && raw.currency.trim() ? raw.currency.trim() : 'INR',
+    suggested_amounts: suggested.length ? suggested : DEFAULT_DONATION_CONFIG.suggested_amounts,
+    purposes: purposes.length ? purposes : DEFAULT_DONATION_CONFIG.purposes
+  };
+}
+
+export function isDonationsEnabled(
+  settings: Record<string, { json_value?: Record<string, unknown> | null }> | null | undefined
+): boolean {
+  return parseDonationConfig(settings).enabled;
+}
+
 export function pickLocalized<T extends Record<string, unknown>>(
   record: T | null | undefined,
   baseField: string,

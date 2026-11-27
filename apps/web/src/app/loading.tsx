@@ -2,7 +2,7 @@ import { HeroSkeleton, MarqueeSkeleton, SectionCardGridSkeleton } from '@/compon
 
 export default function Loading() {
   return (
-    <div className="bg-white">
+    <div className="bg-sand-50">
       <HeroSkeleton />
       <MarqueeSkeleton />
       <SectionCardGridSkeleton count={3} />

@@ -14,16 +14,16 @@ export function FaqSection({ faqs }: { faqs: BilingualFaq[] }) {
   if (!faqs || !faqs.length) return null;
 
   return (
-    <section className="border-t border-slate-200 bg-white py-14 lg:py-16">
+    <section className="border-t border-sand-200 bg-sand-100/70 py-12 sm:py-14 lg:py-16">
       <div className="container-max">
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="mx-auto max-w-3xl text-center">
           <span className="section-kicker">{ui.faqEyebrow}</span>
-          <h2 className="mt-2 font-heading text-2xl font-bold text-slate-900 sm:text-3xl">
+          <h2 className="mt-2 font-heading text-xl font-bold text-brand-900 min-[360px]:text-2xl sm:text-3xl">
             {ui.faqTitle}
           </h2>
         </div>
 
-        <div className="mx-auto mt-10 max-w-4xl space-y-3">
+        <div className="mx-auto mt-8 max-w-3xl space-y-3 sm:mt-10">
           {faqs.map((faq, idx) => {
             const isOpen = openIdx === idx;
             const q = lang === 'ta' && faq.question_ta ? faq.question_ta : faq.question_en;
@@ -31,23 +31,23 @@ export function FaqSection({ faqs }: { faqs: BilingualFaq[] }) {
             return (
               <div
                 key={idx}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition"
+                className="overflow-hidden rounded-2xl border border-sand-200 bg-white shadow-xs transition"
               >
                 <button
                   type="button"
                   onClick={() => setOpenIdx(isOpen ? null : idx)}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-heading text-base font-bold text-slate-900 transition hover:bg-slate-50 sm:px-6"
+                  className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left font-heading text-sm font-bold text-brand-900 transition hover:bg-sand-50/70 min-[360px]:px-5 sm:px-6 sm:text-base"
                 >
-                  <span>{q}</span>
+                  <span className="min-w-0 break-words">{q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 shrink-0 text-brand-600 transition-transform duration-200 ${
+                    className={`h-5 w-5 shrink-0 text-saffron-600 transition-transform duration-200 ${
                       isOpen ? 'rotate-180' : ''
                     }`}
                   />
                 </button>
                 {isOpen && (
-                  <div className="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-600 sm:px-6">
+                  <div className="border-t border-sand-100 bg-white px-4 py-4 text-sm leading-relaxed text-slate-600 min-[360px]:px-5 sm:px-6">
                     {a}
                   </div>
                 )}

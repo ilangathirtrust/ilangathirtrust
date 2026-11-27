@@ -17,7 +17,6 @@ export function LoginPage({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Two-Factor (MFA TOTP) step state
   const [mfaStep, setMfaStep] = useState<{ factorId: string } | null>(null);
   const [mfaCode, setMfaCode] = useState('');
 
@@ -35,7 +34,6 @@ export function LoginPage({
       });
       if (authErr) throw authErr;
 
-      // Enforce Authenticator 2FA when enrolled on this admin account
       const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aal.data?.currentLevel === 'aal1' && aal.data?.nextLevel === 'aal2') {
         const factorsRes = await supabase.auth.mfa.listFactors();
@@ -77,27 +75,29 @@ export function LoginPage({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-9">
+    <div className="flex min-h-screen items-center justify-center bg-sand-50 p-3.5 sm:p-6">
+      <div className="w-full max-w-md rounded-3xl border border-sand-200 bg-white p-6 shadow-[0_14px_40px_rgba(11,24,46,0.06)] sm:p-9">
         <div className="text-center">
           <img
-            src="/ilangathir-logo.jpg"
+            src="/logo.webp"
             alt="Ilangathir Trust"
-            className="mx-auto h-16 w-16 rounded-full border border-slate-200 object-cover"
+            className="mx-auto h-16 w-16 rounded-full border border-sand-200 object-cover shadow-xs"
           />
-          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-700">
+          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-saffron-500/20 bg-saffron-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-saffron-700">
             <Lock className="h-3 w-3" />
-            admin.ilangathirtrust.org
+            Authorized Access Only
           </span>
-          <h1 className="mt-3 text-2xl font-extrabold text-slate-900">Trust Admin Console</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="mt-3 text-xl font-extrabold text-brand-900 sm:text-2xl">
+            Ilangathir Operations Console
+          </h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
             {mfaStep ? 'Enter your 6-digit authenticator code' : 'Protected by Supabase Authentication, 2FA & RBAC'}
           </p>
         </div>
 
         {!isSupabaseConfigured() && (
           <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs font-medium text-amber-900">
-            Configure <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to enable admin sign-in.
+            Configure <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to enable sign-in.
           </div>
         )}
 
@@ -159,7 +159,7 @@ export function LoginPage({
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-700 disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-800 disabled:opacity-60"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
               <span>{loading ? 'Verifying…' : 'Verify & Continue'}</span>
@@ -180,14 +180,14 @@ export function LoginPage({
         ) : (
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <label className="admin-label">
-              <span>Admin Email</span>
+              <span>Account Email</span>
               <input
                 type="email"
                 required
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ilangathirtrust@gmail.com"
+                placeholder="name@ilangathirtrust.org"
                 className="admin-input"
               />
             </label>
@@ -254,7 +254,7 @@ export function LoginPage({
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-700 disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-800 disabled:opacity-60"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               <span>{loading ? 'Signing in…' : 'Sign in securely'}</span>
@@ -263,7 +263,7 @@ export function LoginPage({
         )}
 
         <div className="mt-6 text-center">
-          <a href={PUBLIC_SITE_URL} className="text-xs font-semibold text-slate-500 hover:text-brand-700">
+          <a href={PUBLIC_SITE_URL} className="text-xs font-semibold text-slate-500 hover:text-brand-800">
             ← Return to public website
           </a>
         </div>

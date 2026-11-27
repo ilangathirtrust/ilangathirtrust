@@ -112,39 +112,87 @@ export function EventsActivitiesPage({
 
         {mode === 'team' ? (
           <div className="grid gap-3 sm:grid-cols-2">
-            <input required placeholder="Full Name (EN)" value={String(form.name_en || '')} onChange={(e) => setForm({ ...form, name_en: e.target.value })} className="admin-input" />
-            <input required placeholder="Full Name (TA)" value={String(form.name_ta || '')} onChange={(e) => setForm({ ...form, name_ta: e.target.value })} className="admin-input" />
-            <input required placeholder="Designation (EN)" value={String(form.designation_en || '')} onChange={(e) => setForm({ ...form, designation_en: e.target.value })} className="admin-input" />
-            <input required placeholder="Designation (TA)" value={String(form.designation_ta || '')} onChange={(e) => setForm({ ...form, designation_ta: e.target.value })} className="admin-input" />
-            <textarea rows={2} placeholder="Biography (EN)" value={String(form.biography_en || '')} onChange={(e) => setForm({ ...form, biography_en: e.target.value })} className="admin-input" />
-            <textarea rows={2} placeholder="Biography (TA)" value={String(form.biography_ta || '')} onChange={(e) => setForm({ ...form, biography_ta: e.target.value })} className="admin-input" />
+            <label className="admin-label">
+              <span>Full Name (EN) *</span>
+              <input required placeholder="Full Name (EN)" value={String(form.name_en || '')} onChange={(e) => setForm({ ...form, name_en: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Full Name (TA) *</span>
+              <input required placeholder="Full Name (TA)" value={String(form.name_ta || '')} onChange={(e) => setForm({ ...form, name_ta: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Designation (EN) *</span>
+              <input required placeholder="Designation (EN)" value={String(form.designation_en || '')} onChange={(e) => setForm({ ...form, designation_en: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Designation (TA) *</span>
+              <input required placeholder="Designation (TA)" value={String(form.designation_ta || '')} onChange={(e) => setForm({ ...form, designation_ta: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Biography (EN)</span>
+              <textarea rows={2} placeholder="Biography (EN)" value={String(form.biography_en || '')} onChange={(e) => setForm({ ...form, biography_en: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Biography (TA)</span>
+              <textarea rows={2} placeholder="Biography (TA)" value={String(form.biography_ta || '')} onChange={(e) => setForm({ ...form, biography_ta: e.target.value })} className="admin-input" />
+            </label>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            <input required placeholder="Title (EN)" value={String(form.title_en || '')} onChange={(e) => setForm({ ...form, title_en: e.target.value })} className="admin-input" />
-            <input required placeholder="Title (TA)" value={String(form.title_ta || '')} onChange={(e) => setForm({ ...form, title_ta: e.target.value })} className="admin-input" />
-            <input placeholder="Category" value={String(form.category || '')} onChange={(e) => setForm({ ...form, category: e.target.value })} className="admin-input" />
-            <input
-              type="date"
-              required={mode === 'events'}
-              value={String((mode === 'events' ? form.event_date : form.activity_date) || '')}
-              onChange={(e) => setForm({ ...form, [mode === 'events' ? 'event_date' : 'activity_date']: e.target.value })}
-              className="admin-input"
-            />
-            <input placeholder="Location (EN)" value={String(form.location_en || '')} onChange={(e) => setForm({ ...form, location_en: e.target.value })} className="admin-input" />
-            <input placeholder="Location (TA)" value={String(form.location_ta || '')} onChange={(e) => setForm({ ...form, location_ta: e.target.value })} className="admin-input" />
-            <textarea required rows={3} placeholder="Description (EN)" value={String(form.description_en || '')} onChange={(e) => setForm({ ...form, description_en: e.target.value })} className="admin-input" />
-            <textarea required rows={3} placeholder="Description (TA)" value={String(form.description_ta || '')} onChange={(e) => setForm({ ...form, description_ta: e.target.value })} className="admin-input" />
+            <label className="admin-label">
+              <span>Title (EN) *</span>
+              <input required placeholder="Title (EN)" value={String(form.title_en || '')} onChange={(e) => setForm({ ...form, title_en: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Title (TA) *</span>
+              <input required placeholder="Title (TA)" value={String(form.title_ta || '')} onChange={(e) => setForm({ ...form, title_ta: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Category</span>
+              <input placeholder="e.g. Health Camp, Education" value={String(form.category || '')} onChange={(e) => setForm({ ...form, category: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>{mode === 'events' ? 'Event Date *' : 'Activity Date'}</span>
+              <input
+                type="date"
+                required={mode === 'events'}
+                value={String((mode === 'events' ? form.event_date : form.activity_date) || '')}
+                onChange={(e) => setForm({ ...form, [mode === 'events' ? 'event_date' : 'activity_date']: e.target.value })}
+                className="admin-input"
+              />
+            </label>
+            <label className="admin-label">
+              <span>Location (EN)</span>
+              <input placeholder="Location (EN)" value={String(form.location_en || '')} onChange={(e) => setForm({ ...form, location_en: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Location (TA)</span>
+              <input placeholder="Location (TA)" value={String(form.location_ta || '')} onChange={(e) => setForm({ ...form, location_ta: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Description (EN) *</span>
+              <textarea required rows={3} placeholder="Description (EN)" value={String(form.description_en || '')} onChange={(e) => setForm({ ...form, description_en: e.target.value })} className="admin-input" />
+            </label>
+            <label className="admin-label">
+              <span>Description (TA) *</span>
+              <textarea required rows={3} placeholder="Description (TA)" value={String(form.description_ta || '')} onChange={(e) => setForm({ ...form, description_ta: e.target.value })} className="admin-input" />
+            </label>
             {mode === 'events' && (
-              <select value={String(form.gallery_folder_id || '')} onChange={(e) => setForm({ ...form, gallery_folder_id: e.target.value || null })} className="admin-input">
-                <option value="">Link Gallery Folder (Optional)</option>
-                {folders.map((gf) => <option key={gf.id} value={gf.id}>{gf.title_en}</option>)}
-              </select>
+              <label className="admin-label">
+                <span>Linked Gallery Album</span>
+                <select value={String(form.gallery_folder_id || '')} onChange={(e) => setForm({ ...form, gallery_folder_id: e.target.value || null })} className="admin-input">
+                  <option value="">None (Optional)</option>
+                  {folders.map((gf) => <option key={gf.id} value={gf.id}>{gf.title_en}</option>)}
+                </select>
+              </label>
             )}
-            <select value={String(form.status || 'published')} onChange={(e) => setForm({ ...form, status: e.target.value })} className="admin-input">
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </select>
+            <label className="admin-label">
+              <span>Publish Status</span>
+              <select value={String(form.status || 'published')} onChange={(e) => setForm({ ...form, status: e.target.value })} className="admin-input">
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </label>
           </div>
         )}
 
@@ -167,7 +215,9 @@ export function EventsActivitiesPage({
       </form>
 
       {loading ? (
-        <div className="h-48 animate-pulse rounded-2xl bg-slate-200" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 admin-skeleton rounded-2xl" />)}
+        </div>
       ) : (
         <div className="space-y-3">
           {(mode === 'events' ? events : mode === 'activities' ? activities : team).map((item) => {
