@@ -79,9 +79,9 @@ export function LoginPage({
       <div className="w-full max-w-md rounded-3xl border border-sand-200 bg-white p-6 shadow-[0_14px_40px_rgba(11,24,46,0.06)] sm:p-9">
         <div className="text-center">
           <img
-            src="/logo.webp"
+            src="/logos/logo.png"
             alt="Ilangathir Trust"
-            className="mx-auto h-16 w-16 rounded-full border border-sand-200 object-cover shadow-xs"
+            className="mx-auto h-14 w-auto object-contain"
           />
           <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-saffron-500/20 bg-saffron-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-saffron-700">
             <Lock className="h-3 w-3" />

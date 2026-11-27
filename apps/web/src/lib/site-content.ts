@@ -1,11 +1,32 @@
 import type { BilingualFaq, Language, NavigationItem } from '@ilangathir/shared';
 
 export const STATIC_ASSETS = {
-  logo: '/assets/logo.webp',
-  favicon: '/icons/icon-192.png',
+  logo: '/logos/logo.png',
+  logoEng: '/logos/logo-eng.png',
+  logoTam: '/logos/logo-tam.png',
+  logoWhite: '/logos/logo-white.png',
+  logoWhiteEng: '/logos/logo-white-eng.png',
+  logoWhiteTam: '/logos/logo-white-tam.png',
+  logoBlackMono: '/logos/logo-black-monochrome.png',
+  logoNavyMono: '/logos/logo-navy-monochrome.png',
+  icon: '/logos/icon.png',
+  circularIcon: '/logos/circular-icon.png',
+  favicon: '/logos/favicon.ico',
+  adaptiveForeground: '/logos/adaptive-icon-foreground.png',
+  adaptiveBackground: '/logos/adaptive-icon-background.png',
+  adaptiveMonochrome: '/logos/adaptive-icon-monochrome.png',
   hero: '/assets/herosection.png',
   founder: '/assets/founder.jpg'
 } as const;
+
+export function normalizeBrandAssetUrl(raw: string | undefined | null, fallback: string): string {
+  const val = (raw || '').trim();
+  if (!val) return fallback;
+  if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('/logos/')) {
+    return val;
+  }
+  return fallback;
+}
 
 export const SITE_SETTINGS = {
   trust_name: {

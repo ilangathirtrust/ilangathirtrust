@@ -39,3 +39,7 @@ Thumbs.db
 # Local Supabase temp state
 supabase/.branches
 supabase/.temp
+
+# Synced app public/logos (canonical assets live in /logos)
+apps/web/public/logos/
+apps/admin/public/logos/

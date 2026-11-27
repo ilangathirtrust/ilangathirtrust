@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { pickLocalized, type BilingualFaq, type BlogPost, type EventItem, type GalleryFolder, type Language } from '@ilangathir/shared';
 import { SITE_URL } from './api';
+import { normalizeBrandAssetUrl, STATIC_ASSETS } from './site-content';
 
 export function buildPageMetadata(params: {
   title: string;
@@ -17,7 +18,7 @@ export function buildPageMetadata(params: {
   const sep = canonicalPath.includes('?') ? '&' : '?';
   const taUrl = `${SITE_URL}${canonicalPath}${sep}lang=ta`;
   const enUrl = `${SITE_URL}${canonicalPath}${sep}lang=en`;
-  const image = params.ogImage || `${SITE_URL}/assets/logo.webp`;
+  const image = params.ogImage || `${SITE_URL}${STATIC_ASSETS.logo}`;
 
   return {
     title: params.title,
@@ -79,7 +80,7 @@ export function buildOrganizationGraphJsonLd(
   const email = settings.email?.value_en || 'ilangathirtrust@gmail.com';
   const phone = settings.phone?.value_en || '+91 93630 15050';
   const address = settings.address?.value_en || 'V. Kallupatti, Dindigul - 624307, Tamil Nadu, India.';
-  const logo = settings.logo_url?.value_en || `${SITE_URL}/assets/logo.webp`;
+  const logo = normalizeBrandAssetUrl(settings.logo_url?.value_en, STATIC_ASSETS.logo);
   const socials = (settings.social_links?.json_value || {}) as Record<string, string>;
   const sameAs = Object.values(socials).filter((v) => typeof v === 'string' && v.startsWith('http'));
 

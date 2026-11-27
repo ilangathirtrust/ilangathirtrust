@@ -1,9 +1,16 @@
-const ADMIN_CACHE = 'ilangathir-admin-shell-v1';
-const SHELL_URLS = ['/icons/icon-192.png', '/icons/icon-512.png', '/logo.webp'];
+const ADMIN_CACHE = 'ilangathir-admin-shell-v2';
+const SHELL_URLS = [
+  '/logos/logo.png',
+  '/logos/logo-white.png',
+  '/logos/circular-icon.png',
+  '/logos/icon.png',
+  '/logos/icon-192.png',
+  '/logos/icon-512.png'
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(ADMIN_CACHE).then((c) => c.addAll(SHELL_URLS)).catch(() => { })
+    caches.open(ADMIN_CACHE).then((c) => c.addAll(SHELL_URLS)).catch(() => {})
   );
   self.skipWaiting();
 });
@@ -33,15 +40,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first only for static JS/CSS/icon bundles
-  if (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/icons/')) {
+  // Cache-first only for static JS/CSS/logo bundles
+  if (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/logos/')) {
     event.respondWith(
       caches.match(request).then((cached) => {
         const net = fetch(request)
           .then((res) => {
             if (res.ok) {
               const copy = res.clone();
-              caches.open(ADMIN_CACHE).then((c) => c.put(request, copy)).catch(() => { });
+              caches.open(ADMIN_CACHE).then((c) => c.put(request, copy)).catch(() => {});
             }
             return res;
           })

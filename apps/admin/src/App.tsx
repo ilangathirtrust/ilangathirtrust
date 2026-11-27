@@ -203,11 +203,13 @@ export default function App() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-sand-50 p-4">
         <div className="relative flex h-20 w-20 items-center justify-center">
           <span className="absolute inset-0 animate-spin rounded-full border-2 border-sand-200 border-t-saffron-600 border-r-brand-900" />
-          <img
-            src="/logo.webp"
-            alt="Ilangathir Trust"
-            className="h-14 w-14 rounded-full object-cover shadow-sm"
-          />
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white p-1 shadow-sm">
+            <img
+              src="/logos/circular-icon.png"
+              alt="Ilangathir Trust"
+              className="h-full w-full object-contain"
+            />
+          </div>
         </div>
         <p className="mt-4 text-sm font-bold text-brand-900">Loading Operations Console…</p>
       </div>
@@ -265,13 +267,10 @@ export default function App() {
         className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-brand-950 text-slate-200 shadow-2xl transition-transform duration-200 lg:static lg:w-64 lg:translate-x-0 lg:shadow-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
       >
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <img src="/logo.webp" alt="" className="h-10 w-10 rounded-full border border-white/20 object-cover" />
-            <div>
-              <p className="text-sm font-bold text-white">Ilangathir Trust</p>
-              <p className="text-[11px] font-semibold text-saffron-400">Operations Console</p>
-            </div>
+        <div className="flex items-center justify-between gap-2 border-b border-white/10 px-5 py-4">
+          <div className="min-w-0">
+            <img src="/logos/logo-white.png" alt="Ilangathir Trust" className="h-9 w-auto object-contain object-left" />
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-saffron-400">Operations Console</p>
           </div>
           <button type="button" onClick={() => setSidebarOpen(false)} aria-label="Close menu" className="rounded-lg p-1 text-slate-300 hover:bg-white/10 lg:hidden">
             <X className="h-5 w-5" />
@@ -356,7 +355,7 @@ export default function App() {
               >
                 <Menu className="h-6 w-6" strokeWidth={2.2} />
               </button>
-              <img src="/logo.webp" alt="" className="h-8 w-8 shrink-0 rounded-full border border-sand-200 object-cover" />
+              <img src="/logos/circular-icon.png" alt="Ilangathir Trust" className="h-8 w-8 shrink-0 object-contain" />
               <div className="min-w-0">
                 <p className="truncate text-xs font-extrabold text-brand-900">{currentNav.label}</p>
                 <p className="truncate text-[10px] font-bold uppercase text-saffron-600">{currentNav.group}</p>

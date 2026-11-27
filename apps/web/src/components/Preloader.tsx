@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { STATIC_ASSETS } from '@/lib/site-content';
 
-export function Preloader({ logoUrl }: { logoUrl: string }) {
+export function Preloader() {
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
 
@@ -34,17 +35,18 @@ export function Preloader({ logoUrl }: { logoUrl: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-sand-50 px-4 transition-opacity duration-300 ${fading ? 'pointer-events-none opacity-0' : 'opacity-100'
-        }`}
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-sand-50 px-4 transition-opacity duration-300 ${
+        fading ? 'pointer-events-none opacity-0' : 'opacity-100'
+      }`}
     >
       <div className="relative flex h-24 w-24 items-center justify-center">
         <span className="absolute inset-0 animate-ping rounded-full bg-saffron-400/20" />
         <span className="absolute inset-0 animate-spin rounded-full border-[2.5px] border-sand-200 border-t-saffron-600 border-r-brand-700" />
-        <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white p-1 shadow-md ring-1 ring-sand-200">
+        <div className="flex h-[74px] w-[74px] items-center justify-center rounded-full bg-white p-1.5 shadow-md ring-1 ring-sand-200">
           <img
-            src={logoUrl || '/assets/logo.webp'}
+            src={STATIC_ASSETS.circularIcon}
             alt="Ilangathir Trust"
-            className="h-full w-full rounded-full object-cover"
+            className="h-full w-full object-contain"
           />
         </div>
       </div>

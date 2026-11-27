@@ -5,7 +5,7 @@ import { isDonationsEnabled } from '@ilangathir/shared';
 import { getBootstrap, SITE_URL } from '@/lib/api';
 import { getServerLang } from '@/lib/lang-server';
 import { buildOrganizationGraphJsonLd } from '@/lib/seo';
-import { SITE_SETTINGS, STATIC_ASSETS } from '@/lib/site-content';
+import { normalizeBrandAssetUrl, SITE_SETTINGS, STATIC_ASSETS } from '@/lib/site-content';
 import { LanguageProvider } from '@/components/LanguageProvider';
 import { Preloader } from '@/components/Preloader';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
@@ -57,10 +57,25 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+      { url: '/logos/favicon.ico', sizes: 'any' },
+      { url: '/logos/favicon.svg', type: 'image/svg+xml' },
+      { url: '/logos/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/logos/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logos/favicon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/logos/favicon-192x192.png', sizes: '192x192', type: 'image/png' }
     ],
-    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }]
+    shortcut: [{ url: '/logos/favicon.ico' }],
+    apple: [
+      { url: '/logos/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/logos/apple-icon-120.png', sizes: '120x120', type: 'image/png' },
+      { url: '/logos/apple-icon-152.png', sizes: '152x152', type: 'image/png' },
+      { url: '/logos/apple-icon-167.png', sizes: '167x167', type: 'image/png' },
+      { url: '/logos/apple-icon-180.png', sizes: '180x180', type: 'image/png' }
+    ]
+  },
+  other: {
+    'msapplication-TileImage': '/logos/icon-144.png',
+    'msapplication-TileColor': '#13294B'
   }
 };
 
@@ -75,7 +90,7 @@ export default async function RootLayout({
 
   const trustNameEn = settings.trust_name?.value_en || SITE_SETTINGS.trust_name.value_en;
   const trustNameTa = settings.trust_name?.value_ta || SITE_SETTINGS.trust_name.value_ta;
-  const logoUrl = settings.logo_url?.value_en || STATIC_ASSETS.logo;
+  const logoUrl = normalizeBrandAssetUrl(settings.logo_url?.value_en, STATIC_ASSETS.logo);
   const phone = settings.phone?.value_en || SITE_SETTINGS.phone.value_en;
   const email = settings.email?.value_en || SITE_SETTINGS.email.value_en;
   const addressEn = settings.address?.value_en || SITE_SETTINGS.address.value_en;
@@ -96,7 +111,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
 
-        <Preloader logoUrl={logoUrl} />
+        <Preloader />
 
         <LanguageProvider initialLang={lang}>
           <Suspense fallback={null}>
@@ -118,7 +133,6 @@ export default async function RootLayout({
           </main>
 
           <SiteFooter
-            logoUrl={logoUrl}
             trustNameEn={trustNameEn}
             trustNameTa={trustNameTa}
             footerDescEn={footerDescEn}

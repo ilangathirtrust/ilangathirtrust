@@ -303,7 +303,10 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b border-sand-100 pb-3">
-              <h3 className="font-bold text-brand-900">Donation Transaction Detail</h3>
+              <div className="flex items-center gap-2.5">
+                <img src="/logos/logo-navy-monochrome.png" alt="Ilangathir Trust" className="h-7 w-7 object-contain" />
+                <h3 className="font-bold text-brand-900">Donation Transaction Detail</h3>
+              </div>
               <button type="button" onClick={() => setSelected(null)} className="rounded-lg p-1 hover:bg-sand-100"><X className="h-5 w-5" /></button>
             </div>
             <dl className="mt-4 space-y-2.5 text-xs">

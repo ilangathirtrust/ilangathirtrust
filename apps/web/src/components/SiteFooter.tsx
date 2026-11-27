@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { Heart, Mail, MapPin, Phone } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import { getUi } from '@/lib/i18n';
+import { STATIC_ASSETS } from '@/lib/site-content';
 
 interface SiteFooterProps {
-  logoUrl: string;
   trustNameEn: string;
   trustNameTa: string;
   footerDescEn: string;
@@ -22,25 +22,28 @@ export function SiteFooter(props: SiteFooterProps) {
   const { lang } = useLanguage();
   const ui = getUi(lang);
 
+  const mobileWhiteLogo = lang === 'ta' ? STATIC_ASSETS.logoWhiteTam : STATIC_ASSETS.logoWhiteEng;
+
   return (
     <footer className="border-t border-brand-800 bg-brand-950 pb-24 pt-14 text-sand-200 lg:pb-10">
       <div className="container-max">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12">
           <div className="space-y-4 lg:col-span-5">
-            <Link href="/" className="inline-flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center"
+              aria-label={lang === 'ta' ? props.trustNameTa : props.trustNameEn}
+            >
               <img
-                src={props.logoUrl || '/assets/logo.webp'}
-                alt={props.trustNameEn}
-                className="h-12 w-12 rounded-full border border-white/15 object-cover"
+                src={mobileWhiteLogo}
+                alt={lang === 'ta' ? props.trustNameTa : props.trustNameEn}
+                className="h-11 w-auto object-contain object-left lg:hidden"
               />
-              <div>
-                <p className="font-heading text-base font-bold text-white">
-                  {lang === 'ta' ? props.trustNameTa : props.trustNameEn}
-                </p>
-                <p className="text-xs font-semibold text-saffron-400">
-                  {lang === 'ta' ? props.trustNameEn : props.trustNameTa}
-                </p>
-              </div>
+              <img
+                src={STATIC_ASSETS.logoWhite}
+                alt={`${props.trustNameEn} | ${props.trustNameTa}`}
+                className="hidden h-12 w-auto object-contain object-left lg:block"
+              />
             </Link>
             <p className="max-w-md text-sm leading-relaxed text-sand-200/85">
               {lang === 'ta' ? props.footerDescTa : props.footerDescEn}
