@@ -41,22 +41,25 @@ interface AdminUser {
 }
 
 const NAV_ITEMS = [
-  { id: 'overview', label: 'Dashboard', icon: LayoutDashboard, group: 'Workspace' },
-  { id: 'settings', label: 'Site Settings & Brand', icon: Settings, group: 'Content CMS' },
-  { id: 'pages', label: 'Pages, Hero & SEO', icon: FileCode2, group: 'Content CMS' },
-  { id: 'navigation', label: 'Menus & Marquee', icon: Navigation, group: 'Content CMS' },
-  { id: 'activities', label: 'Activities & Services', icon: Sparkles, group: 'Content CMS' },
-  { id: 'events', label: 'Events Management', icon: CalendarDays, group: 'Content CMS' },
-  { id: 'gallery', label: 'Gallery Folders', icon: FolderOpen, group: 'Media & Blog' },
-  { id: 'media', label: 'Media Library', icon: ImageIcon, group: 'Media & Blog' },
-  { id: 'blogs', label: 'Blog & Articles', icon: BookOpen, group: 'Media & Blog' },
-  { id: 'team', label: 'Team & Trustees', icon: Users, group: 'Media & Blog' },
-  { id: 'donations', label: 'Donations & Razorpay', icon: IndianRupee, group: 'Operations' },
-  { id: 'enquiries', label: 'Contact Enquiries', icon: Inbox, group: 'Operations' },
-  { id: 'volunteers', label: 'Volunteers', icon: Heart, group: 'Operations' },
-  { id: 'audit', label: 'Audit Logs', icon: Activity, group: 'Security' },
-  { id: 'users', label: 'Admin Roles', icon: Shield, group: 'Security' }
+  { id: 'overview', label: 'Dashboard', shortLabel: 'Home', icon: LayoutDashboard, group: 'Workspace' },
+  { id: 'pages', label: 'Pages, Hero & SEO', shortLabel: 'Pages', icon: FileCode2, group: 'Content CMS' },
+  { id: 'events', label: 'Events Management', shortLabel: 'Events', icon: CalendarDays, group: 'Content CMS' },
+  { id: 'gallery', label: 'Gallery Folders', shortLabel: 'Gallery', icon: FolderOpen, group: 'Media & Blog' },
+  { id: 'donations', label: 'Donations & Razorpay', shortLabel: 'Donate', icon: IndianRupee, group: 'Operations' },
+  // Remaining items live in the Desktop Sidebar AND Mobile Menubar Drawer
+  { id: 'settings', label: 'Site Settings & Brand', shortLabel: 'Settings', icon: Settings, group: 'Content CMS' },
+  { id: 'navigation', label: 'Menus & Marquee', shortLabel: 'Menus', icon: Navigation, group: 'Content CMS' },
+  { id: 'activities', label: 'Activities & Services', shortLabel: 'Activities', icon: Sparkles, group: 'Content CMS' },
+  { id: 'media', label: 'Media Library', shortLabel: 'Media', icon: ImageIcon, group: 'Media & Blog' },
+  { id: 'blogs', label: 'Blog & Articles', shortLabel: 'Blog', icon: BookOpen, group: 'Media & Blog' },
+  { id: 'team', label: 'Team & Trustees', shortLabel: 'Team', icon: Users, group: 'Media & Blog' },
+  { id: 'enquiries', label: 'Contact Enquiries', shortLabel: 'Enquiries', icon: Inbox, group: 'Operations' },
+  { id: 'volunteers', label: 'Volunteers', shortLabel: 'Volunteers', icon: Heart, group: 'Operations' },
+  { id: 'audit', label: 'Audit Logs', shortLabel: 'Audit', icon: Activity, group: 'Security' },
+  { id: 'users', label: 'Admin Roles', shortLabel: 'Roles', icon: Shield, group: 'Security' }
 ];
+
+const MOBILE_BOTTOM_IDS = new Set(['overview', 'pages', 'events', 'gallery', 'donations']);
 
 export default function App() {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
@@ -113,7 +116,7 @@ export default function App() {
 
   if (checkingAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F4]">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-200 border-t-brand-600" />
       </div>
     );
@@ -124,20 +127,23 @@ export default function App() {
   }
 
   const currentNav = NAV_ITEMS.find((n) => n.id === activeTab) || NAV_ITEMS[0];
+  const primaryBottomItems = NAV_ITEMS.filter((item) => MOBILE_BOTTOM_IDS.has(item.id));
+  const groups = ['Workspace', 'Content CMS', 'Media & Blog', 'Operations', 'Security'];
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Mobile Sidebar Backdrop */}
+    <div className="flex min-h-screen bg-[#FAF8F4]">
+      {/* Mobile Menu Drawer Backdrop */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm lg:hidden"
         />
       )}
 
-      {/* Sidebar */}
+      {/* Desktop Sidebar & Mobile Menubar Drawer (contains ALL items grouped cleanly) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-brand-950 text-slate-200 transition-transform duration-200 lg:static lg:translate-x-0 ${
+        aria-label="Admin navigation menu"
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#081030] text-slate-200 shadow-2xl transition-transform duration-200 lg:static lg:w-64 lg:translate-x-0 lg:shadow-none ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -146,35 +152,47 @@ export default function App() {
             <img src="/ilangathir-logo.jpg" alt="" className="h-10 w-10 rounded-full border border-white/20 object-cover" />
             <div>
               <p className="text-sm font-bold text-white">Ilangathir Trust</p>
-              <p className="text-[11px] font-medium text-brand-200">Admin Console</p>
+              <p className="text-[11px] font-medium text-amber-300">Admin Console</p>
             </div>
           </div>
-          <button type="button" onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400">
+          <button type="button" onClick={() => setSidebarOpen(false)} aria-label="Close menu" className="rounded-lg p-1 text-slate-300 hover:bg-white/10 lg:hidden">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const active = activeTab === item.id;
+        <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+          {groups.map((grp) => {
+            const grpItems = NAV_ITEMS.filter((i) => i.group === grp);
             return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setSidebarOpen(false);
-                }}
-                className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-xs font-semibold transition ${
-                  active
-                    ? 'bg-brand-600 text-white shadow'
-                    : 'text-slate-300 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{item.label}</span>
-              </button>
+              <div key={grp}>
+                <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+                  {grp}
+                </p>
+                <div className="space-y-1">
+                  {grpItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab(item.id);
+                          setSidebarOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-xs font-semibold transition ${
+                          active
+                            ? 'bg-brand-600 text-white shadow'
+                            : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>
@@ -202,34 +220,52 @@ export default function App() {
 
       {/* Main Content */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-4 py-3.5 backdrop-blur-md sm:px-8">
-          <div className="flex items-center gap-3 min-w-0">
+        <header className="sticky top-0 z-30 border-b border-stone-200/90 bg-white/95 px-4 py-3 backdrop-blur-xl sm:px-8">
+          {/* Mobile Header: Left Menu (all other sections) | Center Logo | Right Profile */}
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 lg:hidden">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              aria-label="Open menu"
-              className="rounded-xl border border-slate-200 p-2 text-slate-700 lg:hidden"
+              aria-label="Open admin menu"
+              className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-stone-200 bg-[#FAF8F4] px-3 text-xs font-bold text-slate-800"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
+              <span className="hidden min-[360px]:inline">More</span>
             </button>
-            <div className="min-w-0">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-600">{currentNav.group}</p>
-              <h1 className="truncate text-lg font-extrabold text-slate-900 sm:text-xl">{currentNav.label}</h1>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">
+            <div className="flex items-center justify-center gap-2 min-w-0">
+              <img src="/ilangathir-logo.jpg" alt="" className="h-8 w-8 rounded-full border border-stone-200 object-cover shrink-0" />
+              <div className="min-w-0 text-center min-[380px]:text-left">
+                <p className="truncate text-xs font-extrabold text-slate-900">{currentNav.label}</p>
+                <p className="text-[10px] font-bold uppercase text-brand-700">{currentNav.group}</p>
+              </div>
+            </div>
+
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white shadow-xs">
               {adminUser.email.slice(0, 2).toUpperCase()}
             </span>
-            <div className="hidden text-left sm:block">
-              <p className="text-xs font-bold text-slate-900">{adminUser.email}</p>
-              <p className="text-[10px] font-semibold uppercase text-brand-600">{adminUser.role}</p>
+          </div>
+
+          {/* Desktop Header */}
+          <div className="hidden items-center justify-between gap-4 lg:flex">
+            <div className="min-w-0">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-amber-700">{currentNav.group}</p>
+              <h1 className="truncate text-xl font-extrabold text-slate-900">{currentNav.label}</h1>
+            </div>
+
+            <div className="flex items-center gap-2.5 rounded-full border border-stone-200 bg-[#FAF8F4] px-3.5 py-1.5">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">
+                {adminUser.email.slice(0, 2).toUpperCase()}
+              </span>
+              <div className="text-left">
+                <p className="text-xs font-bold text-slate-900">{adminUser.email}</p>
+                <p className="text-[10px] font-semibold uppercase text-brand-700">{adminUser.role}</p>
+              </div>
             </div>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-8">
+        <main className="mx-auto w-full max-w-7xl flex-1 p-4 pb-24 sm:p-8 lg:pb-10">
           {toast && (
             <div
               role="status"
@@ -260,6 +296,37 @@ export default function App() {
           {activeTab === 'users' && <InboxAndAuditPage mode="users" onNotify={notify} />}
         </main>
       </div>
+
+      {/* Mobile Floating Bottom Navbar (5 Primary Admin Sections) */}
+      <nav
+        aria-label="Mobile admin bottom navigation"
+        className="fixed bottom-3 left-2 right-2 z-40 mx-auto max-w-md rounded-2xl border border-stone-200/90 bg-white/95 px-1 py-1.5 shadow-[0_12px_34px_rgba(8,16,48,0.16)] backdrop-blur-xl lg:hidden"
+      >
+        <ul className="grid grid-cols-5 items-stretch gap-1">
+          {primaryBottomItems.map((item) => {
+            const Icon = item.icon;
+            const active = activeTab === item.id;
+            return (
+              <li key={item.id} className="min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex w-full flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-center transition ${
+                    active
+                      ? 'bg-brand-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-[#FAF8F4] hover:text-slate-900'
+                  }`}
+                >
+                  <Icon className="h-4 w-4 shrink-0" strokeWidth={2.2} />
+                  <span className="w-full truncate text-[10px] font-bold leading-tight">
+                    {item.shortLabel}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
     </div>
   );
 }

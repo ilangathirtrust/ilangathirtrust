@@ -22,21 +22,21 @@ export function SiteFooter(props: SiteFooterProps) {
   const ui = getUi(lang);
 
   return (
-    <footer className="border-t border-slate-800 bg-brand-950 pb-24 pt-14 text-slate-300 lg:pb-10">
+    <footer className="border-t border-brand-900/30 bg-brand-950 pb-24 pt-14 text-slate-300 lg:pb-10">
       <div className="container-max">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-4">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12">
+          <div className="space-y-4 lg:col-span-4">
             <Link href="/" className="flex items-center gap-3">
               <img
                 src={props.logoUrl || '/assets/ilangathir-logo.jpg'}
                 alt={props.trustNameEn}
-                className="h-12 w-12 rounded-full border-2 border-brand-500/40 object-cover"
+                className="h-12 w-12 rounded-full border-2 border-amberwarm-400/40 object-cover"
               />
               <div>
                 <p className="font-heading text-base font-bold text-white">
                   {lang === 'ta' ? props.trustNameTa : props.trustNameEn}
                 </p>
-                <p className="text-xs font-medium text-brand-200">
+                <p className="text-xs font-medium text-amberwarm-300">
                   {lang === 'ta' ? props.trustNameEn : props.trustNameTa}
                 </p>
               </div>
@@ -46,8 +46,8 @@ export function SiteFooter(props: SiteFooterProps) {
             </p>
           </div>
 
-          <div>
-            <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-white">
+          <div className="lg:col-span-2">
+            <h3 className="font-heading text-xs font-extrabold uppercase tracking-widest text-amberwarm-400">
               {ui.footerExplore}
             </h3>
             <ul className="mt-4 space-y-2.5 text-sm">
@@ -59,14 +59,14 @@ export function SiteFooter(props: SiteFooterProps) {
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-white">
+          <div className="lg:col-span-2">
+            <h3 className="font-heading text-xs font-extrabold uppercase tracking-widest text-amberwarm-400">
               {ui.footerSupport}
             </h3>
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
-                <Link href="/donate" className="inline-flex items-center gap-1.5 font-semibold text-amberwarm-400 transition hover:text-amberwarm-300">
-                  <Heart className="h-3.5 w-3.5" />
+                <Link href="/donate" className="inline-flex items-center gap-1.5 font-semibold text-white transition hover:text-amberwarm-300">
+                  <Heart className="h-3.5 w-3.5 text-amberwarm-400" />
                   <span>{ui.donateNow}</span>
                 </Link>
               </li>
@@ -86,8 +86,8 @@ export function SiteFooter(props: SiteFooterProps) {
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-white">
+          <div className="lg:col-span-4">
+            <h3 className="font-heading text-xs font-extrabold uppercase tracking-widest text-amberwarm-400">
               {ui.footerContact}
             </h3>
             <ul className="mt-4 space-y-3 text-sm">
@@ -117,7 +117,7 @@ export function SiteFooter(props: SiteFooterProps) {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-slate-800 pt-6 text-center text-xs text-slate-400 sm:flex-row sm:text-left">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-center text-xs text-slate-400 sm:flex-row sm:text-left">
           <p>
             © {new Date().getFullYear()} {lang === 'ta' ? props.trustNameTa : props.trustNameEn}. {ui.allRightsReserved}
           </p>

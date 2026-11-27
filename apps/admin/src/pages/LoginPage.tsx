@@ -29,19 +29,19 @@ export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-950 via-brand-900 to-brand-700 p-4">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-[#FAF8F4] p-4">
+      <div className="w-full max-w-md rounded-3xl border border-stone-200 bg-white p-7 shadow-[0_20px_50px_rgba(14,27,77,0.08)] sm:p-9">
         <div className="text-center">
           <img
             src="/ilangathir-logo.jpg"
             alt="Ilangathir Trust"
-            className="mx-auto h-16 w-16 rounded-full border-2 border-brand-100 object-cover shadow"
+            className="mx-auto h-16 w-16 rounded-full border-2 border-white object-cover shadow ring-1 ring-stone-200"
           />
-          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-brand-700">
+          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-[#FAF8F4] px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-brand-700">
             <Lock className="h-3 w-3" />
             admin.ilangathirtrust.com
           </span>
-          <h1 className="mt-3 text-2xl font-extrabold text-slate-900">Admin Portal Sign In</h1>
+          <h1 className="mt-3 text-2xl font-extrabold text-slate-900">Trust Admin Console</h1>
           <p className="mt-1 text-sm text-slate-500">Protected by Supabase Authentication & RBAC</p>
         </div>
 
@@ -97,7 +97,7 @@ export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-brand-600/25 transition hover:bg-brand-700 disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-60"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             <span>{loading ? 'Verifying session…' : 'Sign in securely'}</span>
@@ -105,7 +105,7 @@ export function LoginPage({ onSuccess }: { onSuccess: () => void }) {
         </form>
 
         <div className="mt-6 text-center">
-          <a href={PUBLIC_SITE_URL} className="text-xs font-semibold text-slate-500 hover:text-brand-600">
+          <a href={PUBLIC_SITE_URL} className="text-xs font-semibold text-slate-500 hover:text-brand-700">
             ← Return to public website
           </a>
         </div>

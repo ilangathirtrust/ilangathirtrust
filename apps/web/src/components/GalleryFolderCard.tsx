@@ -22,7 +22,7 @@ export function GalleryFolderCard({ folder }: { folder: GalleryFolder }) {
   return (
     <Link
       href={`/gallery/${folder.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl"
+      className="editorial-card group flex h-full flex-col overflow-hidden"
     >
       {/* Multi-image Folder Collage Preview */}
       <div className="relative h-56 overflow-hidden bg-slate-100 p-2">

@@ -10,10 +10,10 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-ivory-100 text-slate-900 antialiased;
     overflow-x: clip;
     font-family: var(--font-inter), var(--font-tamil), system-ui, sans-serif;
-    line-height: 1.65;
+    line-height: 1.68;
   }
 
   h1, h2, h3, h4 {
@@ -21,33 +21,60 @@
     overflow-wrap: break-word;
   }
 
-  /* Tamil Typography & Layout Consistency Optimizations */
+  /* Dedicated Tamil Typography & Proportional Layout Stability */
   html[lang='ta'] body {
     font-family: var(--font-tamil), var(--font-inter), system-ui, sans-serif;
     line-height: 1.85;
+    font-size: 0.96rem;
   }
 
-  html[lang='ta'] h1,
+  html[lang='ta'] h1 {
+    font-family: var(--font-tamil), var(--font-jakarta), system-ui, sans-serif;
+    line-height: 1.42 !important;
+    letter-spacing: -0.005em !important;
+  }
+
   html[lang='ta'] h2,
   html[lang='ta'] h3,
   html[lang='ta'] h4 {
     font-family: var(--font-tamil), var(--font-jakarta), system-ui, sans-serif;
-    line-height: 1.42;
-    letter-spacing: -0.01em;
+    line-height: 1.48 !important;
+    letter-spacing: 0 !important;
+  }
+
+  html[lang='ta'] p,
+  html[lang='ta'] li {
+    line-height: 1.85;
   }
 
   html[lang='ta'] button,
   html[lang='ta'] a {
-    line-height: 1.5;
+    line-height: 1.45;
   }
 }
 
 .container-max {
-  @apply mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8;
+  @apply mx-auto w-full max-w-[1220px] px-4 sm:px-6 lg:px-8;
+}
+
+.editorial-card {
+  @apply rounded-2xl border border-stone-200/90 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.04)] transition duration-300;
+}
+
+.editorial-card:hover {
+  @apply border-stone-300 shadow-[0_14px_34px_rgba(14,27,77,0.08)];
+}
+
+.section-kicker {
+  @apply inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-amberwarm-700;
+}
+
+html[lang='ta'] .section-kicker {
+  @apply tracking-[0.04em] text-xs;
 }
 
 .skeleton-box {
-  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background: linear-gradient(90deg, #e7e5e4 25%, #f5f5f4 50%, #e7e5e4 75%);
   background-size: 200% 100%;
   @apply animate-shimmer rounded-xl;
 }

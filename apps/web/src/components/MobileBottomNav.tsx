@@ -26,6 +26,15 @@ const ICON_MAP = {
   HeartHandshake
 } as const;
 
+// Compact Tamil mobile bottom labels so nothing ever clips or overflows at 300px+
+const COMPACT_TA_LABELS: Record<string, string> = {
+  '/': 'முகப்பு',
+  '/events': 'நிகழ்வு',
+  '/gallery': 'படங்கள்',
+  '/blog': 'கட்டுரை',
+  '/donate': 'உதவி'
+};
+
 export function MobileBottomNav({ navItems }: { navItems: NavigationItem[] }) {
   const pathname = usePathname();
   const { lang } = useLanguage();
@@ -39,9 +48,9 @@ export function MobileBottomNav({ navItems }: { navItems: NavigationItem[] }) {
   return (
     <nav
       aria-label="Mobile bottom navigation"
-      className="fixed bottom-3 left-2.5 right-2.5 z-40 mx-auto max-w-md rounded-2xl border border-slate-200/90 bg-white/95 px-1.5 py-1.5 shadow-[0_12px_36px_rgba(12,21,74,0.16)] backdrop-blur-xl lg:hidden"
+      className="fixed bottom-3 left-2 right-2 z-40 mx-auto max-w-md rounded-2xl border border-stone-200/90 bg-white/95 px-1 py-1.5 shadow-[0_12px_34px_rgba(8,16,48,0.16)] backdrop-blur-xl lg:hidden"
     >
-      <ul className="grid grid-cols-5 items-center gap-0.5">
+      <ul className="grid grid-cols-5 items-stretch gap-1">
         {items.map((item) => {
           const isActive =
             item.href === '/'
@@ -49,25 +58,28 @@ export function MobileBottomNav({ navItems }: { navItems: NavigationItem[] }) {
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const IconComponent =
             ICON_MAP[(item.icon_name as keyof typeof ICON_MAP) || 'Home'] || Home;
-          const label = lang === 'ta' ? item.label_ta : item.label_en;
+          const label =
+            lang === 'ta'
+              ? COMPACT_TA_LABELS[item.href] || item.label_ta
+              : item.label_en;
           const isDonate = item.href === '/donate';
 
           return (
-            <li key={item.id}>
+            <li key={item.id} className="min-w-0">
               <Link
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-center transition ${
+                className={`flex h-full flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1.5 text-center transition ${
                   isDonate
                     ? isActive
                       ? 'bg-brand-700 text-white shadow-sm'
                       : 'bg-brand-600 text-white shadow-sm'
                     : isActive
-                    ? 'bg-brand-50 text-brand-700'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-ivory-200 text-brand-900 font-bold'
+                    : 'text-slate-600 hover:bg-ivory-100 hover:text-slate-900'
                 }`}
               >
                 <IconComponent className="h-4 w-4 shrink-0" strokeWidth={2.2} />
-                <span className="max-w-full truncate text-[10px] font-semibold leading-tight">
+                <span className="w-full text-center text-[9.5px] font-bold leading-tight whitespace-nowrap sm:text-[10.5px]">
                   {label}
                 </span>
               </Link>

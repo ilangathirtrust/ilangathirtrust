@@ -16,20 +16,20 @@ export function ActivityMarquee({ items }: { items: MarqueeItem[] }) {
   const trackItems = [...items, ...items];
 
   return (
-    <section className="overflow-hidden border-y border-slate-200/80 bg-white py-14">
+    <section className="overflow-hidden border-y border-stone-200 bg-white py-14">
       <div className="container-max mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <span className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-brand-600">
-            <span className="h-2 w-2 rounded-full bg-amberwarm-500" />
+          <span className="section-kicker">
+            <span className="h-1.5 w-1.5 rounded-full bg-amberwarm-500" />
             {ui.marqueeEyebrow}
           </span>
-          <h2 className="mt-2 font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h2 className="mt-2 font-heading text-2xl font-bold text-brand-950 sm:text-3xl">
             {ui.marqueeTitle}
           </h2>
         </div>
         <Link
           href="/gallery"
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-600 transition hover:text-brand-700"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 transition hover:text-brand-900"
         >
           <span>{ui.viewAll}</span>
           <ArrowUpRight className="h-4 w-4" />

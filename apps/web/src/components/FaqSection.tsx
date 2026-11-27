@@ -14,14 +14,14 @@ export function FaqSection({ faqs }: { faqs: BilingualFaq[] }) {
   if (!faqs || !faqs.length) return null;
 
   return (
-    <section className="bg-slate-50 py-16 lg:py-20">
+    <section className="border-t border-stone-200 bg-ivory-200/50 py-16 lg:py-20">
       <div className="container-max">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-brand-600">
-            <span className="h-2 w-2 rounded-full bg-amberwarm-500" />
+          <span className="section-kicker">
+            <span className="h-1.5 w-1.5 rounded-full bg-amberwarm-500" />
             {ui.faqEyebrow}
           </span>
-          <h2 className="mt-2 font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h2 className="mt-2 font-heading text-2xl font-bold text-brand-950 sm:text-3xl">
             {ui.faqTitle}
           </h2>
         </div>

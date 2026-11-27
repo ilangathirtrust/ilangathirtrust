@@ -5,7 +5,7 @@ import { getEvents, getPageContent } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
-import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { PageHeader } from '@/components/PageHeader';
 import { EventsExplorer } from '@/components/EventsExplorer';
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
@@ -41,21 +41,15 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <section className="border-b border-slate-200 bg-white py-12 lg:py-16">
-        <div className="container-max">
-          <Breadcrumbs items={[{ label: ui.events }]} />
-          <span className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-brand-600">
-            <CalendarDays className="h-4 w-4" />
-            {ui.eventsEyebrow}
-          </span>
-          <h1 className="mt-3 max-w-3xl font-heading text-3xl font-extrabold text-slate-900 sm:text-5xl">
-            {heroTitle}
-          </h1>
-          {heroSub && <p className="mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">{heroSub}</p>}
-        </div>
-      </section>
+      <PageHeader
+        crumbs={[{ label: ui.events }]}
+        eyebrow={ui.eventsEyebrow}
+        title={heroTitle}
+        subtitle={heroSub}
+        icon={CalendarDays}
+      />
 
-      <section className="bg-slate-50 py-14 lg:py-20">
+      <section className="bg-ivory-100 py-14 lg:py-20">
         <div className="container-max">
           <EventsExplorer initialUpcoming={upcoming} initialPast={past} />
         </div>

@@ -9,28 +9,37 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        ivory: {
+          50: '#FDFCF9',
+          100: '#FAF8F4',
+          200: '#F3EFE6',
+          300: '#E8E1D3'
+        },
         brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          500: '#2e41e8',
-          600: '#1727d8',
-          700: '#101c9e',
-          900: '#0c154a',
-          950: '#070c2e'
+          50: '#EEF2FF',
+          100: '#E0E7FF',
+          200: '#C7D2FE',
+          500: '#2E41E8',
+          600: '#1727D8',
+          700: '#101C9E',
+          900: '#0E1B4D',
+          950: '#081030'
         },
         amberwarm: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706'
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          300: '#FCD34D',
+          400: '#FBBF24',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309'
         },
         tealcare: {
-          50: '#f0fdfa',
-          500: '#14b8a6',
-          600: '#0d9488',
-          700: '#0f766e'
+          50: '#F0FDFA',
+          100: '#CCFBF1',
+          500: '#14B8A6',
+          600: '#0D9488',
+          700: '#0F766E'
         }
       },
       fontFamily: {
@@ -53,7 +62,7 @@ const config: Config = {
         }
       },
       animation: {
-        marquee: 'marquee 42s linear infinite',
+        marquee: 'marquee 44s linear infinite',
         shimmer: 'shimmer 1.8s ease-in-out infinite',
         fadeInUp: 'fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards'
       }

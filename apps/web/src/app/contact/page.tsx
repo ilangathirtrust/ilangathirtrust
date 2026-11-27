@@ -5,7 +5,7 @@ import { getBootstrap, getPageContent } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
-import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { PageHeader } from '@/components/PageHeader';
 import { ContactEnquiryForm, VolunteerForm } from '@/components/ContactForms';
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
@@ -46,59 +46,53 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <section className="border-b border-slate-200 bg-white py-12 lg:py-16">
-        <div className="container-max">
-          <Breadcrumbs items={[{ label: ui.contact }]} />
-          <span className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-brand-600">
-            <Mail className="h-4 w-4" />
-            {ui.contact}
-          </span>
-          <h1 className="mt-3 max-w-3xl font-heading text-3xl font-extrabold text-slate-900 sm:text-5xl">
-            {heroTitle}
-          </h1>
-          {heroSub && <p className="mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">{heroSub}</p>}
-        </div>
-      </section>
+      <PageHeader
+        crumbs={[{ label: ui.contact }]}
+        eyebrow={ui.contact}
+        title={heroTitle}
+        subtitle={heroSub}
+        icon={Mail}
+      />
 
-      <section className="bg-slate-50 py-14 lg:py-20">
+      <section className="bg-ivory-100 py-14 lg:py-20">
         <div className="container-max space-y-12">
           <div className="grid gap-8 lg:grid-cols-12">
             <div className="space-y-4 lg:col-span-5">
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="editorial-card p-5">
                 <div className="flex items-start gap-3.5">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
                     <Phone className="h-5 w-5" />
                   </span>
                   <div>
                     <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
                       {lang === 'ta' ? 'தொலைபேசி' : 'Call Us'}
                     </p>
-                    <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="mt-1 block font-heading text-base font-bold text-slate-900 hover:text-brand-600">
+                    <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="mt-1 block font-heading text-base font-bold text-slate-900 hover:text-brand-700">
                       {phone}
                     </a>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="editorial-card p-5">
                 <div className="flex items-start gap-3.5">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
                     <Mail className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
                       {lang === 'ta' ? 'மின்னஞ்சல்' : 'Email Us'}
                     </p>
-                    <a href={`mailto:${email}`} className="mt-1 block break-all font-heading text-base font-bold text-slate-900 hover:text-brand-600">
+                    <a href={`mailto:${email}`} className="mt-1 block break-all font-heading text-base font-bold text-slate-900 hover:text-brand-700">
                       {email}
                     </a>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="editorial-card p-5">
                 <div className="flex items-start gap-3.5">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amberwarm-50 text-amberwarm-600">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amberwarm-50 text-amberwarm-700">
                     <MapPin className="h-5 w-5" />
                   </span>
                   <div>
@@ -113,7 +107,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
               {hours && (
                 <div className="rounded-2xl border border-amberwarm-200 bg-amberwarm-50 p-5 text-sm text-amberwarm-900">
                   <div className="flex items-start gap-3">
-                    <Clock className="mt-0.5 h-5 w-5 shrink-0 text-amberwarm-600" />
+                    <Clock className="mt-0.5 h-5 w-5 shrink-0 text-amberwarm-700" />
                     <p className="font-medium">{hours}</p>
                   </div>
                 </div>
