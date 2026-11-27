@@ -34,7 +34,12 @@ export function createApp() {
         if (env.ALLOWED_ORIGINS.includes(origin) || vercelOriginPattern.test(origin)) {
           return callback(null, true);
         }
-        return callback(new Error(`Origin ${origin} is not allowed by CORS policy.`));
+        return callback(
+          Object.assign(new Error(`Origin ${origin} is not allowed by CORS policy.`), {
+            status: 403,
+            code: 'CORS_NOT_ALLOWED'
+          })
+        );
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -94,24 +99,88 @@ export function createApp() {
   app.use('/api/admin', adminRouter);
 
   app.use((_req, res) => {
-    res.status(404).json({ error: 'API route not found.' });
+    res.status(404).json({ error: 'API route not found.', code: 'ROUTE_NOT_FOUND' });
   });
 
-  app.use((err: Error & { status?: number }, _req: Request, res: Response, _next: NextFunction) => {
-    if (err instanceof multer.MulterError) {
-      res.status(400).json({ error: `Upload error: ${err.message}` });
-      return;
+  app.use(
+    (
+      err: Error & {
+        status?: number;
+        statusCode?: number;
+        code?: string;
+        type?: string;
+        error?: { description?: string; code?: string };
+      },
+      _req: Request,
+      res: Response,
+      _next: NextFunction
+    ) => {
+      if (err instanceof multer.MulterError) {
+        const multerMessages: Record<string, string> = {
+          LIMIT_FILE_SIZE: 'Uploaded file exceeds the maximum allowed size limit.',
+          LIMIT_FILE_COUNT: 'Too many files uploaded at once (maximum 20 files).',
+          LIMIT_UNEXPECTED_FILE: 'Unexpected file field in upload request.'
+        };
+        res.status(400).json({
+          error: multerMessages[err.code] || `Upload error: ${err.message}`,
+          code: err.code || 'UPLOAD_ERROR'
+        });
+        return;
+      }
+
+      if (err instanceof SyntaxError && (err.type === 'entity.parse.failed' || 'body' in err)) {
+        res.status(400).json({
+          error: 'Invalid JSON request body. Please check your input format.',
+          code: 'INVALID_JSON'
+        });
+        return;
+      }
+
+      // Postgres / PostgREST error code mapping
+      const dbErrorMap: Record<string, { status: number; message: string; code: string }> = {
+        '23505': { status: 409, message: 'A record with this unique value or slug already exists.', code: 'DUPLICATE_RECORD' },
+        '23503': { status: 400, message: 'Referenced record does not exist or cannot be removed while still in use.', code: 'FOREIGN_KEY_VIOLATION' },
+        '23502': { status: 400, message: 'A required database field was missing.', code: 'MISSING_REQUIRED_FIELD' },
+        '22P02': { status: 400, message: 'Invalid ID or parameter format.', code: 'INVALID_INPUT_SYNTAX' },
+        '42501': { status: 403, message: 'Database permission denied. Ensure schema grants and policies are configured.', code: 'DB_PERMISSION_DENIED' },
+        PGRST116: { status: 404, message: 'The requested record could not be found.', code: 'RECORD_NOT_FOUND' }
+      };
+
+      if (err.code && dbErrorMap[err.code]) {
+        const mapped = dbErrorMap[err.code];
+        if (mapped.status >= 500 || err.code === '42501') {
+          console.error('[API DB Error]', err.code, err.message);
+        }
+        res.status(mapped.status).json({ error: mapped.message, code: mapped.code });
+        return;
+      }
+
+      // Razorpay SDK error shape ({ statusCode, error: { description, code } })
+      if (typeof err.statusCode === 'number' && err.error?.description) {
+        const safeStatus = err.statusCode >= 400 && err.statusCode < 500 ? 400 : 502;
+        console.error('[Razorpay Error]', err.statusCode, err.error);
+        res.status(safeStatus).json({
+          error: `Payment gateway error: ${err.error.description}`,
+          code: err.error.code || 'PAYMENT_GATEWAY_ERROR'
+        });
+        return;
+      }
+
+      const status = err.status || 500;
+      if (status >= 500) {
+        console.error('[API Error]', err);
+      }
+
+      const isSafeClientOrConfigError = status < 500 || status === 503;
+      res.status(status).json({
+        error:
+          env.NODE_ENV === 'production' && !isSafeClientOrConfigError
+            ? 'Something went wrong on our server. Please try again in a moment.'
+            : err.message || 'Server error.',
+        code: err.code || (status === 503 ? 'SERVICE_UNAVAILABLE' : status >= 500 ? 'INTERNAL_ERROR' : 'REQUEST_ERROR')
+      });
     }
-    const status = err.status || 500;
-    if (status >= 500) {
-      console.error('[API Error]', err);
-    }
-    res.status(status).json({
-      error: env.NODE_ENV === 'production' && status >= 500
-        ? 'An unexpected server error occurred. Please try again.'
-        : err.message || 'Server error.'
-    });
-  });
+  );
 
   return app;
 }

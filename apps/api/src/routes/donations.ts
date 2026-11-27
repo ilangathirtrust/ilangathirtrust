@@ -19,8 +19,9 @@ donationsRouter.post('/create-order', donationOrderLimiter, async (req, res, nex
   try {
     const parsed = createDonationOrderSchema.safeParse(req.body);
     if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0]?.message;
       res.status(400).json({
-        error: 'Invalid donation details. Minimum donation is INR 100.',
+        error: firstIssue || 'Invalid donation details. Minimum donation is INR 100.',
         issues: parsed.error.flatten().fieldErrors
       });
       return;

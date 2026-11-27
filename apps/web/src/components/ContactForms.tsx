@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { CheckCircle2, Loader2, Send, AlertCircle } from 'lucide-react';
 import { API_URL } from '@/lib/api';
+import { formatClientError, readApiResponse } from '@/lib/client-error';
 import { trackEvent } from '@/lib/analytics';
 import { useLanguage } from './LanguageProvider';
 import { getUi } from '@/lib/i18n';
@@ -29,15 +30,24 @@ export function ContactEnquiryForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...raw, preferred_lang: lang })
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Submission failed.');
+      const json = await readApiResponse<{ message: string }>(
+        res,
+        lang,
+        'Unable to send enquiry.',
+        'உங்கள் தகவலை அனுப்ப முடியவில்லை.'
+      );
       setStatus({ type: 'success', text: json.message });
       trackEvent('contact_form_submit', { language: lang });
       form.reset();
     } catch (err) {
       setStatus({
         type: 'error',
-        text: err instanceof Error ? err.message : 'Unable to send enquiry.'
+        text: formatClientError(
+          err,
+          lang,
+          'Unable to send enquiry. Please try again.',
+          'தகவலை அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.'
+        )
       });
     } finally {
       setSubmitting(false);
@@ -172,15 +182,24 @@ export function VolunteerForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Submission failed.');
+      const json = await readApiResponse<{ message: string }>(
+        res,
+        lang,
+        'Unable to submit application.',
+        'விண்ணப்பத்தைச் சமர்ப்பிக்க முடியவில்லை.'
+      );
       setStatus({ type: 'success', text: json.message });
       trackEvent('volunteer_form_submit', { language: lang, interest: payload.interest });
       form.reset();
     } catch (err) {
       setStatus({
         type: 'error',
-        text: err instanceof Error ? err.message : 'Unable to submit application.'
+        text: formatClientError(
+          err,
+          lang,
+          'Unable to submit application. Please try again.',
+          'விண்ணப்பத்தைச் சமர்ப்பிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.'
+        )
       });
     } finally {
       setSubmitting(false);

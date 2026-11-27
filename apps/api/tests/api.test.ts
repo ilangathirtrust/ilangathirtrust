@@ -131,6 +131,20 @@ test('API server enforces auth on /api/admin/* and exposes /api/health', async (
 
     const notFoundRes = await fetch(`http://127.0.0.1:${port}/api/non-existent-route`);
     assert.equal(notFoundRes.status, 404);
+
+    const badJsonRes = await fetch(`http://127.0.0.1:${port}/api/public/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"broken_json": '
+    });
+    assert.equal(badJsonRes.status, 400);
+    const badJsonBody = (await badJsonRes.json()) as { code?: string };
+    assert.equal(badJsonBody.code, 'INVALID_JSON');
+
+    const corsBlockedRes = await fetch(`http://127.0.0.1:${port}/api/health`, {
+      headers: { Origin: 'https://evil-untrusted-origin.example' }
+    });
+    assert.equal(corsBlockedRes.status, 403);
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }

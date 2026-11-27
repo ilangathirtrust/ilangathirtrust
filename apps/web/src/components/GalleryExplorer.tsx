@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FolderOpen, Search } from 'lucide-react';
+import { AlertCircle, FolderOpen, Search } from 'lucide-react';
 import type { GalleryFolder, PaginatedResponse } from '@ilangathir/shared';
 import { API_URL } from '@/lib/api';
+import { formatClientError, readApiResponse } from '@/lib/client-error';
 import { useLanguage } from './LanguageProvider';
 import { getUi } from '@/lib/i18n';
 import { GalleryFolderCard } from './GalleryFolderCard';
@@ -23,17 +24,21 @@ export function GalleryExplorer({ initialData }: GalleryExplorerProps) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     // Avoid duplicate fetch on initial unmodified render
-    if (!category && !year && !search && page === 1) {
+    if (!category && !year && !search && page === 1 && reloadKey === 0) {
       setData(initialData);
+      setError('');
       return;
     }
 
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       setLoading(true);
+      setError('');
       try {
         const q = new URLSearchParams();
         if (category) q.set('category', category);
@@ -45,12 +50,23 @@ export function GalleryExplorer({ initialData }: GalleryExplorerProps) {
         const res = await fetch(`${API_URL}/api/public/gallery/folders?${q.toString()}`, {
           signal: controller.signal
         });
-        if (res.ok) {
-          const json = await res.json();
-          setData(json);
-        }
-      } catch {
-        // ignore abort
+        const json = await readApiResponse<GalleryExplorerProps['initialData']>(
+          res,
+          lang,
+          'Could not load gallery folders.',
+          'படத் தொகுப்புகளை ஏற்ற முடியவில்லை.'
+        );
+        setData(json);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setError(
+          formatClientError(
+            err,
+            lang,
+            'Could not load gallery folders. Please try again.',
+            'படத் தொகுப்புகளை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.'
+          )
+        );
       } finally {
         setLoading(false);
       }
@@ -60,7 +76,7 @@ export function GalleryExplorer({ initialData }: GalleryExplorerProps) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [category, year, search, page, initialData]);
+  }, [category, year, search, page, initialData, lang, reloadKey]);
 
   return (
     <div>
@@ -110,6 +126,25 @@ export function GalleryExplorer({ initialData }: GalleryExplorerProps) {
           ))}
         </select>
       </div>
+
+      {error && (
+        <div
+          role="alert"
+          className="mb-6 flex flex-col items-start justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800 sm:flex-row sm:items-center"
+        >
+          <span className="inline-flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {error}
+          </span>
+          <button
+            type="button"
+            onClick={() => setReloadKey((k) => k + 1)}
+            className="shrink-0 rounded-xl bg-red-600 px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-red-700"
+          >
+            {lang === 'ta' ? 'மீண்டும் முயற்சிக்கவும்' : 'Retry'}
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <FolderGridSkeleton count={6} />

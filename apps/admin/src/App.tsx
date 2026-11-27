@@ -71,7 +71,9 @@ export default function App() {
 
   const notify = (text: string, isErr = false) => {
     setToast({ text, isErr });
-    setTimeout(() => setToast(null), 4500);
+    if (!isErr) {
+      setTimeout(() => setToast(null), 5000);
+    }
   };
 
   async function verifySession() {
@@ -100,12 +102,22 @@ export default function App() {
 
   useEffect(() => {
     verifySession();
-    if (!isSupabaseConfigured()) return;
+    const handleExpired = () => {
+      setAdminUser(null);
+      setAuthError('Your session expired. Please sign in again.');
+    };
+    window.addEventListener('ilangathir:session-expired', handleExpired);
+    if (!isSupabaseConfigured()) {
+      return () => window.removeEventListener('ilangathir:session-expired', handleExpired);
+    }
     const supabase = getSupabaseClient();
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) setAdminUser(null);
     });
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      window.removeEventListener('ilangathir:session-expired', handleExpired);
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   async function handleSignOut() {
@@ -272,14 +284,22 @@ export default function App() {
         <main className="mx-auto w-full max-w-7xl flex-1 p-4 pb-24 sm:p-8 lg:pb-10">
           {toast && (
             <div
-              role="status"
-              className={`mb-6 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-sm ${
+              role={toast.isErr ? 'alert' : 'status'}
+              className={`mb-6 flex items-start justify-between gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-sm ${
                 toast.isErr
                   ? 'border-red-200 bg-red-50 text-red-800'
                   : 'border-emerald-200 bg-emerald-50 text-emerald-800'
               }`}
             >
-              {toast.text}
+              <span>{toast.text}</span>
+              <button
+                type="button"
+                onClick={() => setToast(null)}
+                aria-label="Dismiss message"
+                className="shrink-0 rounded-lg px-2 py-0.5 text-xs font-bold opacity-70 transition hover:bg-black/5 hover:opacity-100"
+              >
+                Dismiss
+              </button>
             </div>
           )}
 

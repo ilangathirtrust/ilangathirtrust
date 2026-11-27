@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Script from 'next/script';
 import { AlertCircle, CheckCircle2, Heart, Loader2, ShieldCheck } from 'lucide-react';
 import { API_URL } from '@/lib/api';
+import { formatClientError, readApiResponse } from '@/lib/client-error';
 import { trackEvent } from '@/lib/analytics';
 import { useLanguage } from './LanguageProvider';
 import { getUi } from '@/lib/i18n';
@@ -76,8 +77,18 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
         })
       });
 
-      const orderData = await orderRes.json();
-      if (!orderRes.ok) throw new Error(orderData.error || 'Could not initialize payment order.');
+      const orderData = await readApiResponse<{
+        donation_id: string;
+        order_id: string;
+        amount_paise: number;
+        currency: string;
+        key_id: string;
+      }>(
+        orderRes,
+        lang,
+        'Could not initialize payment order.',
+        'கட்டண ஆணையைத் தொடங்க முடியவில்லை.'
+      );
 
       if (!window.Razorpay) {
         throw new Error(
@@ -125,9 +136,24 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(response)
             });
-            const verifyJson = await verifyRes.json();
-            if (!verifyRes.ok || !verifyJson.verified) {
-              throw new Error(verifyJson.error || 'Payment verification failed.');
+            const verifyJson = await readApiResponse<{
+              verified: boolean;
+              receipt_number: string;
+              amount_inr: number;
+              purpose: string;
+              razorpay_payment_id: string;
+            }>(
+              verifyRes,
+              lang,
+              'Payment verification failed.',
+              'கட்டணச் சரிபார்ப்பு தோல்வியடைந்தது.'
+            );
+            if (!verifyJson.verified) {
+              throw new Error(
+                lang === 'ta'
+                  ? 'கட்டணச் சரிபார்ப்பு நிறைவடையவில்லை. தயவுசெய்து தொடர்பு கொள்ளுங்கள்.'
+                  : 'Payment verification did not complete. Please contact support with your payment ID.'
+              );
             }
             setReceipt(verifyJson);
             trackEvent('donation_completed', {
@@ -136,7 +162,14 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               receipt_number: verifyJson.receipt_number
             });
           } catch (verErr) {
-            setError(verErr instanceof Error ? verErr.message : 'Verification error.');
+            setError(
+              formatClientError(
+                verErr,
+                lang,
+                'Payment verification failed. Please contact support if amount was debited.',
+                'கட்டணச் சரிபார்ப்பு தோல்வியடைந்தது. தொகை பிடித்தம் செய்யப்பட்டால் எங்களைத் தொடர்பு கொள்ளவும்.'
+              )
+            );
           } finally {
             setLoading(false);
           }
@@ -156,7 +189,14 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
 
       rzp.open();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to start donation checkout.');
+      setError(
+        formatClientError(
+          err,
+          lang,
+          'Unable to start donation checkout. Please try again.',
+          'நன்கொடைக் கட்டணத்தைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.'
+        )
+      );
       setLoading(false);
     }
   }

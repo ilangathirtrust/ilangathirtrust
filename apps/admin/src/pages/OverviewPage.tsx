@@ -39,11 +39,17 @@ export function OverviewPage({ onNavigate }: { onNavigate: (tab: string) => void
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
+  const loadDashboard = () => {
+    setLoading(true);
+    setError('');
     adminApi<DashboardData>('/dashboard')
       .then(setData)
-      .catch((e) => setError(e.message))
+      .catch((e) => setError(e instanceof Error ? e.message : 'Could not load dashboard overview.'))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadDashboard();
   }, []);
 
   if (loading) {
@@ -61,8 +67,18 @@ export function OverviewPage({ onNavigate }: { onNavigate: (tab: string) => void
 
   if (error || !data) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm font-medium text-red-700">
-        {error || 'Could not load dashboard overview.'}
+      <div
+        role="alert"
+        className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 p-6 text-sm font-medium text-red-800 sm:flex-row sm:items-center"
+      >
+        <span>{error || 'Could not load dashboard overview.'}</span>
+        <button
+          type="button"
+          onClick={loadDashboard}
+          className="shrink-0 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-red-700"
+        >
+          Retry
+        </button>
       </div>
     );
   }
