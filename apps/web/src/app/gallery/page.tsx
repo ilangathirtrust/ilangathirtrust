@@ -1,0 +1,64 @@
+import type { Metadata } from 'next';
+import { Images } from 'lucide-react';
+import { pickLocalized } from '@ilangathir/shared';
+import { getGalleryFolders, getPageContent } from '@/lib/api';
+import { getUi } from '@/lib/i18n';
+import { getServerLang } from '@/lib/lang-server';
+import { buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { GalleryExplorer } from '@/components/GalleryExplorer';
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
+  const lang = await getServerLang((await searchParams).lang);
+  const page = await getPageContent('gallery');
+  return buildPageMetadata({
+    title: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_title', lang)) || (lang === 'ta' ? 'புகைப்பட & காணொளித் தொகுப்பு | இளங்கதிர் அறக்கட்டளை' : 'Gallery | Ilangathir Trust'),
+    description: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_description', lang)) || (lang === 'ta' ? 'நிகழ்வுகள் வாரியான புகைப்படங்கள் மற்றும் காணொளிகள்.' : 'Event-based photo and video gallery of Ilangathir Trust.'),
+    path: '/gallery',
+    lang
+  });
+}
+
+export default async function GalleryPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
+  const lang = await getServerLang((await searchParams).lang);
+  const ui = getUi(lang);
+
+  const [pageContent, foldersData] = await Promise.all([
+    getPageContent('gallery'),
+    getGalleryFolders({ page: 1, pageSize: 12 })
+  ]);
+
+  const heroTitle = (pageContent && pickLocalized(pageContent as unknown as Record<string, unknown>, 'hero_title', lang)) || ui.galleryTitle;
+  const heroSub = (pageContent && pickLocalized(pageContent as unknown as Record<string, unknown>, 'hero_subtitle', lang)) || '';
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: ui.home, path: '/' },
+    { name: ui.gallery, path: '/gallery' }
+  ]);
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+
+      <section className="border-b border-slate-200 bg-white py-12 lg:py-16">
+        <div className="container-max">
+          <Breadcrumbs items={[{ label: ui.gallery }]} />
+          <span className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-brand-600">
+            <Images className="h-4 w-4" />
+            {ui.galleryEyebrow}
+          </span>
+          <h1 className="mt-3 max-w-3xl font-heading text-3xl font-extrabold text-slate-900 sm:text-5xl">
+            {heroTitle}
+          </h1>
+          {heroSub && <p className="mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">{heroSub}</p>}
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-14 lg:py-20">
+        <div className="container-max">
+          <GalleryExplorer initialData={foldersData} />
+        </div>
+      </section>
+    </>
+  );
+}

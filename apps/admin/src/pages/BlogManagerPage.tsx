@@ -1,0 +1,248 @@
+import { useEffect, useState } from 'react';
+import { Eye, History, Image as ImageIcon, Plus, Trash2, X } from 'lucide-react';
+import type { BlogCategory, BlogPost } from '@ilangathir/shared';
+import { adminApi } from '../lib/api';
+import { MediaPickerModal } from '../components/MediaPickerModal';
+import { VersionHistoryModal } from '../components/VersionHistoryModal';
+
+export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [previewPost, setPreviewPost] = useState<Record<string, unknown> | null>(null);
+  const [historyId, setHistoryId] = useState<string | null>(null);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    title_en: '',
+    title_ta: '',
+    slug: '',
+    category_id: '',
+    excerpt_en: '',
+    excerpt_ta: '',
+    content_en: '',
+    content_ta: '',
+    featured_image_url: '',
+    featured_image_alt_en: '',
+    featured_image_alt_ta: '',
+    tags: '',
+    author_name: 'Ilangathir Trust Editorial',
+    reading_time_minutes: 3,
+    seo_title_en: '',
+    seo_title_ta: '',
+    seo_description_en: '',
+    seo_description_ta: '',
+    status: 'draft'
+  });
+
+  const load = () => {
+    setLoading(true);
+    Promise.all([adminApi<BlogPost[]>('/blogs'), adminApi<BlogCategory[]>('/blog-categories')])
+      .then(([p, c]) => {
+        setPosts(p);
+        setCategories(c);
+      })
+      .catch((e) => onNotify(e.message, true))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(load, []);
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    const payload = {
+      ...form,
+      tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
+      reading_time_minutes: Number(form.reading_time_minutes) || 3
+    };
+
+    try {
+      if (editingId) {
+        await adminApi(`/blogs/${editingId}`, { method: 'PUT', body: JSON.stringify(payload) });
+        onNotify('Blog post updated.');
+      } else {
+        await adminApi('/blogs', { method: 'POST', body: JSON.stringify(payload) });
+        onNotify('Blog post created.');
+      }
+      setEditingId(null);
+      setForm({
+        title_en: '', title_ta: '', slug: '', category_id: '', excerpt_en: '', excerpt_ta: '',
+        content_en: '', content_ta: '', featured_image_url: '', featured_image_alt_en: '',
+        featured_image_alt_ta: '', tags: '', author_name: 'Ilangathir Trust Editorial',
+        reading_time_minutes: 3, seo_title_en: '', seo_title_ta: '',
+        seo_description_en: '', seo_description_ta: '', status: 'draft'
+      });
+      load();
+    } catch (err) {
+      onNotify(err instanceof Error ? err.message : 'Save failed.', true);
+    }
+  }
+
+  async function toggleStatus(post: BlogPost) {
+    const next = post.status === 'published' ? 'draft' : 'published';
+    await adminApi(`/blogs/${post.id}`, { method: 'PUT', body: JSON.stringify({ status: next }) });
+    onNotify(`Blog ${next}.`);
+    load();
+  }
+
+  async function deletePost(id: string) {
+    if (!confirm('Delete this blog post permanently?')) return;
+    await adminApi(`/blogs/${id}`, { method: 'DELETE' });
+    onNotify('Blog deleted.');
+    load();
+  }
+
+  return (
+    <div className="space-y-6">
+      <form onSubmit={handleSave} className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-bold text-slate-900">{editingId ? 'Edit Blog Post' : 'Write New Blog Article'}</h2>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPreviewPost(form)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-700"
+            >
+              <Eye className="h-4 w-4" />
+              <span>Preview</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input required placeholder="Article Title (EN)" value={form.title_en} onChange={(e) => setForm({ ...form, title_en: e.target.value })} className="admin-input" />
+          <input required placeholder="Article Title (TA)" value={form.title_ta} onChange={(e) => setForm({ ...form, title_ta: e.target.value })} className="admin-input" />
+          <input placeholder="URL Slug (auto-generated if empty)" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="admin-input font-mono text-xs" />
+          <select value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })} className="admin-input">
+            <option value="">Select Category</option>
+            {categories.map((c) => <option key={c.id} value={c.id}>{c.name_en} / {c.name_ta}</option>)}
+          </select>
+          <textarea rows={2} placeholder="Short Excerpt (EN)" value={form.excerpt_en} onChange={(e) => setForm({ ...form, excerpt_en: e.target.value })} className="admin-input" />
+          <textarea rows={2} placeholder="Short Excerpt (TA)" value={form.excerpt_ta} onChange={(e) => setForm({ ...form, excerpt_ta: e.target.value })} className="admin-input" />
+          <textarea required rows={6} placeholder="Full Article Content (EN)" value={form.content_en} onChange={(e) => setForm({ ...form, content_en: e.target.value })} className="admin-input" />
+          <textarea required rows={6} placeholder="Full Article Content (TA)" value={form.content_ta} onChange={(e) => setForm({ ...form, content_ta: e.target.value })} className="admin-input" />
+          <input placeholder="Tags (comma separated)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="admin-input" />
+          <div className="grid grid-cols-2 gap-2">
+            <input placeholder="Author Name" value={form.author_name} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className="admin-input" />
+            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="admin-input">
+              <option value="draft">Save as Draft</option>
+              <option value="published">Publish Now</option>
+            </select>
+          </div>
+          <input placeholder="SEO Title (EN)" value={form.seo_title_en} onChange={(e) => setForm({ ...form, seo_title_en: e.target.value })} className="admin-input" />
+          <input placeholder="SEO Title (TA)" value={form.seo_title_ta} onChange={(e) => setForm({ ...form, seo_title_ta: e.target.value })} className="admin-input" />
+          <input placeholder="SEO Description (EN)" value={form.seo_description_en} onChange={(e) => setForm({ ...form, seo_description_en: e.target.value })} className="admin-input" />
+          <input placeholder="SEO Description (TA)" value={form.seo_description_ta} onChange={(e) => setForm({ ...form, seo_description_ta: e.target.value })} className="admin-input" />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <input placeholder="Featured Image URL" value={form.featured_image_url} onChange={(e) => setForm({ ...form, featured_image_url: e.target.value })} className="admin-input flex-1" />
+          <button type="button" onClick={() => setPickerOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700">
+            <ImageIcon className="h-4 w-4 text-brand-600" />
+            <span>Select Featured Image</span>
+          </button>
+          <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-6 py-2.5 text-xs font-bold text-white hover:bg-brand-700">
+            <Plus className="h-4 w-4" />
+            <span>{editingId ? 'Save Article' : 'Create Article'}</span>
+          </button>
+        </div>
+      </form>
+
+      {loading ? (
+        <div className="h-48 animate-pulse rounded-2xl bg-slate-200" />
+      ) : (
+        <div className="space-y-3">
+          {posts.map((p) => (
+            <div key={p.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div>
+                <h3 className="font-bold text-slate-900">{p.title_en}</h3>
+                <p className="text-xs text-slate-500">/{p.slug} • {p.author_name}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggleStatus(p)}
+                  className={`rounded-full px-3 py-1 text-xs font-bold ${
+                    p.status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                  }`}
+                >
+                  {p.status}
+                </button>
+                <button type="button" onClick={() => setHistoryId(p.id)} className="rounded-lg border border-slate-200 p-2 text-slate-600">
+                  <History className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingId(p.id);
+                    setForm({
+                      title_en: p.title_en, title_ta: p.title_ta, slug: p.slug,
+                      category_id: p.category_id || '', excerpt_en: p.excerpt_en, excerpt_ta: p.excerpt_ta,
+                      content_en: p.content_en, content_ta: p.content_ta,
+                      featured_image_url: p.featured_image_url || '',
+                      featured_image_alt_en: p.featured_image_alt_en || '',
+                      featured_image_alt_ta: p.featured_image_alt_ta || '',
+                      tags: (p.tags || []).join(', '), author_name: p.author_name,
+                      reading_time_minutes: p.reading_time_minutes,
+                      seo_title_en: p.seo_title_en || '', seo_title_ta: p.seo_title_ta || '',
+                      seo_description_en: p.seo_description_en || '', seo_description_ta: p.seo_description_ta || '',
+                      status: p.status || 'draft'
+                    });
+                  }}
+                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700"
+                >
+                  Edit
+                </button>
+                <button type="button" onClick={() => deletePost(p.id)} className="rounded-lg p-2 text-red-600">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {previewPost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+          <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl">
+            <div className="flex items-center justify-between border-b pb-4">
+              <span className="text-xs font-bold uppercase text-brand-600">Live Blog Preview</span>
+              <button type="button" onClick={() => setPreviewPost(null)}><X className="h-5 w-5" /></button>
+            </div>
+            {Boolean(previewPost.featured_image_url) && (
+              <img src={String(previewPost.featured_image_url)} alt="" className="mt-4 h-60 w-full rounded-2xl object-cover" />
+            )}
+            <h2 className="mt-5 text-2xl font-extrabold text-slate-900">{String(previewPost.title_en || '')}</h2>
+            <p className="mt-2 text-sm font-medium text-slate-500">{String(previewPost.excerpt_en || '')}</p>
+            <div className="mt-5 whitespace-pre-line text-sm leading-relaxed text-slate-700">{String(previewPost.content_en || '')}</div>
+          </div>
+        </div>
+      )}
+
+      <MediaPickerModal
+        open={pickerOpen}
+        bucket="blogs"
+        folderName="articles"
+        onClose={() => setPickerOpen(false)}
+        onSelect={(url) => {
+          setForm((prev) => ({ ...prev, featured_image_url: url }));
+          setPickerOpen(false);
+        }}
+      />
+
+      {historyId && (
+        <VersionHistoryModal
+          open={true}
+          entityType="blog_posts"
+          entityId={historyId}
+          onClose={() => setHistoryId(null)}
+          onRestored={() => {
+            onNotify('Blog post version restored.');
+            load();
+          }}
+        />
+      )}
+    </div>
+  );
+}

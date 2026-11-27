@@ -1,0 +1,32 @@
+# Ilangathir Trust — Production Caddy Configuration (Auto-HTTPS)
+# Domain architecture:
+# - ilangathirtrust.com -> 301 redirect to https://www.ilangathirtrust.com
+# - www.ilangathirtrust.com -> Next.js public web app (port 3000)
+# - admin.ilangathirtrust.com -> Vite React admin SPA (static dist)
+# - api.ilangathirtrust.com -> Express API server (port 4000)
+
+ilangathirtrust.com {
+	redir https://www.ilangathirtrust.com{uri} permanent
+}
+
+www.ilangathirtrust.com {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3000
+}
+
+admin.ilangathirtrust.com {
+	encode zstd gzip
+	root * /var/www/ilangathirtrust/apps/admin/dist
+	try_files {path} /index.html
+	file_server
+	header {
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+}
+
+api.ilangathirtrust.com {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:4000
+}

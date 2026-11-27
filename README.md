@@ -1,56 +1,45 @@
-# Ilangathir Arakattalai — Trust Website
+# Ilangathir Trust — Full-Stack Web Platform
 
-A responsive public website and Express/MySQL starter with a protected admin area.
+Modern, bilingual (English & தமிழ்) full-stack web platform for **Ilangathir Trust** (`ilangathirtrust.com`), powered by **Next.js 15**, **React + Vite Admin Portal**, **Express API**, **Supabase** (PostgreSQL, Auth, Storage), **Razorpay**, and **Google Analytics 4**.
 
-## Included
-- Public home page with About, Founder, Activities, Gallery, Join Us and Contact sections.
-- Uploaded trust logo crop and founder portrait in `public/assets/`.
-- Public contact and volunteer forms that store submissions in MySQL.
-- Admin login using server-side password hash verification and an HTTP-only session cookie (JWT).
-- Admin dashboard with live database counts and CRUD screens for activities, news, gallery and team members.
-- Inbox views for contact enquiries and volunteer applications.
-- Responsive layouts, basic SEO metadata, accessible labels, reduced-motion support, and image upload endpoint.
-- SQL schema and environment-variable example.
+## Architecture & Domain Layout
 
-## Requirements
-- Node.js 18+ and npm
-- MySQL 8+ (or compatible MySQL server)
+| Surface | Domain | Workspace |
+| --- | --- | --- |
+| Public Website (SSR/ISR) | `https://www.ilangathirtrust.com` (`ilangathirtrust.com` → 301 redirect) | `apps/web` |
+| Secure Admin Portal | `https://admin.ilangathirtrust.com` | `apps/admin` |
+| Backend REST & Webhook API | `https://api.ilangathirtrust.com` | `apps/api` |
+| Shared Types & Zod Schemas | Internal workspace package | `packages/shared` |
+| Database, Storage & RLS | Supabase SQL Migrations | `supabase/` |
 
-## Setup
-1. Install Node.js and MySQL.
-2. Create the database tables:
-   ```bash
-   mysql -u root -p < schema.sql
-   ```
-3. Copy `.env.example` to `.env`.
-4. Set database connection values, a long random `SESSION_SECRET` (at least 32 characters), and an admin email/password.
-5. Install dependencies:
+## Setup & Installation
+
+1. **Install dependencies** (Node.js 20+):
    ```bash
    npm install
    ```
-6. Create the first admin account by running:
+2. **Apply Supabase SQL migrations** in order (`supabase/migrations/v001_initial_schema.sql` through `v008_indexes_and_optimisation.sql`).
+3. **Create Admin User**:
+   - Create your admin account in **Supabase Authentication → Users**.
+   - Grant `super_admin` in SQL Editor:
+     ```sql
+     INSERT INTO public.admin_users (id, email, full_name, role, is_active)
+     SELECT id, email, 'Trust Administrator', 'super_admin', true
+     FROM auth.users WHERE email = 'ilangathirtrust@gmail.com'
+     ON CONFLICT (id) DO UPDATE SET role = 'super_admin', is_active = true;
+     ```
+4. **Configure Environment Variables**:
+   - Copy `.env.example` to `.env` and fill in Supabase (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`), Razorpay (`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`), and Google Analytics (`NEXT_PUBLIC_GA4_MEASUREMENT_ID`).
+   - Mirror public client vars (`NEXT_PUBLIC_*`, `VITE_*`) in your hosting environment.
+5. **Run Development Servers**:
    ```bash
-   node scripts/create-admin.js
+   npm run dev
    ```
-   The script reads `ADMIN_EMAIL` and `ADMIN_PASSWORD` from `.env`, hashes the password and inserts/updates the account.
-7. Start the site:
+   - Public Website: `http://localhost:3000`
+   - Admin Portal: `http://localhost:3001`
+   - Backend API: `http://localhost:4000`
+6. **Build & Test**:
    ```bash
-   npm start
+   npm run build
+   npm test
    ```
-8. Open `http://localhost:3000` for the website and `http://localhost:3000/admin` for the admin dashboard.
-
-## Important production checklist
-- Change all example credentials and use a unique, randomly generated secret.
-- Use HTTPS and `NODE_ENV=production` behind a properly configured reverse proxy.
-- Add backups, monitoring, and a verified privacy policy.
-- Restrict admin creation and keep the `.env` file out of version control.
-- Confirm founder name/biography and all programme details with the trust before publishing.
-- Do not upload private documents or images without permission.
-- Configure CSP and CSRF protection appropriate to the final deployment; this starter disables Helmet CSP to allow a simple static frontend.
-- Review role permissions and perform a security test before public deployment.
-
-## Honest implementation notes
-- Database-backed forms and content routes require MySQL and a configured `.env`; they will not persist until setup is complete.
-- The uploaded founder portrait and a crop of the logo supplied in the chat are used as local assets. The logo source was a screenshot, so replace `public/assets/ilangathir-logo.jpg` with the original clean logo file for best quality.
-- Names, biography, activities, and event history are not fabricated. Replace placeholder text with verified details.
-- Admin content editing supports CRUD for the listed content models. Site settings are seeded in SQL; a dedicated settings editor and admin-user management screen are not included in this starter yet.

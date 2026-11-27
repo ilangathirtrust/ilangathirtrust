@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 96px;
+    overflow-x: clip;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    overflow-x: clip;
+    font-family: var(--font-inter), var(--font-tamil), system-ui, sans-serif;
+    line-height: 1.65;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-jakarta), var(--font-tamil), system-ui, sans-serif;
+    overflow-wrap: break-word;
+  }
+
+  /* Tamil Typography & Layout Consistency Optimizations */
+  html[lang='ta'] body {
+    font-family: var(--font-tamil), var(--font-inter), system-ui, sans-serif;
+    line-height: 1.85;
+  }
+
+  html[lang='ta'] h1,
+  html[lang='ta'] h2,
+  html[lang='ta'] h3,
+  html[lang='ta'] h4 {
+    font-family: var(--font-tamil), var(--font-jakarta), system-ui, sans-serif;
+    line-height: 1.42;
+    letter-spacing: -0.01em;
+  }
+
+  html[lang='ta'] button,
+  html[lang='ta'] a {
+    line-height: 1.5;
+  }
+}
+
+.container-max {
+  @apply mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8;
+}
+
+.skeleton-box {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  @apply animate-shimmer rounded-xl;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .marquee-track {
+    animation: none !important;
+  }
+}

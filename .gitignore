@@ -1,4 +1,41 @@
-node_modules
-node_modules/*
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
 
+# Environment variables & private secrets (never commit to public repo)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.jks
+*service-account*.json
+*credentials*.json
 
+# Build outputs & TypeScript caches
+dist/
+build/
+.next/
+out/
+coverage/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local uploads & runtime data
+uploads/
+data/store.json
+
+# Logs & OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Local Supabase temp state
+supabase/.branches
+supabase/.temp
