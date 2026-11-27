@@ -101,6 +101,12 @@ function syncTarget(appName, files) {
     }
     fs.copyFileSync(src, path.join(destDir, file));
   }
+
+  // Also place favicon.ico at app public root so browser default GET /favicon.ico never 404s
+  const rootFaviconSrc = path.join(sourceDir, 'favicon.ico');
+  if (fs.existsSync(rootFaviconSrc)) {
+    fs.copyFileSync(rootFaviconSrc, path.join(repoRoot, 'apps', appName, 'public', 'favicon.ico'));
+  }
 }
 
 if (targetArg === 'web' || targetArg === 'all') {

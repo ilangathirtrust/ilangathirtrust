@@ -40,6 +40,8 @@ Thumbs.db
 supabase/.branches
 supabase/.temp
 
-# Synced app public/logos (canonical assets live in /logos)
+# Synced app public/logos & root favicon (canonical assets live in /logos)
 apps/web/public/logos/
 apps/admin/public/logos/
+apps/web/public/favicon.ico
+apps/admin/public/favicon.ico

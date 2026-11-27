@@ -206,7 +206,7 @@ export async function HomeBlogsSection({ lang }: { lang: Language }) {
   const blogsRes = await getBlogs({ pageSize: 3 });
 
   return (
-    <section className="lazy-section bg-white py-12 sm:py-14 lg:py-16">
+    <section className="lazy-section border-b border-sand-200 bg-sand-100/75 py-11 sm:py-14 lg:py-16">
       <div className="container-max">
         <div className="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
@@ -222,7 +222,7 @@ export async function HomeBlogsSection({ lang }: { lang: Language }) {
         </div>
 
         {blogsRes.items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-sand-300 bg-sand-50 p-8 text-center text-sm text-slate-600 sm:p-10">
+          <div className="rounded-2xl border border-dashed border-sand-300 bg-white/85 p-8 text-center text-sm text-slate-600 sm:p-10">
             {ui.emptyBlogs}
           </div>
         ) : (

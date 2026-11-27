@@ -71,10 +71,10 @@ export function PwaInstallBanner() {
         />
         <div className="min-w-0">
           <p className="truncate text-xs font-bold text-brand-900">
-            {lang === 'ta' ? 'இளங்கதிர் செயலி' : 'Install Ilangathir App'}
+            {lang === 'ta' ? 'இளங்கதிர் அறக்கட்டளை' : 'Ilangathir Trust'}
           </p>
           <p className="truncate text-[11px] text-slate-600">
-            {lang === 'ta' ? 'மொபைலில் எளிதாகப் பயன்படுத்த' : 'Quick access from home screen'}
+            {lang === 'ta' ? 'செயலியாக மொபைலில் நிறுவவும்' : 'Install web app for quick access'}
           </p>
         </div>
       </div>

@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Ilangathir Trust | இளங்கதிர் அறக்கட்டளை',
-    short_name: 'Ilangathir',
+    name: 'Ilangathir Trust',
+    short_name: 'Ilangathir Trust',
     description:
       'Registered charitable trust in V. Kallupatti, Dindigul, Tamil Nadu supporting student education, free medical camps, and community welfare.',
     start_url: '/',

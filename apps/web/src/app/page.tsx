@@ -108,134 +108,131 @@ export default async function HomePage({
         />
       )}
 
-      {/* 1. HERO: Warm Sandstone Editorial Canvas with Crisp Mat Imagery */}
-      <section className="relative overflow-hidden border-b border-sand-200 bg-gradient-to-br from-sand-100 via-sand-50 to-saffron-50/50">
-        <div className="container-max py-9 sm:py-14 lg:py-16">
-          <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
-            <div className="min-w-0 space-y-5 lg:col-span-7">
-              <span className="inline-flex items-center gap-2 rounded-full border border-saffron-200 bg-white/90 px-3 py-1 text-[11px] font-bold text-saffron-700 shadow-2xs">
-                <span className="h-1.5 w-1.5 rounded-full bg-saffron-600" />
-                <span>{heroEyebrow}</span>
-              </span>
+      {/* 1. HERO: Full-Bleed Background Photography with High-Contrast Heritage Overlay */}
+      <section className="relative isolate overflow-hidden border-b border-brand-900 bg-brand-950 text-white">
+        <div className="absolute inset-0 -z-10">
+          <img
+            src={STATIC_ASSETS.hero}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            className="h-full w-full object-cover object-center sm:object-[center_35%]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-950/90 via-brand-950/80 to-brand-950/94 lg:bg-gradient-to-r lg:from-brand-950/95 lg:via-brand-950/82 lg:to-brand-950/45" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.16),transparent_52%)]" />
+        </div>
 
-              <h1
-                className={`font-heading font-extrabold text-brand-900 ${
-                  lang === 'ta'
-                    ? 'text-[22px] leading-[1.38] min-[360px]:text-2xl sm:text-4xl lg:text-[40px]'
-                    : 'text-[26px] leading-[1.16] tracking-tight min-[360px]:text-3xl sm:text-5xl lg:text-[48px]'
-                }`}
-              >
-                {heroTitle}
-              </h1>
+        <div className="container-max py-10 min-[360px]:py-12 sm:py-16 lg:py-20 xl:py-24">
+          <div className="max-w-3xl space-y-5 sm:space-y-6">
+            <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-saffron-400/35 bg-brand-950/70 px-3.5 py-1.5 text-[11px] font-bold text-saffron-300 shadow-xs backdrop-blur-md sm:text-xs">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-saffron-400" />
+              <span className="truncate">{heroEyebrow}</span>
+            </span>
 
-              <p className="max-w-2xl text-sm leading-relaxed text-slate-600 min-[360px]:text-base sm:text-lg">
-                {heroSubtitle}
-              </p>
+            <h1
+              className={`font-heading font-extrabold text-white drop-shadow-xs ${
+                lang === 'ta'
+                  ? 'text-[22px] leading-[1.36] min-[360px]:text-[25px] sm:text-4xl lg:text-[42px]'
+                  : 'text-[25px] leading-[1.15] tracking-tight min-[360px]:text-3xl sm:text-5xl lg:text-[50px]'
+              }`}
+            >
+              {heroTitle}
+            </h1>
 
-              {/* Dynamic CTAs responsive to Donations Enabled / Disabled */}
-              <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
-                {donationsEnabled ? (
-                  <>
-                    <Link
-                      href="/donate"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-saffron-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-saffron-700"
-                    >
-                      <Heart className="h-4 w-4 shrink-0" />
-                      <span>{primaryCtaLabel}</span>
-                    </Link>
-                    <Link
-                      href="/activities"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-sand-300 bg-white px-6 py-3.5 text-sm font-bold text-brand-900 transition hover:border-brand-700"
-                    >
-                      <span>{secondaryCtaLabel}</span>
-                      <ArrowRight className="h-4 w-4 shrink-0" />
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/activities"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-900 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand-800"
-                    >
-                      <span>{secondaryCtaLabel}</span>
-                      <ArrowRight className="h-4 w-4 shrink-0" />
-                    </Link>
-                    <Link
-                      href="/contact#volunteer"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-sand-300 bg-white px-6 py-3.5 text-sm font-bold text-brand-900 transition hover:border-saffron-500"
-                    >
-                      <Users className="h-4 w-4 shrink-0 text-saffron-600" />
-                      <span>{ui.volunteer}</span>
-                    </Link>
-                  </>
-                )}
-              </div>
+            <p className="max-w-2xl text-sm leading-relaxed text-sand-100/90 min-[360px]:text-base sm:text-lg">
+              {heroSubtitle}
+            </p>
 
-              <div
-                className={`grid gap-4 border-t border-sand-200 pt-5 ${
-                  donationsEnabled ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-1 min-[360px]:grid-cols-2'
-                }`}
-              >
-                <div>
-                  <p className="font-heading text-sm font-bold text-brand-900 sm:text-base">
-                    {lang === 'ta' ? 'பதிவு பெற்ற அறக்கட்டளை' : 'Registered Trust'}
-                  </p>
-                  <p className="mt-0.5 text-xs font-medium text-slate-600">
-                    {lang === 'ta' ? 'V. கல்லுப்பட்டி, திண்டுக்கல்' : 'V. Kallupatti, Dindigul'}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-heading text-sm font-bold text-brand-900 sm:text-base">
-                    {lang === 'ta' ? 'முக்கியப் பணிகள்' : 'Core Focus'}
-                  </p>
-                  <p className="mt-0.5 text-xs font-medium text-slate-600">
-                    {lang === 'ta' ? 'கல்வி • மருத்துவம் • உதவி' : 'Education • Health • Relief'}
-                  </p>
-                </div>
-                {donationsEnabled && (
-                  <div className="col-span-2 sm:col-span-1">
-                    <p className="font-heading text-sm font-bold text-brand-900 sm:text-base">
-                      {lang === 'ta' ? 'முறையான ரசீது' : 'Direct Receipts'}
-                    </p>
-                    <p className="mt-0.5 text-xs font-medium text-slate-600">
-                      {lang === 'ta' ? 'பாதுகாப்பான ஆன்லைன் உதவி' : 'Verified Online Donations'}
-                    </p>
-                  </div>
-                )}
-              </div>
+            {/* Dynamic CTAs responsive to Donations Enabled / Disabled */}
+            <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
+              {donationsEnabled ? (
+                <>
+                  <Link
+                    href="/donate"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-saffron-500 px-6 py-3.5 text-sm font-bold text-brand-950 shadow-[0_8px_24px_rgba(217,119,6,0.32)] transition hover:bg-saffron-400 sm:w-auto"
+                  >
+                    <Heart className="h-4 w-4 shrink-0" />
+                    <span>{primaryCtaLabel}</span>
+                  </Link>
+                  <Link
+                    href="/activities"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-bold text-white backdrop-blur-md transition hover:border-white/50 hover:bg-white/20 sm:w-auto"
+                  >
+                    <span>{secondaryCtaLabel}</span>
+                    <ArrowRight className="h-4 w-4 shrink-0" />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/activities"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-saffron-500 px-6 py-3.5 text-sm font-bold text-brand-950 shadow-[0_8px_24px_rgba(217,119,6,0.32)] transition hover:bg-saffron-400 sm:w-auto"
+                  >
+                    <span>{secondaryCtaLabel}</span>
+                    <ArrowRight className="h-4 w-4 shrink-0" />
+                  </Link>
+                  <Link
+                    href="/contact#volunteer"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-bold text-white backdrop-blur-md transition hover:border-white/50 hover:bg-white/20 sm:w-auto"
+                  >
+                    <Users className="h-4 w-4 shrink-0 text-saffron-300" />
+                    <span>{ui.volunteer}</span>
+                  </Link>
+                </>
+              )}
             </div>
 
-            <div className="min-w-0 lg:col-span-5">
-              <div className="mx-auto max-w-md rounded-3xl border border-sand-200 bg-white p-2.5 shadow-[0_14px_40px_rgba(19,41,75,0.09)] lg:max-w-none">
-                <div className="overflow-hidden rounded-2xl bg-sand-100">
-                  <img
-                    src={STATIC_ASSETS.hero}
-                    alt={heroTitle}
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    className="h-60 w-full object-cover min-[360px]:h-72 sm:h-[410px]"
-                  />
-                </div>
+            <div
+              className={`grid gap-3 rounded-2xl border border-white/15 bg-brand-950/65 p-4 backdrop-blur-md sm:gap-5 sm:p-5 ${
+                donationsEnabled ? 'grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3' : 'grid-cols-1 min-[360px]:grid-cols-2'
+              }`}
+            >
+              <div className="min-w-0">
+                <p className="font-heading text-sm font-bold text-white sm:text-base">
+                  {lang === 'ta' ? 'பதிவு பெற்ற அறக்கட்டளை' : 'Registered Trust'}
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-sand-200/90">
+                  {lang === 'ta' ? 'V. கல்லுப்பட்டி, திண்டுக்கல்' : 'V. Kallupatti, Dindigul'}
+                </p>
               </div>
+              <div className="min-w-0">
+                <p className="font-heading text-sm font-bold text-white sm:text-base">
+                  {lang === 'ta' ? 'முக்கியப் பணிகள்' : 'Core Focus'}
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-sand-200/90">
+                  {lang === 'ta' ? 'கல்வி • மருத்துவம் • உதவி' : 'Education • Health • Relief'}
+                </p>
+              </div>
+              {donationsEnabled && (
+                <div className="min-w-0 min-[360px]:col-span-2 sm:col-span-1">
+                  <p className="font-heading text-sm font-bold text-white sm:text-base">
+                    {lang === 'ta' ? 'முறையான ரசீது' : 'Direct Receipts'}
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-sand-200/90">
+                    {lang === 'ta' ? 'பாதுகாப்பான ஆன்லைன் உதவி' : 'Verified Online Donations'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </section>
 
       {/* 2. FOUR PRINCIPLES: Elevated White Cards on Warm Sand Surface */}
-      <section className="border-b border-sand-200 bg-sand-100/60 py-10 sm:py-12">
+      <section className="border-b border-sand-200 bg-sand-100/80 py-9 sm:py-12">
         <div className="container-max">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3.5 min-[360px]:gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: Heart, title: ui.valCompassionTitle, desc: ui.valCompassionDesc, tone: 'bg-saffron-50 text-saffron-600' },
-              { icon: ShieldCheck, title: ui.valEqualityTitle, desc: ui.valEqualityDesc, tone: 'bg-brand-50 text-brand-700' },
-              { icon: Users, title: ui.valCommunityTitle, desc: ui.valCommunityDesc, tone: 'bg-forest-50 text-forest-700' },
-              { icon: HeartHandshake, title: ui.valTransparencyTitle, desc: ui.valTransparencyDesc, tone: 'bg-saffron-50 text-saffron-700' }
+              { icon: Heart, title: ui.valCompassionTitle, desc: ui.valCompassionDesc, tone: 'bg-saffron-50 text-saffron-600', accent: 'border-t-saffron-500' },
+              { icon: ShieldCheck, title: ui.valEqualityTitle, desc: ui.valEqualityDesc, tone: 'bg-brand-50 text-brand-700', accent: 'border-t-brand-700' },
+              { icon: Users, title: ui.valCommunityTitle, desc: ui.valCommunityDesc, tone: 'bg-forest-50 text-forest-700', accent: 'border-t-forest-600' },
+              { icon: HeartHandshake, title: ui.valTransparencyTitle, desc: ui.valTransparencyDesc, tone: 'bg-saffron-50 text-saffron-700', accent: 'border-t-saffron-600' }
             ].map((val, i) => {
               const Icon = val.icon;
               return (
-                <div key={i} className="trust-card flex items-start gap-3.5 p-4 min-[360px]:p-5">
+                <div key={i} className={`trust-card flex h-full items-start gap-3.5 border-t-[3px] ${val.accent} p-4 min-[360px]:p-5`}>
                   <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${val.tone}`}>
                     <Icon className="h-5 w-5" />
                   </span>
@@ -256,20 +253,20 @@ export default async function HomePage({
       </Suspense>
 
       {/* 4. FOUNDER, VISION & MISSION (Warm Sandstone Band with White Elevated Cards) */}
-      <section className="lazy-section border-b border-sand-200 bg-sand-100/50 py-12 sm:py-14 lg:py-16">
+      <section className="lazy-section border-b border-sand-200 bg-sand-100/70 py-11 sm:py-14 lg:py-16">
         <div className="container-max">
           <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-10">
             <LazyReveal className="lg:col-span-5">
-              <div className="overflow-hidden rounded-3xl border border-sand-200 bg-white p-3 shadow-xs">
+              <div className="mx-auto max-w-md overflow-hidden rounded-3xl border border-sand-200 bg-white p-2.5 shadow-[0_12px_32px_rgba(11,24,46,0.06)] lg:max-w-none">
                 <LazyImage
                   src={founderImg}
                   alt={founderName}
-                  wrapperClassName="h-72 w-full rounded-2xl sm:h-96"
+                  wrapperClassName="h-64 w-full rounded-2xl min-[360px]:h-72 sm:h-96"
                   className="h-full w-full object-cover object-top"
                 />
-                <div className="mt-3 px-2 pb-1">
+                <div className="mt-2.5 rounded-2xl bg-sand-50 px-3.5 py-2.5">
                   <p className="font-heading text-base font-bold text-brand-900">{founderName}</p>
-                  <p className="text-xs font-semibold text-saffron-600">{founderRole}</p>
+                  <p className="mt-0.5 text-xs font-semibold text-saffron-600">{founderRole}</p>
                 </div>
               </div>
             </LazyReveal>
@@ -284,14 +281,14 @@ export default async function HomePage({
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="trust-card flex flex-col p-5">
+                <div className="trust-card flex flex-col border-t-[3px] border-t-brand-700 p-4 min-[360px]:p-5">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-800">
                     <Eye className="h-5 w-5" />
                   </span>
                   <h3 className="mt-3 font-heading text-base font-bold text-brand-900">{ui.visionTitle}</h3>
                   <p className="mt-1.5 flex-1 text-sm text-slate-600">{vision}</p>
                 </div>
-                <div className="trust-card flex flex-col p-5">
+                <div className="trust-card flex flex-col border-t-[3px] border-t-saffron-500 p-4 min-[360px]:p-5">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-saffron-50 text-saffron-600">
                     <Target className="h-5 w-5" />
                   </span>
@@ -336,10 +333,11 @@ export default async function HomePage({
       <FaqSection faqs={faqs} />
 
       {/* 10. HIGH-CONTRAST HERITAGE CTA BAND */}
-      <section className="lazy-section border-t border-sand-200 bg-sand-50 py-12 sm:py-14">
+      <section className="lazy-section border-t border-sand-200 bg-sand-100/70 py-11 sm:py-14">
         <div className="container-max">
-          <div className="flex flex-col items-start justify-between gap-7 rounded-3xl bg-brand-900 p-6 text-white shadow-lg sm:p-10 lg:flex-row lg:items-center lg:p-12">
-            <div className="max-w-2xl">
+          <div className="relative overflow-hidden flex flex-col items-start justify-between gap-7 rounded-3xl bg-gradient-to-br from-brand-900 via-brand-900 to-brand-950 p-5 text-white shadow-xl min-[360px]:p-6 sm:p-10 lg:flex-row lg:items-center lg:p-12">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-saffron-500/10 blur-2xl" />
+            <div className="relative max-w-2xl">
               <span className="text-xs font-bold uppercase tracking-widest text-saffron-400">
                 {ui.ctaBannerEyebrow}
               </span>
@@ -354,7 +352,7 @@ export default async function HomePage({
                   : 'Join our volunteer network or partner with us across Dindigul and neighbouring districts.'}
               </p>
             </div>
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
+            <div className="relative flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
               {donationsEnabled && (
                 <Link
                   href="/donate"

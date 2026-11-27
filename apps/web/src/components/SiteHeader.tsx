@@ -82,37 +82,35 @@ export function SiteHeader({
       {/* Main Sticky Header */}
       <header className="sticky top-0 z-40 border-b border-sand-200 bg-white/95 shadow-[0_2px_12px_rgba(11,24,46,0.04)] backdrop-blur-md">
         <div className="container-max">
-          {/* Mobile Header (< lg): Left bare menu icon | Language-switched logo | Right full "En" "த" toggle | NO donate icon */}
-          <div className="flex h-16 items-center justify-between gap-1.5 lg:hidden">
-            <div className="flex min-w-0 items-center gap-1.5 min-[360px]:gap-2.5">
-              <button
-                type="button"
-                onClick={() => setDrawerOpen((v) => !v)}
-                aria-label={drawerOpen ? ui.close : ui.menu}
-                aria-expanded={drawerOpen}
-                className="-ml-1 inline-flex h-9 w-9 shrink-0 items-center justify-center bg-transparent p-0 text-brand-900 transition hover:text-saffron-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
-              >
-                {drawerOpen ? <X className="h-6 w-6" strokeWidth={2.2} /> : <Menu className="h-6 w-6" strokeWidth={2.2} />}
-              </button>
+          {/* Mobile Header (< lg): Left bare menu icon | Centered language-switched logo | Right full "En" "த" toggle | NO donate icon */}
+          <div className="grid h-16 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 lg:hidden">
+            <button
+              type="button"
+              onClick={() => setDrawerOpen((v) => !v)}
+              aria-label={drawerOpen ? ui.close : ui.menu}
+              aria-expanded={drawerOpen}
+              className="-ml-1 inline-flex h-9 w-9 shrink-0 justify-self-start items-center justify-center bg-transparent p-0 text-brand-900 transition hover:text-saffron-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+            >
+              {drawerOpen ? <X className="h-6 w-6" strokeWidth={2.2} /> : <Menu className="h-6 w-6" strokeWidth={2.2} />}
+            </button>
 
-              <Link
-                href="/"
-                className="flex min-w-0 items-center"
-                aria-label={lang === 'ta' ? trustNameTa : trustNameEn}
-              >
-                <img
-                  src={mobileLogoSrc}
-                  alt={lang === 'ta' ? trustNameTa : trustNameEn}
-                  className="h-9 w-auto max-w-[155px] object-contain object-left min-[360px]:h-10 min-[360px]:max-w-[185px]"
-                />
-              </Link>
-            </div>
+            <Link
+              href="/"
+              className="flex min-w-0 justify-self-center items-center"
+              aria-label={lang === 'ta' ? trustNameTa : trustNameEn}
+            >
+              <img
+                src={mobileLogoSrc}
+                alt={lang === 'ta' ? trustNameTa : trustNameEn}
+                className="h-8 w-auto max-w-[128px] object-contain object-center min-[360px]:h-9 min-[360px]:max-w-[162px] sm:h-10 sm:max-w-[190px]"
+              />
+            </Link>
 
             {/* Full Segmented Language Toggle ("En" / "த") */}
             <div
               role="group"
               aria-label="Language switcher"
-              className="inline-flex shrink-0 items-center rounded-full border border-sand-200 bg-sand-50 p-0.5 shadow-xs"
+              className="inline-flex shrink-0 justify-self-end items-center rounded-full border border-sand-200 bg-sand-50 p-0.5 shadow-xs"
             >
               <button
                 type="button"
@@ -144,7 +142,7 @@ export function SiteHeader({
           </div>
 
           {/* Desktop Header (>= lg): Primary /logos/logo.png with original aspect ratio */}
-          <div className="hidden h-20 items-center justify-between gap-4 lg:flex">
+          <div className="hidden h-[84px] items-center justify-between gap-4 lg:flex">
             <Link
               href="/"
               className="flex shrink-0 items-center"
@@ -153,7 +151,7 @@ export function SiteHeader({
               <img
                 src={desktopLogoSrc}
                 alt={`${trustNameEn} | ${trustNameTa}`}
-                className="h-12 w-auto object-contain object-left xl:h-[52px]"
+                className="h-[54px] w-auto object-contain object-left xl:h-[62px]"
               />
             </Link>
 

@@ -45,7 +45,7 @@ export function ActivityMarquee({ items }: { items: MarqueeItem[] }) {
               <Link
                 key={`${item.id}-${idx}`}
                 href={item.link_url || '/gallery'}
-                className="group relative h-48 w-64 shrink-0 overflow-hidden rounded-2xl border border-sand-200 bg-sand-100 shadow-xs transition hover:-translate-y-1 hover:shadow-lg sm:h-60 sm:w-80"
+                className="group relative h-44 w-56 shrink-0 overflow-hidden rounded-2xl border border-sand-200 bg-sand-100 shadow-xs transition hover:-translate-y-1 hover:shadow-lg min-[360px]:h-48 min-[360px]:w-64 sm:h-60 sm:w-80"
               >
                 <LazyImage
                   src={item.image_url}

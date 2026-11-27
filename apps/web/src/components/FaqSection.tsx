@@ -14,7 +14,7 @@ export function FaqSection({ faqs }: { faqs: BilingualFaq[] }) {
   if (!faqs || !faqs.length) return null;
 
   return (
-    <section className="border-t border-sand-200 bg-sand-100/70 py-12 sm:py-14 lg:py-16">
+    <section className="border-t border-sand-200 bg-sand-50 py-11 sm:py-14 lg:py-16">
       <div className="container-max">
         <div className="mx-auto max-w-3xl text-center">
           <span className="section-kicker">{ui.faqEyebrow}</span>
