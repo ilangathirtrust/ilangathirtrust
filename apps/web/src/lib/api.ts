@@ -25,7 +25,8 @@ export const SITE_URL = (
 async function fetchApi<T>(path: string, revalidateSeconds = 120): Promise<T | null> {
   try {
     const res = await fetch(`${API_URL}${path}`, {
-      next: { revalidate: revalidateSeconds }
+      next: { revalidate: revalidateSeconds },
+      signal: AbortSignal.timeout(4500)
     });
     if (!res.ok) return null;
     return (await res.json()) as T;

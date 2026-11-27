@@ -1,19 +1,20 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Images } from 'lucide-react';
-import { pickLocalized } from '@ilangathir/shared';
-import { getGalleryFolders, getPageContent } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
+import { PERMANENT_PAGES } from '@/lib/site-content';
 import { PageHeader } from '@/components/PageHeader';
-import { GalleryExplorer } from '@/components/GalleryExplorer';
+import { GalleryExplorerSection } from '@/components/DynamicSections';
+import { FolderGridSkeleton } from '@/components/Skeletons';
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
   const lang = await getServerLang((await searchParams).lang);
-  const page = await getPageContent('gallery');
+  const p = PERMANENT_PAGES.gallery;
   return buildPageMetadata({
-    title: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_title', lang)) || (lang === 'ta' ? 'புகைப்பட & காணொளித் தொகுப்பு | இளங்கதிர் அறக்கட்டளை' : 'Gallery | Ilangathir Trust'),
-    description: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_description', lang)) || (lang === 'ta' ? 'நிகழ்வுகள் வாரியான புகைப்படங்கள் மற்றும் காணொளிகள்.' : 'Event-based photo and video gallery of Ilangathir Trust.'),
+    title: lang === 'ta' ? p.seo_title_ta : p.seo_title_en,
+    description: lang === 'ta' ? p.seo_description_ta : p.seo_description_en,
     path: '/gallery',
     lang
   });
@@ -22,14 +23,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 export default async function GalleryPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   const lang = await getServerLang((await searchParams).lang);
   const ui = getUi(lang);
-
-  const [pageContent, foldersData] = await Promise.all([
-    getPageContent('gallery'),
-    getGalleryFolders({ page: 1, pageSize: 12 })
-  ]);
-
-  const heroTitle = (pageContent && pickLocalized(pageContent as unknown as Record<string, unknown>, 'hero_title', lang)) || ui.galleryTitle;
-  const heroSub = (pageContent && pickLocalized(pageContent as unknown as Record<string, unknown>, 'hero_subtitle', lang)) || '';
+  const p = PERMANENT_PAGES.gallery;
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: ui.home, path: '/' },
@@ -42,15 +36,17 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
 
       <PageHeader
         crumbs={[{ label: ui.gallery }]}
-        eyebrow={ui.galleryEyebrow}
-        title={heroTitle}
-        subtitle={heroSub}
+        eyebrow={lang === 'ta' ? p.eyebrow_ta : p.eyebrow_en}
+        title={lang === 'ta' ? p.title_ta : p.title_en}
+        subtitle={lang === 'ta' ? p.subtitle_ta : p.subtitle_en}
         icon={Images}
       />
 
       <section className="bg-white py-14 lg:py-16">
         <div className="container-max">
-          <GalleryExplorer initialData={foldersData} />
+          <Suspense fallback={<FolderGridSkeleton count={6} />}>
+            <GalleryExplorerSection />
+          </Suspense>
         </div>
       </section>
     </>

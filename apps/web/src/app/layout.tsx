@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { Inter, Noto_Sans_Tamil, Plus_Jakarta_Sans } from 'next/font/google';
 import { Suspense } from 'react';
-import { getBootstrap } from '@/lib/api';
+import { SITE_URL } from '@/lib/api';
 import { getServerLang } from '@/lib/lang-server';
 import { buildOrganizationJsonLd } from '@/lib/seo';
+import { SITE_SETTINGS, STATIC_ASSETS, STATIC_NAVIGATION } from '@/lib/site-content';
 import { LanguageProvider } from '@/components/LanguageProvider';
-import { Preloader } from '@/components/Preloader';
 import { SiteHeader } from '@/components/SiteHeader';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -33,37 +33,21 @@ const notoTamil = Noto_Sans_Tamil({
   display: 'swap'
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const bootstrap = await getBootstrap();
-  const favicon = bootstrap.settings.favicon_url?.value_en || '/assets/ilangathir-logo.jpg';
-  return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ilangathirtrust.com'),
-    icons: {
-      icon: favicon,
-      apple: favicon
-    }
-  };
-}
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: STATIC_ASSETS.favicon,
+    apple: STATIC_ASSETS.favicon
+  }
+};
 
 export default async function RootLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
-  const [lang, bootstrap] = await Promise.all([getServerLang(), getBootstrap()]);
-  const { settings, navigation } = bootstrap;
-
-  const logoUrl = settings.logo_url?.value_en || '/assets/ilangathir-logo.jpg';
-  const trustNameEn = settings.trust_name?.value_en || 'Ilangathir Trust';
-  const trustNameTa = settings.trust_name?.value_ta || 'இளங்கதிர் அறக்கட்டளை';
-  const phone = settings.phone?.value_en || '+91 93630 15050';
-  const email = settings.email?.value_en || 'ilangathirtrust@gmail.com';
-  const addressEn = settings.address?.value_en || 'V. Kallupatti, Dindigul - 624307, Tamil Nadu, India.';
-  const addressTa = settings.address?.value_ta || 'V. கல்லுப்பட்டி, திண்டுக்கல் - 624307, தமிழ்நாடு, இந்தியா.';
-  const footerDescEn = settings.footer_description?.value_en || '';
-  const footerDescTa = settings.footer_description?.value_ta || '';
-
-  const orgJsonLd = buildOrganizationJsonLd(settings);
+  const lang = await getServerLang();
+  const orgJsonLd = buildOrganizationJsonLd(SITE_SETTINGS);
 
   return (
     <html
@@ -77,18 +61,17 @@ export default async function RootLayout({
         />
 
         <LanguageProvider initialLang={lang}>
-          <Preloader logoUrl={logoUrl} />
           <Suspense fallback={null}>
             <AnalyticsTracker />
           </Suspense>
 
           <SiteHeader
-            logoUrl={logoUrl}
-            trustNameEn={trustNameEn}
-            trustNameTa={trustNameTa}
-            phone={phone}
-            email={email}
-            navItems={navigation}
+            logoUrl={STATIC_ASSETS.logo}
+            trustNameEn={SITE_SETTINGS.trust_name.value_en}
+            trustNameTa={SITE_SETTINGS.trust_name.value_ta}
+            phone={SITE_SETTINGS.phone.value_en}
+            email={SITE_SETTINGS.email.value_en}
+            navItems={STATIC_NAVIGATION}
           />
 
           <main id="main-content" className="flex-1">
@@ -96,18 +79,18 @@ export default async function RootLayout({
           </main>
 
           <SiteFooter
-            logoUrl={logoUrl}
-            trustNameEn={trustNameEn}
-            trustNameTa={trustNameTa}
-            footerDescEn={footerDescEn}
-            footerDescTa={footerDescTa}
-            phone={phone}
-            email={email}
-            addressEn={addressEn}
-            addressTa={addressTa}
+            logoUrl={STATIC_ASSETS.logo}
+            trustNameEn={SITE_SETTINGS.trust_name.value_en}
+            trustNameTa={SITE_SETTINGS.trust_name.value_ta}
+            footerDescEn={SITE_SETTINGS.footer_description.value_en}
+            footerDescTa={SITE_SETTINGS.footer_description.value_ta}
+            phone={SITE_SETTINGS.phone.value_en}
+            email={SITE_SETTINGS.email.value_en}
+            addressEn={SITE_SETTINGS.address.value_en}
+            addressTa={SITE_SETTINGS.address.value_ta}
           />
 
-          <MobileBottomNav navItems={navigation} />
+          <MobileBottomNav navItems={STATIC_NAVIGATION} />
         </LanguageProvider>
       </body>
     </html>

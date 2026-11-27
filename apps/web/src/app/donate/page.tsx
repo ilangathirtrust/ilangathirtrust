@@ -1,20 +1,19 @@
 import type { Metadata } from 'next';
 import { Check, Heart, Lock, ShieldCheck } from 'lucide-react';
-import { pickLocalized } from '@ilangathir/shared';
-import { getBootstrap, getPageContent } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildFaqJsonLd, buildPageMetadata } from '@/lib/seo';
+import { DONATE_FAQS, PERMANENT_PAGES, SITE_SETTINGS } from '@/lib/site-content';
 import { PageHeader } from '@/components/PageHeader';
 import { DonationCheckout } from '@/components/DonationCheckout';
 import { FaqSection } from '@/components/FaqSection';
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
   const lang = await getServerLang((await searchParams).lang);
-  const page = await getPageContent('donate');
+  const p = PERMANENT_PAGES.donate;
   return buildPageMetadata({
-    title: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_title', lang)) || (lang === 'ta' ? 'நன்கொடை | இளங்கதிர் அறக்கட்டளை' : 'Donate | Ilangathir Trust'),
-    description: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_description', lang)) || (lang === 'ta' ? 'இளங்கதிர் அறக்கட்டளைக்கு பாதுகாப்பாக ஆன்லைன் நன்கொடை வழங்கவும்.' : 'Support Ilangathir Trust education, healthcare, and community programmes online.'),
+    title: lang === 'ta' ? p.seo_title_ta : p.seo_title_en,
+    description: lang === 'ta' ? p.seo_description_ta : p.seo_description_en,
     path: '/donate',
     lang
   });
@@ -23,28 +22,10 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 export default async function DonatePage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   const lang = await getServerLang((await searchParams).lang);
   const ui = getUi(lang);
+  const p = PERMANENT_PAGES.donate;
+  const donationCfg = SITE_SETTINGS.donation_config.json_value;
 
-  const [bootstrap, pageContent] = await Promise.all([
-    getBootstrap(),
-    getPageContent('donate')
-  ]);
-
-  const donationCfg = (bootstrap.settings.donation_config?.json_value || {}) as {
-    suggested_amounts?: number[];
-    purposes?: string[];
-  };
-
-  const suggestedAmounts = donationCfg.suggested_amounts?.length
-    ? donationCfg.suggested_amounts
-    : [500, 1000, 2500, 5000, 10000];
-  const purposes = donationCfg.purposes?.length
-    ? donationCfg.purposes
-    : ['General Welfare', 'Education Support', 'Medical Relief', 'Environmental Care'];
-
-  const heroTitle = (pageContent && pickLocalized(pageContent as unknown as Record<string, unknown>, 'hero_title', lang)) || ui.donateTitle;
-  const heroSub = (pageContent && pickLocalized(pageContent as unknown as Record<string, unknown>, 'hero_subtitle', lang)) || ui.donateSubtitle;
-  const faqs = pageContent?.faqs || [];
-  const faqJsonLd = buildFaqJsonLd(faqs, lang);
+  const faqJsonLd = buildFaqJsonLd(DONATE_FAQS, lang);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: ui.home, path: '/' },
     { name: ui.donateNow, path: '/donate' }
@@ -59,16 +40,19 @@ export default async function DonatePage({ searchParams }: { searchParams: Promi
 
       <PageHeader
         crumbs={[{ label: ui.donateNow }]}
-        eyebrow={lang === 'ta' ? 'நன்கொடை' : 'CONTRIBUTE'}
-        title={heroTitle}
-        subtitle={heroSub}
+        eyebrow={lang === 'ta' ? p.eyebrow_ta : p.eyebrow_en}
+        title={lang === 'ta' ? p.title_ta : p.title_en}
+        subtitle={lang === 'ta' ? p.subtitle_ta : p.subtitle_en}
         icon={Heart}
       />
 
       <section className="bg-white py-14 lg:py-16">
         <div className="container-max grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <DonationCheckout suggestedAmounts={suggestedAmounts} purposes={purposes} />
+            <DonationCheckout
+              suggestedAmounts={[...donationCfg.suggested_amounts]}
+              purposes={[...donationCfg.purposes]}
+            />
           </div>
 
           <aside className="space-y-5 lg:col-span-4">
@@ -108,7 +92,7 @@ export default async function DonatePage({ searchParams }: { searchParams: Promi
         </div>
       </section>
 
-      <FaqSection faqs={faqs} />
+      <FaqSection faqs={DONATE_FAQS} />
     </>
   );
 }

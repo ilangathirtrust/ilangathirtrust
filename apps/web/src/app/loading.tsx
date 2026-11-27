@@ -1,12 +1,11 @@
-import { CardGridSkeleton, HeroSkeleton } from '@/components/Skeletons';
+import { HeroSkeleton, MarqueeSkeleton, SectionCardGridSkeleton } from '@/components/Skeletons';
 
 export default function Loading() {
   return (
-    <div>
+    <div className="bg-white">
       <HeroSkeleton />
-      <div className="container-max py-12">
-        <CardGridSkeleton count={6} />
-      </div>
+      <MarqueeSkeleton />
+      <SectionCardGridSkeleton count={3} />
     </div>
   );
 }

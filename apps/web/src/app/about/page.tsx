@@ -1,19 +1,27 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Eye, HeartHandshake, Target, Users } from 'lucide-react';
-import { pickLocalized } from '@ilangathir/shared';
-import { getBootstrap, getPageContent, getTeamMembers } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
+import {
+  HOME_FAQS,
+  PERMANENT_PAGES,
+  SITE_SETTINGS,
+  STATIC_ASSETS,
+  pickText
+} from '@/lib/site-content';
 import { PageHeader } from '@/components/PageHeader';
 import { FaqSection } from '@/components/FaqSection';
+import { AboutTeamSection } from '@/components/DynamicSections';
+import { CardGridSkeleton } from '@/components/Skeletons';
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
   const lang = await getServerLang((await searchParams).lang);
-  const page = await getPageContent('about');
+  const p = PERMANENT_PAGES.about;
   return buildPageMetadata({
-    title: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_title', lang)) || (lang === 'ta' ? 'எங்களைப் பற்றி | இளங்கதிர் அறக்கட்டளை' : 'About Us | Ilangathir Trust'),
-    description: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_description', lang)) || (lang === 'ta' ? 'இளங்கதிர் அறக்கட்டளையின் நோக்கம், தொலைநோக்கு மற்றும் குழு.' : 'Mission, vision, founder, and leadership team of Ilangathir Trust.'),
+    title: lang === 'ta' ? p.seo_title_ta : p.seo_title_en,
+    description: lang === 'ta' ? p.seo_description_ta : p.seo_description_en,
     path: '/about',
     lang
   });
@@ -22,22 +30,13 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 export default async function AboutPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   const lang = await getServerLang((await searchParams).lang);
   const ui = getUi(lang);
-  const [bootstrap, page, team] = await Promise.all([
-    getBootstrap(),
-    getPageContent('about'),
-    getTeamMembers()
-  ]);
+  const p = PERMANENT_PAGES.about;
 
-  const { settings } = bootstrap;
-  const heroTitle = (page && pickLocalized(page as unknown as Record<string, unknown>, 'hero_title', lang)) || ui.about;
-  const heroSub = (page && pickLocalized(page as unknown as Record<string, unknown>, 'hero_subtitle', lang)) || '';
-
-  const founderName = (lang === 'ta' ? settings.founder_name?.value_ta : settings.founder_name?.value_en) || 'Founder';
-  const founderRole = (lang === 'ta' ? settings.founder_role?.value_ta : settings.founder_role?.value_en) || '';
-  const founderBio = (lang === 'ta' ? settings.founder_bio?.value_ta : settings.founder_bio?.value_en) || '';
-  const founderImg = settings.founder_image_url?.value_en || '/assets/founder.jpg';
-  const mission = (lang === 'ta' ? settings.mission_statement?.value_ta : settings.mission_statement?.value_en) || '';
-  const vision = (lang === 'ta' ? settings.vision_statement?.value_ta : settings.vision_statement?.value_en) || '';
+  const founderName = pickText(SITE_SETTINGS.founder_name, lang);
+  const founderRole = pickText(SITE_SETTINGS.founder_role, lang);
+  const founderBio = pickText(SITE_SETTINGS.founder_bio, lang);
+  const mission = pickText(SITE_SETTINGS.mission_statement, lang);
+  const vision = pickText(SITE_SETTINGS.vision_statement, lang);
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: ui.home, path: '/' },
@@ -50,9 +49,9 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
 
       <PageHeader
         crumbs={[{ label: ui.about }]}
-        eyebrow={ui.aboutEyebrow}
-        title={heroTitle}
-        subtitle={heroSub}
+        eyebrow={lang === 'ta' ? p.eyebrow_ta : p.eyebrow_en}
+        title={lang === 'ta' ? p.title_ta : p.title_en}
+        subtitle={lang === 'ta' ? p.subtitle_ta : p.subtitle_en}
         icon={HeartHandshake}
       />
 
@@ -60,13 +59,19 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
         <div className="container-max grid items-center gap-10 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-3">
-              <img src={founderImg} alt={founderName} className="h-96 w-full rounded-xl object-cover object-top" />
+              <img
+                src={STATIC_ASSETS.founder}
+                alt={founderName}
+                loading="eager"
+                decoding="async"
+                className="h-96 w-full rounded-xl object-cover object-top"
+              />
             </div>
           </div>
           <div className="space-y-6 lg:col-span-7">
             <span className="section-kicker">{ui.founderEyebrow}</span>
             <h2 className="font-heading text-3xl font-bold text-slate-900">{founderName}</h2>
-            {founderRole && <p className="text-sm font-bold text-brand-700">{founderRole}</p>}
+            <p className="text-sm font-bold text-brand-700">{founderRole}</p>
             <p className="text-base leading-relaxed text-slate-600">{founderBio}</p>
 
             <div className="grid gap-4 pt-2 sm:grid-cols-2">
@@ -94,37 +99,13 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
             </h2>
           </div>
 
-          {team.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-600">
-              {ui.emptyTeam}
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {team.map((member) => {
-                const name = pickLocalized(member as unknown as Record<string, unknown>, 'name', lang);
-                const role = pickLocalized(member as unknown as Record<string, unknown>, 'designation', lang);
-                const bio = pickLocalized(member as unknown as Record<string, unknown>, 'biography', lang);
-                return (
-                  <article key={member.id} className="editorial-card flex h-full flex-col overflow-hidden">
-                    {member.image_url && (
-                      <div className="h-64 overflow-hidden bg-slate-100">
-                        <img src={member.image_url} alt={name} loading="lazy" className="h-full w-full object-cover object-top" />
-                      </div>
-                    )}
-                    <div className="flex flex-1 flex-col p-5">
-                      <h3 className="font-heading text-lg font-bold text-slate-900">{name}</h3>
-                      <p className="mt-1 text-xs font-bold text-brand-700">{role}</p>
-                      {bio && <p className="mt-3 flex-1 text-sm text-slate-600">{bio}</p>}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
+          <Suspense fallback={<CardGridSkeleton count={3} />}>
+            <AboutTeamSection lang={lang} />
+          </Suspense>
         </div>
       </section>
 
-      <FaqSection faqs={page?.faqs || []} />
+      <FaqSection faqs={HOME_FAQS} />
     </>
   );
 }

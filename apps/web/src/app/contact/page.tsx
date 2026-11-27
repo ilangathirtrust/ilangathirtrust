@@ -1,19 +1,18 @@
 import type { Metadata } from 'next';
 import { Clock, Mail, MapPin, Phone } from 'lucide-react';
-import { pickLocalized } from '@ilangathir/shared';
-import { getBootstrap, getPageContent } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
+import { PERMANENT_PAGES, SITE_SETTINGS, pickText } from '@/lib/site-content';
 import { PageHeader } from '@/components/PageHeader';
 import { ContactEnquiryForm, VolunteerForm } from '@/components/ContactForms';
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
   const lang = await getServerLang((await searchParams).lang);
-  const page = await getPageContent('contact');
+  const p = PERMANENT_PAGES.contact;
   return buildPageMetadata({
-    title: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_title', lang)) || (lang === 'ta' ? 'தொடர்பு & தன்னார்வலர் | இளங்கதிர் அறக்கட்டளை' : 'Contact & Volunteer | Ilangathir Trust'),
-    description: (page && pickLocalized(page as unknown as Record<string, unknown>, 'seo_description', lang)) || (lang === 'ta' ? 'இளங்கதிர் அறக்கட்டளையைத் தொடர்பு கொள்ளவும் அல்லது தன்னார்வலராக இணையவும்.' : 'Contact Ilangathir Trust or apply to volunteer in Tamil Nadu.'),
+    title: lang === 'ta' ? p.seo_title_ta : p.seo_title_en,
+    description: lang === 'ta' ? p.seo_description_ta : p.seo_description_en,
     path: '/contact',
     lang
   });
@@ -22,20 +21,12 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 export default async function ContactPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   const lang = await getServerLang((await searchParams).lang);
   const ui = getUi(lang);
+  const p = PERMANENT_PAGES.contact;
 
-  const [bootstrap, pageContent] = await Promise.all([
-    getBootstrap(),
-    getPageContent('contact')
-  ]);
-
-  const { settings } = bootstrap;
-  const phone = settings.phone?.value_en || '+91 93630 15050';
-  const email = settings.email?.value_en || 'ilangathirtrust@gmail.com';
-  const address = (lang === 'ta' ? settings.address?.value_ta : settings.address?.value_en) || '';
-  const hours = (lang === 'ta' ? settings.office_hours?.value_ta : settings.office_hours?.value_en) || '';
-
-  const heroTitle = (pageContent && pickLocalized(pageContent as unknown as Record<string, unknown>, 'hero_title', lang)) || ui.contact;
-  const heroSub = (pageContent && pickLocalized(pageContent as unknown as Record<string, unknown>, 'hero_subtitle', lang)) || '';
+  const phone = SITE_SETTINGS.phone.value_en;
+  const email = SITE_SETTINGS.email.value_en;
+  const address = pickText(SITE_SETTINGS.address, lang);
+  const hours = pickText(SITE_SETTINGS.office_hours, lang);
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: ui.home, path: '/' },
@@ -48,9 +39,9 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
 
       <PageHeader
         crumbs={[{ label: ui.contact }]}
-        eyebrow={ui.contact}
-        title={heroTitle}
-        subtitle={heroSub}
+        eyebrow={lang === 'ta' ? p.eyebrow_ta : p.eyebrow_en}
+        title={lang === 'ta' ? p.title_ta : p.title_en}
+        subtitle={lang === 'ta' ? p.subtitle_ta : p.subtitle_en}
         icon={Mail}
       />
 
@@ -64,7 +55,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                     <Phone className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
                       {lang === 'ta' ? 'தொலைபேசி' : 'Call Us'}
                     </p>
                     <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="mt-1 block font-heading text-base font-bold text-slate-900 hover:text-brand-700">
@@ -80,7 +71,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                     <Mail className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
                       {lang === 'ta' ? 'மின்னஞ்சல்' : 'Email Us'}
                     </p>
                     <a href={`mailto:${email}`} className="mt-1 block break-all font-heading text-base font-bold text-slate-900 hover:text-brand-700">
@@ -92,11 +83,11 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
 
               <div className="editorial-card p-5">
                 <div className="flex items-start gap-3.5">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amberwarm-50 text-amberwarm-700">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
                     <MapPin className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
                       {lang === 'ta' ? 'முகவரி' : 'Trust Address'}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-slate-800">{address}</p>
@@ -104,14 +95,12 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                 </div>
               </div>
 
-              {hours && (
-                <div className="rounded-2xl border border-amberwarm-200 bg-amberwarm-50 p-5 text-sm text-amberwarm-900">
-                  <div className="flex items-start gap-3">
-                    <Clock className="mt-0.5 h-5 w-5 shrink-0 text-amberwarm-700" />
-                    <p className="font-medium">{hours}</p>
-                  </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-700">
+                <div className="flex items-start gap-3">
+                  <Clock className="mt-0.5 h-5 w-5 shrink-0 text-brand-700" />
+                  <p className="font-medium">{hours}</p>
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="lg:col-span-7">
