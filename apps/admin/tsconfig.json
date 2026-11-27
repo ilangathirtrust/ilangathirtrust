@@ -13,7 +13,8 @@
     "jsx": "react-jsx",
     "strict": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@ilangathir/shared": ["../../packages/shared/src/index.ts"]
     }
   },
   "include": ["src"]
