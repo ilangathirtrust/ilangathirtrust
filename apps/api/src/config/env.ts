@@ -52,7 +52,6 @@ export const env: AppEnv = {
 export function isSupabaseConfigured(): boolean {
   return Boolean(
     env.SUPABASE_URL &&
-    env.SUPABASE_ANON_KEY &&
     env.SUPABASE_SERVICE_ROLE_KEY &&
     !env.SUPABASE_URL.includes('your-project-ref')
   );

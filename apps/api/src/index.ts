@@ -76,7 +76,15 @@ export function createApp() {
       supabaseConfigured: supabaseReady,
       databaseConnected: dbConnected,
       razorpayConfigured: razorpayReady,
-      cacheEntries: apiCache.size()
+      cacheEntries: apiCache.size(),
+      checks: {
+        hasSupabaseUrl: Boolean(env.SUPABASE_URL),
+        hasSupabaseAnonKey: Boolean(env.SUPABASE_ANON_KEY),
+        hasSupabaseServiceRoleKey: Boolean(env.SUPABASE_SERVICE_ROLE_KEY),
+        hasRazorpayKeyId: Boolean(env.RAZORPAY_KEY_ID),
+        hasRazorpayKeySecret: Boolean(env.RAZORPAY_KEY_SECRET),
+        hasRazorpayWebhookSecret: Boolean(env.RAZORPAY_WEBHOOK_SECRET)
+      }
     });
   });
 
