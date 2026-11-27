@@ -132,7 +132,7 @@ export function OverviewPage({ onNavigate }: { onNavigate: (tab: string) => void
               key={btn.tab}
               type="button"
               onClick={() => onNavigate(btn.tab)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-200 bg-[#FAF8F4] px-4 py-3 text-xs font-bold text-slate-800 transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-800 transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>{btn.label}</span>
@@ -154,7 +154,7 @@ export function OverviewPage({ onNavigate }: { onNavigate: (tab: string) => void
               <p className="text-sm text-slate-500">No donations recorded yet.</p>
             ) : (
               data.recentDonations.map((d) => (
-                <div key={d.id} className="flex items-center justify-between rounded-xl bg-[#FAF8F4] px-4 py-3 text-sm">
+                <div key={d.id} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-sm">
                   <div className="min-w-0 pr-2">
                     <p className="truncate font-bold text-slate-900">{d.donor_name}</p>
                     <p className="text-xs text-slate-500">{d.receipt_number || new Date(d.created_at).toLocaleDateString()}</p>
@@ -185,7 +185,7 @@ export function OverviewPage({ onNavigate }: { onNavigate: (tab: string) => void
               <p className="text-sm text-slate-500">No activity logs yet.</p>
             ) : (
               data.recentActivities.map((a) => (
-                <div key={a.id} className="flex items-center justify-between gap-2 rounded-xl bg-[#FAF8F4] px-4 py-3 text-xs">
+                <div key={a.id} className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-4 py-3 text-xs">
                   <div className="min-w-0">
                     <p className="truncate font-bold text-slate-800">
                       {a.action} <span className="font-normal text-slate-500">on</span> {a.entity_type}

@@ -291,8 +291,10 @@ publicRouter.get('/gallery/folders', async (req, res, next) => {
       if (category) query = query.eq('category', category);
       if (year && Number.isFinite(year)) query = query.eq('event_year', year);
       if (search) {
-        const clean = search.replace(/[%_]/g, '');
-        query = query.or(`title_en.ilike.%${clean}%,title_ta.ilike.%${clean}%,description_en.ilike.%${clean}%`);
+        const clean = search.replace(/[%_,().*]/g, '').slice(0, 100);
+        if (clean) {
+          query = query.or(`title_en.ilike.%${clean}%,title_ta.ilike.%${clean}%,description_en.ilike.%${clean}%`);
+        }
       }
 
       const [foldersRes, facetsRes] = await Promise.all([
@@ -413,8 +415,10 @@ publicRouter.get('/blogs', async (req, res, next) => {
       if (categoryId) query = query.eq('category_id', categoryId);
       if (featuredOnly) query = query.eq('is_featured', true);
       if (search) {
-        const clean = search.replace(/[%_]/g, '');
-        query = query.or(`title_en.ilike.%${clean}%,title_ta.ilike.%${clean}%,excerpt_en.ilike.%${clean}%,excerpt_ta.ilike.%${clean}%`);
+        const clean = search.replace(/[%_,().*]/g, '').slice(0, 100);
+        if (clean) {
+          query = query.or(`title_en.ilike.%${clean}%,title_ta.ilike.%${clean}%,excerpt_en.ilike.%${clean}%,excerpt_ta.ilike.%${clean}%`);
+        }
       }
 
       const { data, error, count } = await query;

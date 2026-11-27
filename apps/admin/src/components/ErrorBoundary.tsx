@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
     }
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F4] p-4">
+      <div className="flex min-h-screen items-center justify-center bg-white p-4">
         <div className="w-full max-w-lg rounded-3xl border border-red-200 bg-white p-8 text-center shadow-xl">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
             <AlertTriangle className="h-7 w-7" />

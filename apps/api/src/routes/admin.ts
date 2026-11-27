@@ -7,6 +7,7 @@ import { requireAdminAuth, requireRole } from '../middleware/auth.js';
 import { adminApiLimiter } from '../middleware/rateLimit.js';
 import { recordAuditLog, saveContentVersion } from '../services/audit.js';
 import { apiCache } from '../services/cache.js';
+import { parseDeviceMetadata, recordSecurityEvent } from '../services/device.js';
 
 export const adminRouter = Router();
 
@@ -1307,4 +1308,169 @@ adminRouter.patch('/users/:id', requireRole(['super_admin']), async (req, res, n
   } catch (err) {
     next(err);
   }
+});
+
+// ======================== SECURITY, SESSIONS & DEVICES ========================
+adminRouter.get('/security/overview', async (req, res, next) => {
+  try {
+    const supabase = getSupabaseAdmin();
+    const userId = req.admin!.id;
+    const currentDevice = parseDeviceMetadata(req);
+
+    const [sessionsRes, eventsRes] = await Promise.all([
+      supabase
+        .from('admin_sessions')
+        .select('id, device_id, device_name, device_type, browser, os, ip_address, geo_label, is_trusted, is_revoked, revoked_at, revoked_reason, last_active_at, created_at, expires_at')
+        .eq('user_id', userId)
+        .order('last_active_at', { ascending: false })
+        .limit(25),
+      supabase
+        .from('security_events')
+        .select('id, event_type, severity, device_name, ip_address, geo_label, details, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(30)
+    ]);
+
+    const migrationRequired =
+      sessionsRes.error?.code === '42P01' ||
+      sessionsRes.error?.code === 'PGRST205' ||
+      eventsRes.error?.code === '42P01' ||
+      eventsRes.error?.code === 'PGRST205';
+
+    res.json({
+      migrationRequired: Boolean(migrationRequired),
+      currentSessionId: req.admin?.sessionId || null,
+      currentDevice,
+      sessions: sessionsRes.error ? [] : sessionsRes.data || [],
+      events: eventsRes.error ? [] : eventsRes.data || []
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/security/sessions/:id/trust', async (req, res, next) => {
+  try {
+    const supabase = getSupabaseAdmin();
+    const trusted = Boolean(req.body?.is_trusted);
+    const { data, error } = await supabase
+      .from('admin_sessions')
+      .update({ is_trusted: trusted })
+      .eq('id', req.params.id)
+      .eq('user_id', req.admin!.id)
+      .select()
+      .single();
+    if (error) throw error;
+
+    await recordSecurityEvent({
+      userId: req.admin!.id,
+      email: req.admin!.email,
+      eventType: trusted ? 'device_trusted' : 'device_untrusted',
+      severity: 'info',
+      device: parseDeviceMetadata(req),
+      details: { target_session_id: req.params.id, device_name: data.device_name }
+    });
+
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/security/sessions/revoke-others', async (req, res, next) => {
+  try {
+    const supabase = getSupabaseAdmin();
+    const currentDeviceId = req.admin?.deviceId || parseDeviceMetadata(req).deviceId;
+
+    const { error } = await supabase
+      .from('admin_sessions')
+      .update({
+        is_revoked: true,
+        revoked_at: new Date().toISOString(),
+        revoked_reason: 'Signed out from all other devices by account owner.'
+      })
+      .eq('user_id', req.admin!.id)
+      .neq('device_id', currentDeviceId)
+      .eq('is_revoked', false);
+
+    if (error) throw error;
+
+    await recordSecurityEvent({
+      userId: req.admin!.id,
+      email: req.admin!.email,
+      eventType: 'revoke_all_other_sessions',
+      severity: 'warning',
+      device: parseDeviceMetadata(req)
+    });
+
+    await recordAuditLog({
+      actorId: req.admin?.id,
+      actorEmail: req.admin?.email,
+      action: 'revoke_other_sessions',
+      entityType: 'admin_sessions',
+      entityId: req.admin?.id,
+      req
+    });
+
+    res.json({ revoked: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.delete('/security/sessions/:id', async (req, res, next) => {
+  try {
+    const supabase = getSupabaseAdmin();
+    if (req.admin?.sessionId && req.params.id === req.admin.sessionId) {
+      res.status(400).json({ error: 'Use Sign Out to end your current session.' });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('admin_sessions')
+      .update({
+        is_revoked: true,
+        revoked_at: new Date().toISOString(),
+        revoked_reason: 'Signed out remotely from Security & Devices.'
+      })
+      .eq('id', req.params.id)
+      .eq('user_id', req.admin!.id)
+      .select('id, device_name')
+      .single();
+
+    if (error) throw error;
+
+    await recordSecurityEvent({
+      userId: req.admin!.id,
+      email: req.admin!.email,
+      eventType: 'session_revoked',
+      severity: 'warning',
+      device: parseDeviceMetadata(req),
+      details: { target_session_id: data.id, device_name: data.device_name }
+    });
+
+    res.json({ revoked: true, id: data.id });
+  } catch (err) {
+    next(err);
+  }
+});
+
+const ALLOWED_CLIENT_SECURITY_EVENTS = new Set(['mfa_enrolled', 'mfa_removed', 'password_changed']);
+
+adminRouter.post('/security/events/record', async (req, res) => {
+  const rawType = String(req.body?.event_type || '').slice(0, 64);
+  if (!ALLOWED_CLIENT_SECURITY_EVENTS.has(rawType)) {
+    res.status(400).json({ error: 'Unsupported security event type.' });
+    return;
+  }
+  await recordSecurityEvent({
+    userId: req.admin!.id,
+    email: req.admin!.email,
+    eventType: rawType,
+    severity: req.body?.severity === 'warning' || req.body?.severity === 'critical' ? req.body.severity : 'info',
+    device: parseDeviceMetadata(req),
+    details: typeof req.body?.details === 'object' && req.body.details ? req.body.details : {}
+  });
+  res.json({ recorded: true });
 });

@@ -21,7 +21,10 @@ export function createApp() {
 
   app.use(
     helmetFn({
-      crossOriginResourcePolicy: { policy: 'cross-origin' }
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+      hsts: { maxAge: 31536000, includeSubDomains: true },
+      frameguard: { action: 'deny' }
     })
   );
 
@@ -43,7 +46,7 @@ export function createApp() {
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Idempotency-Key']
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Idempotency-Key', 'X-Device-Id']
     })
   );
 

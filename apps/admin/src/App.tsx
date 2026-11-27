@@ -3,6 +3,7 @@ import {
   Activity,
   BookOpen,
   CalendarDays,
+  Compass,
   ExternalLink,
   FileCode2,
   FolderOpen,
@@ -16,6 +17,7 @@ import {
   Navigation,
   Settings,
   Shield,
+  ShieldCheck,
   Sparkles,
   Users,
   X
@@ -32,6 +34,7 @@ import { GalleryManagerPage } from './pages/GalleryManagerPage';
 import { EventsActivitiesPage } from './pages/EventsActivitiesPage';
 import { BlogManagerPage } from './pages/BlogManagerPage';
 import { DonationsPage, InboxAndAuditPage } from './pages/DonationsInboxPage';
+import { SecurityDevicesPage } from './pages/SecurityDevicesPage';
 
 interface AdminUser {
   id: string;
@@ -45,7 +48,7 @@ const NAV_ITEMS = [
   { id: 'pages', label: 'Pages, Hero & SEO', shortLabel: 'Pages', icon: FileCode2, group: 'Content CMS' },
   { id: 'events', label: 'Events Management', shortLabel: 'Events', icon: CalendarDays, group: 'Content CMS' },
   { id: 'gallery', label: 'Gallery Folders', shortLabel: 'Gallery', icon: FolderOpen, group: 'Media & Blog' },
-  { id: 'donations', label: 'Donations & Razorpay', shortLabel: 'Donate', icon: IndianRupee, group: 'Operations' },
+  { id: 'donations', label: 'Donations & Payments', shortLabel: 'Donate', icon: IndianRupee, group: 'Operations' },
   // Remaining items live in the Desktop Sidebar AND Mobile Menubar Drawer
   { id: 'settings', label: 'Site Settings & Brand', shortLabel: 'Settings', icon: Settings, group: 'Content CMS' },
   { id: 'navigation', label: 'Menus & Marquee', shortLabel: 'Menus', icon: Navigation, group: 'Content CMS' },
@@ -55,17 +58,28 @@ const NAV_ITEMS = [
   { id: 'team', label: 'Team & Trustees', shortLabel: 'Team', icon: Users, group: 'Media & Blog' },
   { id: 'enquiries', label: 'Contact Enquiries', shortLabel: 'Enquiries', icon: Inbox, group: 'Operations' },
   { id: 'volunteers', label: 'Volunteers', shortLabel: 'Volunteers', icon: Heart, group: 'Operations' },
+  { id: 'security', label: 'Security & Devices', shortLabel: 'Security', icon: ShieldCheck, group: 'Security' },
   { id: 'audit', label: 'Audit Logs', shortLabel: 'Audit', icon: Activity, group: 'Security' },
   { id: 'users', label: 'Admin Roles', shortLabel: 'Roles', icon: Shield, group: 'Security' }
 ];
 
+const VALID_TAB_IDS = new Set(NAV_ITEMS.map((item) => item.id));
 const MOBILE_BOTTOM_IDS = new Set(['overview', 'pages', 'events', 'gallery', 'donations']);
+
+function resolveRouteTab(pathname: string): string | null {
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  if (clean === '/') return 'overview';
+  const segment = clean.slice(1);
+  return VALID_TAB_IDS.has(segment) ? segment : null;
+}
 
 export default function App() {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<string | null>(() =>
+    typeof window !== 'undefined' ? resolveRouteTab(window.location.pathname) : 'overview'
+  );
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toast, setToast] = useState<{ text: string; isErr?: boolean } | null>(null);
 
@@ -75,6 +89,18 @@ export default function App() {
       setTimeout(() => setToast(null), 5000);
     }
   };
+
+  function navigateTab(tabId: string) {
+    const safeTab = VALID_TAB_IDS.has(tabId) ? tabId : 'overview';
+    setActiveTab(safeTab);
+    setSidebarOpen(false);
+    if (typeof window !== 'undefined') {
+      const targetPath = safeTab === 'overview' ? '/' : `/${safeTab}`;
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState(null, '', targetPath);
+      }
+    }
+  }
 
   async function verifySession() {
     setAuthError('');
@@ -102,19 +128,39 @@ export default function App() {
 
   useEffect(() => {
     verifySession();
-    const handleExpired = () => {
+
+    const onPopState = () => {
+      setActiveTab(resolveRouteTab(window.location.pathname));
+    };
+    window.addEventListener('popstate', onPopState);
+
+    const handleExpired = (evt: Event) => {
+      const custom = evt as CustomEvent<{ message?: string; code?: string } | string | undefined>;
+      const detail = custom.detail;
+      const msg = typeof detail === 'string' ? detail : detail?.message;
+      const code = typeof detail === 'object' && detail ? detail.code : undefined;
+
+      if (code === 'SESSION_REVOKED' && isSupabaseConfigured()) {
+        getSupabaseClient().auth.signOut({ scope: 'local' }).catch(() => {});
+      }
       setAdminUser(null);
-      setAuthError('Your session expired. Please sign in again.');
+      setAuthError(msg || 'Your session expired. Please sign in again.');
     };
     window.addEventListener('ilangathir:session-expired', handleExpired);
+
     if (!isSupabaseConfigured()) {
-      return () => window.removeEventListener('ilangathir:session-expired', handleExpired);
+      return () => {
+        window.removeEventListener('popstate', onPopState);
+        window.removeEventListener('ilangathir:session-expired', handleExpired);
+      };
     }
+
     const supabase = getSupabaseClient();
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) setAdminUser(null);
     });
     return () => {
+      window.removeEventListener('popstate', onPopState);
       window.removeEventListener('ilangathir:session-expired', handleExpired);
       sub.subscription.unsubscribe();
     };
@@ -123,23 +169,52 @@ export default function App() {
   async function handleSignOut() {
     try {
       const supabase = getSupabaseClient();
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
     } catch {
       // ignore
     }
     setAdminUser(null);
+    setAuthError('');
   }
 
   if (checkingAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F4]">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-200 border-t-brand-600" />
       </div>
     );
   }
 
+  if (activeTab === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white p-4">
+        <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+            <Compass className="h-7 w-7" />
+          </div>
+          <p className="mt-4 text-xs font-extrabold uppercase tracking-widest text-brand-700">
+            404 — Page Not Found
+          </p>
+          <h1 className="mt-2 text-2xl font-extrabold text-slate-900">
+            Admin page not found
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">
+            The requested admin route does not exist or has not been created.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigateTab('overview')}
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700"
+          >
+            {adminUser ? 'Go to Dashboard' : 'Go to Sign In'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!adminUser) {
-    return <LoginPage onSuccess={verifySession} externalError={authError} />;
+    return <LoginPage onSuccess={verifySession} onSignOut={handleSignOut} externalError={authError} />;
   }
 
   const currentNav = NAV_ITEMS.find((n) => n.id === activeTab) || NAV_ITEMS[0];
@@ -147,7 +222,7 @@ export default function App() {
   const groups = ['Workspace', 'Content CMS', 'Media & Blog', 'Operations', 'Security'];
 
   return (
-    <div className="flex min-h-screen bg-[#FAF8F4]">
+    <div className="flex min-h-screen bg-slate-50">
       {/* Mobile Menu Drawer Backdrop */}
       {sidebarOpen && (
         <div
@@ -192,10 +267,7 @@ export default function App() {
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() => {
-                          setActiveTab(item.id);
-                          setSidebarOpen(false);
-                        }}
+                        onClick={() => navigateTab(item.id)}
                         className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-xs font-semibold transition ${
                           active
                             ? 'bg-brand-600 text-white shadow'
@@ -236,21 +308,21 @@ export default function App() {
 
       {/* Main Content */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-stone-200/90 bg-white/95 px-4 py-3 backdrop-blur-xl sm:px-8">
-          {/* Mobile Header: Left Menu (all other sections) | Center Logo | Right Profile */}
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-xl sm:px-8">
+          {/* Mobile Header */}
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 lg:hidden">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open admin menu"
-              className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-stone-200 bg-[#FAF8F4] px-3 text-xs font-bold text-slate-800"
+              className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-800"
             >
               <Menu className="h-4 w-4" />
               <span className="hidden min-[360px]:inline">More</span>
             </button>
 
-            <div className="flex items-center justify-center gap-2 min-w-0">
-              <img src="/ilangathir-logo.jpg" alt="" className="h-8 w-8 rounded-full border border-stone-200 object-cover shrink-0" />
+            <div className="flex min-w-0 items-center justify-center gap-2">
+              <img src="/ilangathir-logo.jpg" alt="" className="h-8 w-8 shrink-0 rounded-full border border-slate-200 object-cover" />
               <div className="min-w-0 text-center min-[380px]:text-left">
                 <p className="truncate text-xs font-extrabold text-slate-900">{currentNav.label}</p>
                 <p className="text-[10px] font-bold uppercase text-brand-700">{currentNav.group}</p>
@@ -265,11 +337,16 @@ export default function App() {
           {/* Desktop Header */}
           <div className="hidden items-center justify-between gap-4 lg:flex">
             <div className="min-w-0">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-amber-700">{currentNav.group}</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-700">{currentNav.group}</p>
               <h1 className="truncate text-xl font-extrabold text-slate-900">{currentNav.label}</h1>
             </div>
 
-            <div className="flex items-center gap-2.5 rounded-full border border-stone-200 bg-[#FAF8F4] px-3.5 py-1.5">
+            <button
+              type="button"
+              onClick={() => navigateTab('security')}
+              className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 transition hover:border-brand-300"
+              title="Manage Security & Active Sessions"
+            >
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">
                 {adminUser.email.slice(0, 2).toUpperCase()}
               </span>
@@ -277,11 +354,11 @@ export default function App() {
                 <p className="text-xs font-bold text-slate-900">{adminUser.email}</p>
                 <p className="text-[10px] font-semibold uppercase text-brand-700">{adminUser.role}</p>
               </div>
-            </div>
+            </button>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl flex-1 p-4 pb-24 sm:p-8 lg:pb-10">
+        <main className="mx-auto w-full max-w-[1400px] flex-1 p-4 pb-24 sm:p-8 lg:pb-10">
           {toast && (
             <div
               role={toast.isErr ? 'alert' : 'status'}
@@ -303,7 +380,7 @@ export default function App() {
             </div>
           )}
 
-          {activeTab === 'overview' && <OverviewPage onNavigate={setActiveTab} />}
+          {activeTab === 'overview' && <OverviewPage onNavigate={navigateTab} />}
           {activeTab === 'settings' && <SiteSettingsPage onNotify={notify} />}
           {activeTab === 'pages' && <PagesSeoPage onNotify={notify} />}
           {activeTab === 'navigation' && <NavigationMarqueePage onNotify={notify} />}
@@ -316,15 +393,16 @@ export default function App() {
           {activeTab === 'donations' && <DonationsPage onNotify={notify} />}
           {activeTab === 'enquiries' && <InboxAndAuditPage mode="enquiries" onNotify={notify} />}
           {activeTab === 'volunteers' && <InboxAndAuditPage mode="volunteers" onNotify={notify} />}
+          {activeTab === 'security' && <SecurityDevicesPage onNotify={notify} />}
           {activeTab === 'audit' && <InboxAndAuditPage mode="audit" onNotify={notify} />}
           {activeTab === 'users' && <InboxAndAuditPage mode="users" onNotify={notify} />}
         </main>
       </div>
 
-      {/* Mobile Floating Bottom Navbar (5 Primary Admin Sections) */}
+      {/* Mobile Floating Bottom Navbar */}
       <nav
         aria-label="Mobile admin bottom navigation"
-        className="fixed bottom-3 left-2 right-2 z-40 mx-auto max-w-md rounded-2xl border border-stone-200/90 bg-white/95 px-1 py-1.5 shadow-[0_12px_34px_rgba(8,16,48,0.16)] backdrop-blur-xl lg:hidden"
+        className="fixed bottom-3 left-2 right-2 z-40 mx-auto max-w-md rounded-2xl border border-slate-200 bg-white/95 px-1 py-1.5 shadow-[0_12px_34px_rgba(8,16,48,0.16)] backdrop-blur-xl lg:hidden"
       >
         <ul className="grid grid-cols-5 items-stretch gap-1">
           {primaryBottomItems.map((item) => {
@@ -334,11 +412,11 @@ export default function App() {
               <li key={item.id} className="min-w-0">
                 <button
                   type="button"
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => navigateTab(item.id)}
                   className={`flex w-full flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-center transition ${
                     active
                       ? 'bg-brand-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:bg-[#FAF8F4] hover:text-slate-900'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" strokeWidth={2.2} />

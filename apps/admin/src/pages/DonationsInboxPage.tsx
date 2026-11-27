@@ -240,15 +240,23 @@ export function InboxAndAuditPage({
   useEffect(load, [mode]);
 
   async function updateStatus(id: string, status: string) {
-    await adminApi(`/${mode}/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
-    onNotify('Status updated.');
-    load();
+    try {
+      await adminApi(`/${mode}/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+      onNotify('Status updated.');
+      load();
+    } catch (err) {
+      onNotify(err instanceof Error ? err.message : 'Failed to update status.', true);
+    }
   }
 
   async function updateUserRole(id: string, role: string, isActive: boolean) {
-    await adminApi(`/users/${id}`, { method: 'PATCH', body: JSON.stringify({ role, is_active: isActive }) });
-    onNotify('Admin permissions updated.');
-    load();
+    try {
+      await adminApi(`/users/${id}`, { method: 'PATCH', body: JSON.stringify({ role, is_active: isActive }) });
+      onNotify('Admin permissions updated.');
+      load();
+    } catch (err) {
+      onNotify(err instanceof Error ? err.message : 'Failed to update admin permissions.', true);
+    }
   }
 
   if (loading) return <div className="h-48 animate-pulse rounded-2xl bg-slate-200" />;

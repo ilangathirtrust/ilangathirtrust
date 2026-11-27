@@ -11,6 +11,7 @@ import {
 } from '@ilangathir/shared';
 import { createApp } from '../src/index.js';
 import { apiCache, withCache } from '../src/services/cache.js';
+import { extractJwtSessionHash, parseDeviceMetadata } from '../src/services/device.js';
 import {
   verifyRazorpayPaymentSignature,
   verifyRazorpayWebhookSignature
@@ -122,6 +123,8 @@ test('API server enforces auth on /api/admin/* and exposes /api/health', async (
   try {
     const healthRes = await fetch(`http://127.0.0.1:${port}/api/health`);
     assert.equal(healthRes.status, 200);
+    assert.equal(healthRes.headers.get('x-frame-options'), 'DENY');
+    assert.equal(healthRes.headers.get('referrer-policy'), 'strict-origin-when-cross-origin');
     const healthJson = (await healthRes.json()) as { status: string; service: string };
     assert.equal(healthJson.status, 'ok');
     assert.equal(healthJson.service, 'ilangathir-api');
@@ -148,4 +151,31 @@ test('API server enforces auth on /api/admin/* and exposes /api/health', async (
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
+});
+
+test('Device metadata parser identifies desktop/mobile browsers and geo headers cleanly', () => {
+  const desktopReq = {
+    headers: {
+      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36',
+      'x-forwarded-for': '203.0.113.42, 10.0.0.1',
+      'x-vercel-ip-city': 'Dindigul',
+      'x-vercel-ip-country-region': 'TN',
+      'x-vercel-ip-country': 'IN',
+      'x-device-id': 'dev_abc123456789'
+    },
+    ip: '127.0.0.1'
+  } as unknown as import('express').Request;
+
+  const meta = parseDeviceMetadata(desktopReq);
+  assert.equal(meta.deviceType, 'desktop');
+  assert.equal(meta.browser, 'Chrome');
+  assert.equal(meta.os, 'Windows');
+  assert.equal(meta.deviceName, 'Chrome on Windows');
+  assert.equal(meta.ipAddress, '203.0.113.42');
+  assert.equal(meta.geoLabel, 'Dindigul, TN, IN');
+  assert.equal(meta.deviceId, 'dev_abc123456789');
+
+  const h1 = extractJwtSessionHash('hdr.eyJzZXNzaW9uX2lkIjoic2VzXzEifQ.sig', 'dev_1');
+  const h2 = extractJwtSessionHash('hdr.eyJzZXNzaW9uX2lkIjoic2VzXzIifQ.sig', 'dev_1');
+  assert.notEqual(h1, h2);
 });

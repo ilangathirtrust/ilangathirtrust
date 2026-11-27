@@ -1,5 +1,24 @@
 import { API_URL, getSupabaseClient } from './supabase';
 
+export function getOrCreateDeviceId(): string {
+  if (typeof window === 'undefined') return 'server';
+  const storageKey = 'ilangathir_device_id';
+  try {
+    let existing = localStorage.getItem(storageKey);
+    if (!existing || existing.length < 12) {
+      const rand =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID().replace(/-/g, '')
+          : `${Date.now()}${Math.random().toString(36).slice(2, 12)}`;
+      existing = `dev_${rand}`;
+      localStorage.setItem(storageKey, existing);
+    }
+    return existing;
+  } catch {
+    return 'dev_session_fallback';
+  }
+}
+
 export class AdminApiError extends Error {
   status: number;
   code?: string;
@@ -65,6 +84,7 @@ export async function adminApi<T = unknown>(path: string, options: RequestInit =
   const isFormData = options.body instanceof FormData;
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
+    'X-Device-Id': getOrCreateDeviceId(),
     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...((options.headers as Record<string, string>) || {})
   };
@@ -94,8 +114,15 @@ export async function adminApi<T = unknown>(path: string, options: RequestInit =
   }
 
   if (!res.ok) {
-    if (res.status === 401 && path !== '/me' && typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('ilangathir:session-expired'));
+    if (res.status === 401 && (path !== '/me' || json.code === 'SESSION_REVOKED') && typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('ilangathir:session-expired', {
+          detail: {
+            message: typeof json.error === 'string' ? json.error : undefined,
+            code: typeof json.code === 'string' ? json.code : undefined
+          }
+        })
+      );
     }
     const serverMsg = typeof json.error === 'string' && json.error.trim() ? json.error.trim() : '';
     const fieldMsg = firstIssueMessage(json.issues);
