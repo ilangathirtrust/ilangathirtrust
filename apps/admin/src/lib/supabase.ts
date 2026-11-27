@@ -21,7 +21,7 @@ export const API_URL = (
 
 export const PUBLIC_SITE_URL = (
   import.meta.env.VITE_PUBLIC_SITE_URL ||
-  (import.meta.env.PROD ? 'https://ilangathir-web.vercel.app' : 'http://localhost:3000')
+  (import.meta.env.PROD ? 'https://www.ilangathirtrust.org' : 'http://localhost:3000')
 ).replace(/\/+$/, '');
 
 export function isSupabaseConfigured(): boolean {

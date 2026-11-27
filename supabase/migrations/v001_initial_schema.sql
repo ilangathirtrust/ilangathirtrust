@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v001: Initial Schema Setup, Extensions & Trigger Functions
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- =============================================================================
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";

@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v006: Razorpay Donations & Idempotent Webhook Processing
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- =============================================================================
 
 DO $$

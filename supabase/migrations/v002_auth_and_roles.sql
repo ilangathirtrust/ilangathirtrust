@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v002: Admin Authentication, RBAC Roles & Audit Logs
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- =============================================================================
 
 DO $$

@@ -87,7 +87,7 @@ export function LoginPage({
           />
           <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-700">
             <Lock className="h-3 w-3" />
-            admin.ilangathirtrust.com
+            admin.ilangathirtrust.org
           </span>
           <h1 className="mt-3 text-2xl font-extrabold text-slate-900">Trust Admin Console</h1>
           <p className="mt-1 text-sm text-slate-500">

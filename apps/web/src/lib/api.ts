@@ -19,7 +19,7 @@ export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'https://www.ilangathirtrust.com')
+    : 'https://www.ilangathirtrust.org')
 ).replace(/\/+$/, '');
 
 async function fetchApi<T>(path: string, revalidateSeconds = 120): Promise<T | null> {

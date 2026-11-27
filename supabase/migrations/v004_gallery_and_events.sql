@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v004: Events, Folder-Based Gallery, Media Library & Marquee
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS public.media_assets (

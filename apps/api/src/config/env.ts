@@ -25,12 +25,12 @@ export interface AppEnv {
 }
 
 const rawAllowed = process.env.ALLOWED_ORIGINS ||
-  'http://localhost:3000,http://localhost:3001,https://www.ilangathirtrust.com,https://admin.ilangathirtrust.com,https://ilangathirtrust.com,https://ilangathir-web.vercel.app,https://ilangathir-admin.vercel.app';
+  'http://localhost:3000,http://localhost:3001,https://www.ilangathirtrust.org,https://admin.ilangathirtrust.org,https://ilangathirtrust.org,https://ilangathir-web.vercel.app,https://ilangathir-admin.vercel.app';
 
 export const env: AppEnv = {
   NODE_ENV: (process.env.NODE_ENV as AppEnv['NODE_ENV']) || 'development',
   API_PORT: Number(process.env.API_PORT || process.env.PORT || 4000),
-  ROOT_DOMAIN: process.env.ROOT_DOMAIN || 'ilangathirtrust.com',
+  ROOT_DOMAIN: process.env.ROOT_DOMAIN || 'ilangathirtrust.org',
   PUBLIC_SITE_URL: process.env.PUBLIC_SITE_URL || 'http://localhost:3000',
   ADMIN_SITE_URL: process.env.ADMIN_SITE_URL || 'http://localhost:3001',
   API_SITE_URL: process.env.API_SITE_URL || 'http://localhost:4000',

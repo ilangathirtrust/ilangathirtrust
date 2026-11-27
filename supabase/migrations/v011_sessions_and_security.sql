@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v011: Admin Session & Device Management + Security Event Logs
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- Run in Supabase SQL Editor with "Run without RLS"
 -- =============================================================================
 

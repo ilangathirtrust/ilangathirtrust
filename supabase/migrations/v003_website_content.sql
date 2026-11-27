@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v003: Website Content, Settings, Navigation, Versions & Forms
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS public.site_settings (

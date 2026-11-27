@@ -74,7 +74,7 @@ export function SiteFooter(props: SiteFooterProps) {
               <li><Link href="/contact" className="transition hover:text-brand-700">{ui.contact}</Link></li>
               <li>
                 <a
-                  href={process.env.NEXT_PUBLIC_ADMIN_URL || 'https://ilangathir-admin.vercel.app'}
+                  href={process.env.NEXT_PUBLIC_ADMIN_URL || 'https://admin.ilangathirtrust.org'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-slate-500 transition hover:text-brand-700"

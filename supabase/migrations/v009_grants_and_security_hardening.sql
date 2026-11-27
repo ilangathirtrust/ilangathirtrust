@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v009: Role Grants & Security Hardening
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- Run in Supabase SQL Editor with "Run without RLS"
 -- =============================================================================
 

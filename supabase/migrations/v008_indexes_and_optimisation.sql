@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v008: Indexes, Search Acceleration & Free-Plan Optimisations
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- =============================================================================
 
 -- Navigation lookup

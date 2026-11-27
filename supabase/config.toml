@@ -22,11 +22,12 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-site_url = "https://admin.ilangathirtrust.com"
+site_url = "https://admin.ilangathirtrust.org"
 additional_redirect_urls = [
   "http://localhost:3001",
-  "https://admin.ilangathirtrust.com",
-  "https://www.ilangathirtrust.com",
+  "https://admin.ilangathirtrust.org",
+  "https://www.ilangathirtrust.org",
+  "https://ilangathirtrust.org",
   "https://ilangathir-admin.vercel.app",
   "https://ilangathir-web.vercel.app"
 ]

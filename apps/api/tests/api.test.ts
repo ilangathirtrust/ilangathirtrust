@@ -148,6 +148,12 @@ test('API server enforces auth on /api/admin/* and exposes /api/health', async (
       headers: { Origin: 'https://evil-untrusted-origin.example' }
     });
     assert.equal(corsBlockedRes.status, 403);
+
+    const orgCorsRes = await fetch(`http://127.0.0.1:${port}/api/health`, {
+      headers: { Origin: 'https://www.ilangathirtrust.org' }
+    });
+    assert.equal(orgCorsRes.status, 200);
+    assert.equal(orgCorsRes.headers.get('access-control-allow-origin'), 'https://www.ilangathirtrust.org');
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }

@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v005: Blog & Article Content Management System
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS public.blog_categories (

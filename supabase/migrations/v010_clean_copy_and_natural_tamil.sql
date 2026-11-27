@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v010: Refresh Default English & Natural Everyday Tamil Copy
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- Run in Supabase SQL Editor to update seeded copy without touching uploads/donations.
 -- =============================================================================
 

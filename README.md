@@ -1,14 +1,14 @@
 # Ilangathir Trust — Full-Stack Web Platform
 
-Modern, bilingual (English & தமிழ்) full-stack web platform for **Ilangathir Trust** (`ilangathirtrust.com`), powered by **Next.js 15**, **React + Vite Admin Portal**, **Express API**, **Supabase** (PostgreSQL, Auth, Storage), **Razorpay**, and **Google Analytics 4**.
+Modern, bilingual (English & தமிழ்) full-stack web platform for **Ilangathir Trust** (`ilangathirtrust.org`), powered by **Next.js 15**, **React + Vite Admin Portal**, **Express API**, **Supabase** (PostgreSQL, Auth, Storage), **Razorpay**, and **Google Analytics 4**.
 
 ## Architecture & Domain Layout
 
 | Surface | Domain | Workspace |
 | --- | --- | --- |
-| Public Website (SSR/ISR) | `https://www.ilangathirtrust.com` (`ilangathirtrust.com` → 301 redirect) | `apps/web` |
-| Secure Admin Portal | `https://admin.ilangathirtrust.com` | `apps/admin` |
-| Backend REST & Webhook API | `https://api.ilangathirtrust.com` | `apps/api` |
+| Public Website (SSR/ISR) | `https://www.ilangathirtrust.org` (`ilangathirtrust.org` → 301 redirect) | `apps/web` |
+| Secure Admin Portal | `https://admin.ilangathirtrust.org` | `apps/admin` |
+| Backend REST & Webhook API | `https://api.ilangathirtrust.org` | `apps/api` |
 | Shared Types & Zod Schemas | Internal workspace package | `packages/shared` |
 | Database, Storage & RLS | Supabase SQL Migrations | `supabase/` |
 

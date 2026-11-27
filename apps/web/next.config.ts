@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**.supabase.co' },
-      { protocol: 'https', hostname: 'www.ilangathirtrust.com' }
+      { protocol: 'https', hostname: 'www.ilangathirtrust.org' },
+      { protocol: 'https', hostname: 'ilangathirtrust.org' }
     ]
   },
   async headers() {

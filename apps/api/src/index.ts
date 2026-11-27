@@ -29,12 +29,17 @@ export function createApp() {
   );
 
   const vercelOriginPattern = /^https:\/\/ilangathir-(?:[a-z0-9-]+-)?(web|admin)(?:-ilangathir-trust)?\.vercel\.app$/i;
+  const officialOriginPattern = /^https:\/\/(?:www\.|admin\.)?ilangathirtrust\.org$/i;
 
   app.use(
     cors({
       origin(origin, callback) {
         if (!origin) return callback(null, true);
-        if (env.ALLOWED_ORIGINS.includes(origin) || vercelOriginPattern.test(origin)) {
+        if (
+          env.ALLOWED_ORIGINS.includes(origin) ||
+          vercelOriginPattern.test(origin) ||
+          officialOriginPattern.test(origin)
+        ) {
           return callback(null, true);
         }
         return callback(

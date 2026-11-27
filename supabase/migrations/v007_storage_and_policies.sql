@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration v007: Database Row-Level Security & Storage Policies
--- Project: Ilangathir Trust (ilangathirtrust.com)
+-- Project: Ilangathir Trust (ilangathirtrust.org)
 -- =============================================================================
 
 -- Enable RLS across all public tables
