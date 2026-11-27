@@ -25,7 +25,7 @@ export interface AppEnv {
 }
 
 const rawAllowed = process.env.ALLOWED_ORIGINS ||
-  'http://localhost:3000,http://localhost:3001,https://www.ilangathirtrust.com,https://admin.ilangathirtrust.com,https://ilangathirtrust.com';
+  'http://localhost:3000,http://localhost:3001,https://www.ilangathirtrust.com,https://admin.ilangathirtrust.com,https://ilangathirtrust.com,https://ilangathir-web.vercel.app,https://ilangathir-admin.vercel.app';
 
 export const env: AppEnv = {
   NODE_ENV: (process.env.NODE_ENV as AppEnv['NODE_ENV']) || 'development',
@@ -34,7 +34,10 @@ export const env: AppEnv = {
   PUBLIC_SITE_URL: process.env.PUBLIC_SITE_URL || 'http://localhost:3000',
   ADMIN_SITE_URL: process.env.ADMIN_SITE_URL || 'http://localhost:3001',
   API_SITE_URL: process.env.API_SITE_URL || 'http://localhost:4000',
-  ALLOWED_ORIGINS: rawAllowed.split(',').map(s => s.trim()).filter(Boolean),
+  ALLOWED_ORIGINS: rawAllowed
+    .split(',')
+    .map(s => s.trim().replace(/\/+$/, ''))
+    .filter(Boolean),
   SUPABASE_URL: (process.env.SUPABASE_URL || '').trim(),
   SUPABASE_ANON_KEY: (process.env.SUPABASE_ANON_KEY || '').trim(),
   SUPABASE_SERVICE_ROLE_KEY: (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim(),
