@@ -1,4 +1,12 @@
-import rateLimit from 'express-rate-limit';
+import type { RequestHandler } from 'express';
+import * as rateLimitModule from 'express-rate-limit';
+
+type RateLimitFn = (options?: Record<string, unknown>) => RequestHandler;
+
+const rateLimit = (
+  (rateLimitModule as unknown as { default?: RateLimitFn }).default ??
+  (rateLimitModule as unknown as RateLimitFn)
+);
 
 export const publicApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
