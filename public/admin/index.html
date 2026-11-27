@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Admin Dashboard | Ilangathir Arakattalai</title>
+        <link rel="stylesheet" href="admin.css">
+    </head>
+    <body>
+        <div id="login-view" class="login-wrap">
+            <form id="login-form" class="login-card">
+                <img src="/ilangathir-arakattalai/public/admin/adminimg/ilangathir-logo.jpg" alt="Trust logo" onerror="this.src='/ilangathir-arakattalai/public/admin/adminimg/ilangathir-logo.jpg'">
+                <span class="eyebrow">ILANGATHIR ARAKATTALAI</span>
+                <h1>Admin sign in</h1>
+                <p>Sign in to manage the trust website.</p>
+                <label>Email address<input type="email" name="email" required autocomplete="username" placeholder="ilangathirtrust@gmail.com"></label>
+                <label>Password<div class="password-wrap"><input type="password" name="password" id="password" required autocomplete="current-password">
+                <button type="button" id="show-password">Show</button>
+                </div>
+                </label>
+                <button class="primary full" type="submit">Sign in securely</button>
+                <p class="notice" id="login-message" role="status"></p>
+                <a class="back" href="/">← Return to public website</a>
+            </form>
+        </div>
+        <div id="dashboard-view" class="dashboard hidden">
+            <aside class="sidebar">
+                <a class="side-brand" href="/">
+                    <img src="/ilangathir-arakattalai/public/admin/adminimg/ilangathir-logo.jpg" alt="" onerror="this.src='/ilangathir-arakattalai/public/admin/adminimg/ilangathir-logo.jpg'">
+                    <span>Ilangathir<small>Admin console</small></span>
+                </a>
+                <div class="side-label">WORKSPACE</div>
+                <button class="side-link active" data-page="overview">▦ &nbsp; Dashboard</button>
+                <button class="side-link" data-page="activities">▣ &nbsp; Activities</button>
+                <button class="side-link" data-page="news">▤ &nbsp; News & events</button>
+                <button class="side-link" data-page="gallery">▧ &nbsp; Gallery</button>
+                <button class="side-link" data-page="team">♙ &nbsp; Team members</button>
+                <div class="side-label">INBOX</div>
+                <button class="side-link" data-page="enquiries">✉ &nbsp; Contact enquiries</button>
+                <button class="side-link" data-page="volunteers">♡ &nbsp; Volunteer applications</button>
+                <div class="side-bottom">
+                    <a href="/ilangathir-arakattalai/public/index.html">↗ View website</a>
+                    <button id="logout">⇥ Sign out</button>
+                </div>
+            </aside>
+            <main class="admin-main">
+                <header class="admin-top">
+                    <button id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+                    <div>
+                        <small>ILANGATHIR ARAKKATTALAI</small>
+                        <h2 id="page-title">Dashboard overview</h2>
+                    </div>
+                    <div class="admin-user">
+                        <span class="avatar">IA</span>
+                        <span>
+                            <b id="admin-email">Administrator</b>
+                            <small>Authorized access</small>
+                        </span>
+                    </div>
+                </header>
+                <div class="admin-content">
+                    <div id="notice" class="notice" role="status"></div>
+                    <section id="overview-page">
+                        <div class="welcome"><div>
+                            <span class="eyebrow">OVERVIEW</span>
+                            <h1>Welcome back</h1>
+                            <p>Manage published content and review incoming messages.</p>
+                        </div>
+                        <a class="primary button-link" href="/">View public site ↗</a>
+                    </div>
+                    <div class="stats-grid" id="stats"></div>
+                    <div class="overview-bottom">
+                    <div class="panel">
+                    <div class="panel-head">
+                    <h3>Quick actions</h3>
+                </div>
+                <div class="quick-grid">
+                    <button data-goto="activities">＋ Add activity</button>
+                    <button data-goto="news">＋ Add event &amp; banner</button>
+                    <button data-goto="gallery">＋ Upload gallery image</button>
+                    <button data-goto="team">＋ Add team member</button>
+                </div>
+            </div>
+            <div class="panel checklist">
+            <div class="panel-head">
+                <h3>Before publishing</h3>
+            </div>
+            <p>✓ Verify names, dates, and contact details</p>
+            <p>✓ Use real, approved trust photographs</p>
+            <p>✓ Confirm activity information with the trust</p>
+            <p>✓ Keep private enquiries confidential</p>
+        </div>
+    </div>
+</section>
+<section id="content-page" class="hidden">
+    <div class="toolbar">
+        <p id="page-description">Manage website entries.</p>
+        <button id="add-new" class="primary">＋ Add new</button>
+    </div>
+    <div class="panel table-panel">
+        <div class="table-tools">
+            <input id="table-search" type="search" placeholder="Search entries...">
+            <span id="entry-count"></span>
+        </div>
+        <div class="table-scroll">
+            <table><thead id="table-head"></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+        <p id="empty-state" class="empty hidden">No entries yet. Use “Add new” to create one.</p>
+    </div>
+</section>
+</div>
+</main>
+</div>
+<div id="editor-modal" class="modal hidden">
+    <div class="modal-card">
+        <div class="modal-head">
+            <h3 id="modal-title">Add entry</h3>
+            <button id="close-modal" aria-label="Close">×</button>
+        </div>
+        <form id="editor-form">
+            <div id="editor-fields" class="editor-fields">
+
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="secondary" id="cancel-editor">Cancel</button>
+                <button type="submit" class="primary">Save changes</button>
+            </div>
+            <p id="editor-message" class="notice"></p>
+        </form>
+    </div>
+</div>
+<script src="admin.js" defer></script>
+</body>
+</html>

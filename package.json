@@ -1,0 +1,24 @@
+{
+  "name": "ilangathir-arakattalai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack trust website with an admin content dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch-path=server.js server.js",
+    "build": "node --check server.js && node --check public/app.js && node --check public/translations.js && node --check public/admin/admin.js && node -e \"console.log('Build verified: all server and public assets ready.')\"",
+    "create-admin": "node scripts/create-admin.js"
+  },
+  "dependencies": {
+    "bcryptjs":"^2.4.3",
+    "cookie-parser":"^1.4.6",
+    "dotenv":"^16.4.5",
+    "express":"^4.21.2",
+    "express-rate-limit":"^7.5.0",
+    "helmet":"^8.0.0",
+    "jsonwebtoken":"^9.0.2",
+    "mysql2":"^3.11.5",
+    "multer":"^1.4.5-lts.1"
+  }
+}
