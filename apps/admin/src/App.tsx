@@ -213,6 +213,10 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    scrollPageToTop();
+  }, [activeTab]);
+
   async function handleInstallApp() {
     if (!installPrompt) return;
     await installPrompt.prompt();
@@ -286,10 +290,6 @@ export default function App() {
 
   const allowedNavItems = NAV_ITEMS.filter((n) => n.roles.includes(adminUser.role));
   const resolvedActive = allowedNavItems.some((n) => n.id === activeTab) ? activeTab! : 'overview';
-
-  useEffect(() => {
-    scrollPageToTop();
-  }, [resolvedActive]);
   const currentNav = allowedNavItems.find((n) => n.id === resolvedActive) || allowedNavItems[0];
   const primaryBottomItems = MOBILE_BOTTOM_IDS
     .map((id) => allowedNavItems.find((n) => n.id === id))

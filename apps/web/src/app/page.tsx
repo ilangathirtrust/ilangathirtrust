@@ -11,7 +11,7 @@ import {
   Target,
   Users
 } from 'lucide-react';
-import { isDonationsEnabled, TRUST_INFO } from '@ilangathir/shared';
+import { isDonationsEnabled } from '@ilangathir/shared';
 import { getBootstrap } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
@@ -190,7 +190,7 @@ export default async function HomePage({
                   {lang === 'ta' ? 'பதிவு பெற்ற அறக்கட்டளை' : 'Registered Trust'}
                 </p>
                 <p className="mt-0.5 text-xs font-medium text-sand-200/90">
-                  Reg: {TRUST_INFO.registrationNumber} • PAN: {TRUST_INFO.panNumber}
+                  {lang === 'ta' ? 'V. கல்லுப்பட்டி, திண்டுக்கல்' : 'V. Kallupatti, Dindigul'}
                 </p>
               </div>
               <div className="min-w-0">

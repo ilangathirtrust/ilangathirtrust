@@ -127,7 +127,7 @@ export const uiDict = {
     refundPolicy: 'Refund Policy',
     followUs: 'Connect With Us',
     allRightsReserved: 'All rights reserved.',
-    trustNotice: 'Reg. No: Book - 4/47/2024 • PAN: AACT13541A • Dindigul, Tamil Nadu'
+    trustNotice: 'Registered Charitable Trust • Dindigul, Tamil Nadu'
   },
   ta: {
     brandName: 'இளங்கதிர் அறக்கட்டளை',
@@ -255,7 +255,7 @@ export const uiDict = {
     refundPolicy: 'நன்கொடை ரத்து கொள்கை',
     followUs: 'இணைந்திருக்க',
     allRightsReserved: 'அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.',
-    trustNotice: 'பதிவு எண்: Book - 4/47/2024 • PAN: AACT13541A • திண்டுக்கல், தமிழ்நாடு'
+    trustNotice: 'பதிவு பெற்ற அறக்கட்டளை • திண்டுக்கல், தமிழ்நாடு'
   }
 } as const;
 
