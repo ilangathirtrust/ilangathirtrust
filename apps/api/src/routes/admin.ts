@@ -53,6 +53,56 @@ adminRouter.get('/me', (req, res) => {
   res.json({ admin: req.admin });
 });
 
+async function computeDashboardSummaryFallback(supabase: ReturnType<typeof getSupabaseAdmin>) {
+  const today = new Date().toISOString().slice(0, 10);
+  const [
+    paidDonRes,
+    pendingDonRes,
+    failedDonRes,
+    actRes,
+    upcomingRes,
+    pastRes,
+    pubBlogRes,
+    draftBlogRes,
+    foldersRes,
+    itemsRes,
+    enqRes,
+    volRes
+  ] = await Promise.all([
+    supabase.from('donations').select('amount_paise').eq('status', 'paid'),
+    supabase.from('donations').select('id', { count: 'exact', head: true }).in('status', ['created', 'pending']),
+    supabase.from('donations').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
+    supabase.from('activities').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published').gte('event_date', today),
+    supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published').lt('event_date', today),
+    supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+    supabase.from('gallery_folders').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    supabase.from('gallery_items').select('id', { count: 'exact', head: true }).eq('is_visible', true),
+    supabase.from('contact_enquiries').select('id', { count: 'exact', head: true }).eq('status', 'new'),
+    supabase.from('volunteer_applications').select('id', { count: 'exact', head: true }).eq('status', 'new')
+  ]);
+
+  const paidRows = paidDonRes.data || [];
+  const totalPaise = paidRows.reduce((acc, row) => acc + (Number((row as { amount_paise?: number }).amount_paise) || 0), 0);
+
+  return {
+    total_donations_paise: totalPaise,
+    paid_donations_count: paidRows.length,
+    pending_donations_count: pendingDonRes.count || 0,
+    failed_donations_count: failedDonRes.count || 0,
+    published_activities: actRes.count || 0,
+    upcoming_events: upcomingRes.count || 0,
+    past_events: pastRes.count || 0,
+    published_blogs: pubBlogRes.count || 0,
+    draft_blogs: draftBlogRes.count || 0,
+    gallery_folders: foldersRes.count || 0,
+    gallery_items: itemsRes.count || 0,
+    new_enquiries: enqRes.count || 0,
+    new_volunteers: volRes.count || 0
+  };
+}
+
 adminRouter.get('/dashboard', async (_req, res, next) => {
   try {
     const supabase = getSupabaseAdmin();
@@ -85,11 +135,18 @@ adminRouter.get('/dashboard', async (_req, res, next) => {
         .maybeSingle()
     ]);
 
-    if (summaryRes.error) throw summaryRes.error;
+    let summaryStats = summaryRes.data;
+    if (summaryRes.error) {
+      if (summaryRes.error.code === '42501') {
+        summaryStats = await computeDashboardSummaryFallback(supabase);
+      } else {
+        throw summaryRes.error;
+      }
+    }
     const donationJson = donationCfgRes.data?.json_value as Record<string, unknown> | null | undefined;
 
     res.json({
-      stats: summaryRes.data,
+      stats: summaryStats,
       donationsEnabled: donationJson?.enabled !== false,
       recentDonations: donationsRes.data || [],
       recentEvents: eventsRes.data || [],

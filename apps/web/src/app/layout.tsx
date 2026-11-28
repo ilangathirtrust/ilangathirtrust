@@ -74,6 +74,7 @@ export const metadata: Metadata = {
     ]
   },
   other: {
+    'mobile-web-app-capable': 'yes',
     'msapplication-TileImage': '/logos/icon-144.png',
     'msapplication-TileColor': '#13294B'
   }

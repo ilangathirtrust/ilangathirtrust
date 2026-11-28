@@ -24,8 +24,12 @@ export interface AppEnv {
   API_CACHE_TTL_SECONDS: number;
 }
 
-const rawAllowed = process.env.ALLOWED_ORIGINS ||
-  'http://localhost:3000,http://localhost:3001,https://www.ilangathirtrust.org,https://admin.ilangathirtrust.org,https://ilangathirtrust.org,https://ilangathir-web.vercel.app,https://ilangathir-admin.vercel.app';
+const defaultAllowedOrigins =
+  process.env.NODE_ENV === 'production'
+    ? 'https://www.ilangathirtrust.org,https://admin.ilangathirtrust.org,https://ilangathirtrust.org'
+    : 'http://localhost:3000,http://localhost:3001,https://www.ilangathirtrust.org,https://admin.ilangathirtrust.org,https://ilangathirtrust.org';
+
+const rawAllowed = process.env.ALLOWED_ORIGINS || defaultAllowedOrigins;
 
 export const env: AppEnv = {
   NODE_ENV: (process.env.NODE_ENV as AppEnv['NODE_ENV']) || 'development',
@@ -36,7 +40,7 @@ export const env: AppEnv = {
   API_SITE_URL: process.env.API_SITE_URL || 'http://localhost:4000',
   ALLOWED_ORIGINS: rawAllowed
     .split(',')
-    .map(s => s.trim().replace(/\/+$/, ''))
+    .map((s) => s.trim().replace(/\/+$/, '').toLowerCase())
     .filter(Boolean),
   SUPABASE_URL: (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, ''),
   SUPABASE_ANON_KEY: (process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || '').trim(),

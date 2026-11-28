@@ -151,6 +151,11 @@ test('API server enforces auth on /api/admin/* and exposes /api/health', async (
     });
     assert.equal(corsBlockedRes.status, 403);
 
+    const unlistedVercelCorsRes = await fetch(`http://127.0.0.1:${port}/api/health`, {
+      headers: { Origin: 'https://ilangathir-unlisted-preview-admin.vercel.app' }
+    });
+    assert.equal(unlistedVercelCorsRes.status, 403);
+
     const orgCorsRes = await fetch(`http://127.0.0.1:${port}/api/health`, {
       headers: { Origin: 'https://www.ilangathirtrust.org' }
     });

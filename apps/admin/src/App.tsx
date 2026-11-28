@@ -264,10 +264,10 @@ export default function App() {
       {/* Desktop Sidebar & Mobile Menubar Drawer */}
       <aside
         aria-label="Admin navigation menu"
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-brand-950 text-slate-200 shadow-2xl transition-transform duration-200 lg:static lg:w-64 lg:translate-x-0 lg:shadow-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-brand-950 text-slate-200 shadow-2xl transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:translate-x-0 lg:shadow-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
       >
-        <div className="flex items-center justify-between gap-2 border-b border-white/10 px-5 py-4">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-5 py-4">
           <div className="min-w-0">
             <img src="/logos/logo-white.png" alt="Ilangathir Trust" className="h-9 w-auto object-contain object-left" />
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-saffron-400">Operations Console</p>
@@ -277,7 +277,7 @@ export default function App() {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+        <nav className="admin-sidebar-scroll min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-4">
           {groups.map((grp) => {
             const grpItems = NAV_ITEMS.filter((i) => i.group === grp);
             return (
