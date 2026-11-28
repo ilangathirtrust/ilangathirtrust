@@ -3,6 +3,7 @@ import { Download, Loader2, Lock, Search, Shield, ShieldAlert, ShieldCheck, Tras
 import type { AdminRole } from '@ilangathir/shared';
 import { adminApi } from '../lib/api';
 import { useAdminUi } from '../lib/admin-ui';
+import { DonationsSkeleton, InboxUsersSkeleton } from '../components/PageSkeletons';
 
 const PROTECTED_OWNER_EMAIL = 'ilangathirtrust@gmail.com';
 
@@ -24,7 +25,15 @@ interface DonationRow {
   created_at: string;
 }
 
+const ROLE_LABELS_TA: Record<string, string> = {
+  super_admin: 'சூப்பர் அட்மின்',
+  admin: 'அட்மின்',
+  editor: 'எடிட்டர்',
+  visitor: 'விசிட்டர்'
+};
+
 export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
+  const { tr } = useAdminUi();
   const [rows, setRows] = useState<DonationRow[]>([]);
   const [summary, setSummary] = useState<Record<string, number>>({});
   const [donationsEnabled, setDonationsEnabled] = useState(true);
@@ -78,11 +87,11 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
       setDonationsEnabled(nextEnabled);
       onNotify(
         nextEnabled
-          ? 'Online donations enabled — Donate page and buttons are live on the website.'
-          : 'Online donations disabled — All donation pages, buttons, and links are now hidden.'
+          ? tr('Online donations enabled — Donate page and buttons are live on the website.', 'வெப்சைட்ல நன்கொடை பக்கம் இப்போ லைவ் ஆச்சுங்க.')
+          : tr('Online donations disabled — All donation pages, buttons, and links are now hidden.', 'வெப்சைட்ல நன்கொடை பட்டன், பக்கம் எல்லாம் மறைச்சாச்சுங்க.')
       );
     } catch (err) {
-      onNotify(err instanceof Error ? err.message : 'Failed to toggle donations.', true);
+      onNotify(err instanceof Error ? err.message : tr('Failed to toggle donations.', 'மாத்த முடியலைங்க.'), true);
     } finally {
       setToggling(false);
     }
@@ -114,30 +123,42 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
     URL.revokeObjectURL(url);
   }
 
+  if (loading && rows.length === 0) {
+    return <DonationsSkeleton />;
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Master Donation Acceptance Switch */}
       <div
-        className={`admin-card flex flex-col justify-between gap-4 border-2 p-5 sm:flex-row sm:items-center ${
+        className={`admin-card flex flex-col justify-between gap-4 border-2 sm:flex-row sm:items-center ${
           donationsEnabled ? 'border-emerald-200/80 bg-emerald-50/30' : 'border-amber-300 bg-amber-50/50'
         }`}
       >
-        <div className="flex items-start gap-3.5 min-w-0">
+        <div className="flex min-w-0 items-start gap-3">
           <span
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
               donationsEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'
             }`}
           >
             {donationsEnabled ? <ShieldCheck className="h-5 w-5" /> : <ShieldAlert className="h-5 w-5" />}
           </span>
           <div className="min-w-0">
-            <h2 className="text-base font-extrabold text-brand-900">
-              Accepting Online Donations: {donationsEnabled ? 'Enabled (Live)' : 'Disabled (Hidden)'}
+            <h2 className="text-sm font-extrabold text-slate-900 sm:text-base">
+              {donationsEnabled
+                ? tr('Accepting Online Donations: Enabled (Live)', 'ஆன்லைன் நன்கொடை: ஆன்-ல இருக்கு (லைவ்)')
+                : tr('Accepting Online Donations: Disabled (Hidden)', 'ஆன்லைன் நன்கொடை: ஆஃப்-ல இருக்கு (மறைப்பு)')}
             </h2>
             <p className="mt-1 text-xs leading-relaxed text-slate-600">
               {donationsEnabled
-                ? 'Visitors can access /donate, header/bottom-nav Donate buttons, and Razorpay checkout.'
-                : 'All donation buttons, links, mobile nav Donate tab, sitemap entry, /donate page, and payment order API are disabled.'}
+                ? tr(
+                    'Visitors can access /donate, header/bottom-nav Donate buttons, and Razorpay checkout.',
+                    'வெப்சைட் பார்வையாளர்கள் நன்கொடை பக்கத்தை பார்க்கலாம் மற்றும் பணம் அனுப்பலாம்.'
+                  )
+                : tr(
+                    'All donation buttons, links, mobile nav Donate tab, sitemap entry, /donate page, and payment order API are disabled.',
+                    'எல்லா நன்கொடை பட்டனும், லிங்க்கும், பேமெண்ட் வசதியும் இப்போ நிறுத்தி வச்சிருக்கு.'
+                  )}
             </p>
           </div>
         </div>
@@ -148,44 +169,44 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
           aria-checked={donationsEnabled}
           disabled={toggling}
           onClick={handleToggleDonations}
-          className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-bold shadow-xs transition disabled:opacity-60 ${
+          className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-xs transition disabled:opacity-60 ${
             donationsEnabled
               ? 'bg-red-600 text-white hover:bg-red-700'
               : 'bg-emerald-600 text-white hover:bg-emerald-700'
           }`}
         >
           {toggling && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>{donationsEnabled ? 'Disable Accepting Donations' : 'Enable Accepting Donations'}</span>
+          <span>{donationsEnabled ? tr('Disable Donations', 'நன்கொடை நிறுத்து') : tr('Enable Donations', 'நன்கொடை ஆன் பண்ணு')}</span>
         </button>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <div className="admin-card p-4 sm:p-5">
-          <span className="text-xs font-bold text-slate-500">Total Raised</span>
-          <p className="mt-2 text-lg font-extrabold text-emerald-700 sm:text-2xl">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="admin-card p-3.5 sm:p-4">
+          <span className="text-xs font-bold text-slate-500">{tr('Total Raised', 'மொத்த தொகை')}</span>
+          <p className="mt-1.5 text-lg font-extrabold text-emerald-700 sm:text-2xl">
             ₹{((summary.total_donations_paise || 0) / 100).toLocaleString('en-IN')}
           </p>
         </div>
-        <div className="admin-card p-4 sm:p-5">
-          <span className="text-xs font-bold text-slate-500">Successful</span>
-          <p className="mt-2 text-lg font-extrabold text-brand-900 sm:text-2xl">{summary.paid_donations_count || 0}</p>
+        <div className="admin-card p-3.5 sm:p-4">
+          <span className="text-xs font-bold text-slate-500">{tr('Successful', 'வெற்றி')}</span>
+          <p className="mt-1.5 text-lg font-extrabold text-slate-900 sm:text-2xl">{summary.paid_donations_count || 0}</p>
         </div>
-        <div className="admin-card p-4 sm:p-5">
-          <span className="text-xs font-bold text-slate-500">Pending</span>
-          <p className="mt-2 text-lg font-extrabold text-amber-600 sm:text-2xl">{summary.pending_donations_count || 0}</p>
+        <div className="admin-card p-3.5 sm:p-4">
+          <span className="text-xs font-bold text-slate-500">{tr('Pending', 'பெண்டிங்')}</span>
+          <p className="mt-1.5 text-lg font-extrabold text-amber-600 sm:text-2xl">{summary.pending_donations_count || 0}</p>
         </div>
-        <div className="admin-card p-4 sm:p-5">
-          <span className="text-xs font-bold text-slate-500">Failed</span>
-          <p className="mt-2 text-lg font-extrabold text-red-600 sm:text-2xl">{summary.failed_donations_count || 0}</p>
+        <div className="admin-card p-3.5 sm:p-4">
+          <span className="text-xs font-bold text-slate-500">{tr('Failed', 'தோல்வி')}</span>
+          <p className="mt-1.5 text-lg font-extrabold text-red-600 sm:text-2xl">{summary.failed_donations_count || 0}</p>
         </div>
       </div>
 
-      <div className="admin-card flex flex-wrap items-center gap-3 p-4">
+      <div className="admin-card flex flex-wrap items-center gap-2.5 p-3.5">
         <div className="relative min-w-0 flex-1 sm:min-w-[200px]">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="search"
-            placeholder="Search donor, receipt, order ID…"
+            placeholder={tr('Search donor, receipt, order ID…', 'பெயர், ரசீது, ஆர்டர் நம்பர் தேடு…')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && load()}
@@ -193,16 +214,16 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
           />
         </div>
         <select value={status} onChange={(e) => { setPage(1); setStatus(e.target.value); }} className="admin-input w-full sm:w-36">
-          <option value="">All Status</option>
-          <option value="paid">Paid</option>
-          <option value="created">Pending</option>
-          <option value="failed">Failed</option>
-          <option value="refunded">Refunded</option>
+          <option value="">{tr('All Status', 'எல்லா நிலையும்')}</option>
+          <option value="paid">{tr('Paid', 'செலுத்தியது')}</option>
+          <option value="created">{tr('Pending', 'பெண்டிங்')}</option>
+          <option value="failed">{tr('Failed', 'தோல்வி')}</option>
+          <option value="refunded">{tr('Refunded', 'திரும்பத் தந்தது')}</option>
         </select>
-        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="admin-input w-full sm:w-40" />
-        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="admin-input w-full sm:w-40" />
-        <button type="button" onClick={load} className="rounded-xl bg-brand-900 px-4 py-2.5 text-xs font-bold text-white">Apply</button>
-        <button type="button" onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl border border-sand-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-sand-50">
+        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="admin-input w-full sm:w-36" />
+        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="admin-input w-full sm:w-36" />
+        <button type="button" onClick={load} className="admin-btn-primary py-2.5">{tr('Apply', 'பொருத்து')}</button>
+        <button type="button" onClick={exportCsv} className="admin-btn-secondary py-2.5">
           <Download className="h-4 w-4" />
           <span>CSV</span>
         </button>
@@ -210,28 +231,28 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
 
       {/* Mobile Cards (< md) */}
       <div className="space-y-3 md:hidden">
-        {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-28 admin-skeleton rounded-2xl" />)
-        ) : rows.length === 0 ? (
-          <div className="admin-card p-8 text-center text-sm text-slate-500">No donations match your filters.</div>
+        {rows.length === 0 ? (
+          <div className="admin-card border-dashed py-10 text-center text-sm text-slate-500">
+            {tr('No donations match your filters.', 'தேடுன விவரப்படி நன்கொடை எதுவும் இல்லீங்க.')}
+          </div>
         ) : (
           rows.map((r) => (
-            <div key={r.id} className="admin-card p-4">
+            <div key={r.id} className="admin-card p-3.5">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-brand-900">{r.donor_name}</p>
+                  <p className="truncate text-sm font-bold text-slate-900">{r.donor_name}</p>
                   <p className="truncate text-xs text-slate-500">{r.donor_email}</p>
                 </div>
                 <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
-                  r.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : r.status === 'failed' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                  r.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : r.status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'
                 }`}>
                   {r.status}
                 </span>
               </div>
-              <div className="mt-3 flex items-center justify-between border-t border-sand-100 pt-2.5 text-xs">
+              <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2 text-xs">
                 <span className="font-extrabold text-slate-900">₹{(r.amount_paise / 100).toLocaleString('en-IN')} • {r.purpose}</span>
-                <button type="button" onClick={() => setSelected(r)} className="font-bold text-brand-700 hover:underline">
-                  Inspect
+                <button type="button" onClick={() => setSelected(r)} className="font-bold text-blue-600 hover:underline">
+                  {tr('Inspect', 'விவரம் பாரு')}
                 </button>
               </div>
             </div>
@@ -240,45 +261,43 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
       </div>
 
       {/* Desktop Table (>= md) */}
-      <div className="hidden overflow-x-auto rounded-2xl border border-sand-200 bg-white shadow-xs md:block">
+      <div className="hidden overflow-x-auto rounded-2xl border border-slate-200/90 bg-white shadow-xs md:block">
         <table className="w-full text-left text-xs">
-          <thead className="bg-sand-50 text-slate-500 uppercase">
+          <thead className="bg-slate-50 uppercase text-slate-500">
             <tr>
-              <th className="p-4">Receipt</th>
-              <th className="p-4">Donor</th>
-              <th className="p-4">Purpose</th>
-              <th className="p-4">Amount</th>
-              <th className="p-4">Status</th>
-              <th className="p-4">Date</th>
-              <th className="p-4 text-right">Details</th>
+              <th className="p-3.5">{tr('Receipt', 'ரசீது')}</th>
+              <th className="p-3.5">{tr('Donor', 'நன்கொடையாளர்')}</th>
+              <th className="p-3.5">{tr('Purpose', 'நோக்கம்')}</th>
+              <th className="p-3.5">{tr('Amount', 'தொகை')}</th>
+              <th className="p-3.5">{tr('Status', 'நிலை')}</th>
+              <th className="p-3.5">{tr('Date', 'தேதி')}</th>
+              <th className="p-3.5 text-right">{tr('Details', 'விவரம்')}</th>
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr><td colSpan={7} className="p-8 text-center text-slate-500">Loading donations…</td></tr>
-            ) : rows.length === 0 ? (
-              <tr><td colSpan={7} className="p-8 text-center text-slate-500">No donations match your filters.</td></tr>
+            {rows.length === 0 ? (
+              <tr><td colSpan={7} className="p-8 text-center text-slate-500">{tr('No donations match your filters.', 'நன்கொடை விவரம் எதுவும் இல்லீங்க.')}</td></tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.id} className="border-t border-sand-100 hover:bg-sand-50/50">
-                  <td className="p-4 font-mono font-bold text-slate-800">{r.receipt_number || '—'}</td>
-                  <td className="p-4">
+                <tr key={r.id} className="border-t border-slate-100 hover:bg-slate-50/50">
+                  <td className="p-3.5 font-mono font-bold text-slate-800">{r.receipt_number || '—'}</td>
+                  <td className="p-3.5">
                     <p className="font-bold text-slate-900">{r.donor_name}</p>
                     <p className="text-slate-500">{r.donor_email}</p>
                   </td>
-                  <td className="p-4">{r.purpose}</td>
-                  <td className="p-4 font-bold text-slate-900">₹{(r.amount_paise / 100).toLocaleString('en-IN')}</td>
-                  <td className="p-4">
+                  <td className="p-3.5">{r.purpose}</td>
+                  <td className="p-3.5 font-bold text-slate-900">₹{(r.amount_paise / 100).toLocaleString('en-IN')}</td>
+                  <td className="p-3.5">
                     <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
-                      r.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : r.status === 'failed' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                      r.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : r.status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'
                     }`}>
                       {r.status}
                     </span>
                   </td>
-                  <td className="p-4 text-slate-500">{new Date(r.created_at).toLocaleDateString()}</td>
-                  <td className="p-4 text-right">
-                    <button type="button" onClick={() => setSelected(r)} className="font-bold text-brand-700 hover:underline">
-                      Inspect
+                  <td className="p-3.5 text-slate-500">{new Date(r.created_at).toLocaleDateString()}</td>
+                  <td className="p-3.5 text-right">
+                    <button type="button" onClick={() => setSelected(r)} className="font-bold text-blue-600 hover:underline">
+                      {tr('Inspect', 'விவரம் பாரு')}
                     </button>
                   </td>
                 </tr>
@@ -295,7 +314,7 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
               key={i}
               type="button"
               onClick={() => setPage(i + 1)}
-              className={`h-9 min-w-[36px] rounded-lg px-3 text-xs font-bold ${page === i + 1 ? 'bg-brand-900 text-white' : 'border border-sand-200 bg-white text-slate-700'}`}
+              className={`h-9 min-w-[36px] rounded-lg px-3 text-xs font-bold ${page === i + 1 ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-white text-slate-700'}`}
             >
               {i + 1}
             </button>
@@ -304,26 +323,26 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
       )}
 
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-sand-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-[#262A34] dark:bg-[#161920]">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
-                <img src="/logos/logo-navy-monochrome.webp" alt="Ilangathir Trust" className="h-7 w-7 object-contain" />
-                <h3 className="font-bold text-brand-900">Donation Transaction Detail</h3>
+                <img src="/logos/icon.webp" alt="Ilangathir Trust" className="h-7 w-7 object-contain" />
+                <h3 className="font-bold text-slate-900">{tr('Donation Transaction Detail', 'பரிவர்த்தனை விவரம்')}</h3>
               </div>
-              <button type="button" onClick={() => setSelected(null)} className="rounded-lg p-1 hover:bg-sand-100"><X className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setSelected(null)} className="rounded-lg p-1 hover:bg-slate-100"><X className="h-5 w-5" /></button>
             </div>
             <dl className="mt-4 space-y-2.5 text-xs">
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">Receipt</dt><dd className="font-bold">{selected.receipt_number || '—'}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">Donor</dt><dd className="font-bold">{selected.donor_name}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">Email</dt><dd className="break-all">{selected.donor_email}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">Phone</dt><dd>{selected.donor_phone}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">PAN</dt><dd>{selected.donor_pan || '—'}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">Amount</dt><dd className="font-bold">₹{(selected.amount_paise / 100).toLocaleString('en-IN')}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">Razorpay Order ID</dt><dd className="break-all font-mono">{selected.razorpay_order_id}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">Razorpay Payment ID</dt><dd className="break-all font-mono">{selected.razorpay_payment_id || '—'}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">Status</dt><dd className="font-bold uppercase">{selected.status}</dd></div>
-              {selected.failure_reason && <div className="flex justify-between gap-2 text-red-600"><dt>Failure Reason</dt><dd>{selected.failure_reason}</dd></div>}
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Receipt', 'ரசீது')}</dt><dd className="font-bold">{selected.receipt_number || '—'}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Donor', 'நன்கொடையாளர்')}</dt><dd className="font-bold">{selected.donor_name}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Email', 'ஈமெயில்')}</dt><dd className="break-all">{selected.donor_email}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Phone', 'போன்')}</dt><dd>{selected.donor_phone}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('PAN', 'பான் எண்')}</dt><dd>{selected.donor_pan || '—'}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Amount', 'தொகை')}</dt><dd className="font-bold">₹{(selected.amount_paise / 100).toLocaleString('en-IN')}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Razorpay Order ID', 'ரேசர்பே ஆர்டர் ஐடி')}</dt><dd className="break-all font-mono">{selected.razorpay_order_id}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Razorpay Payment ID', 'பேமெண்ட் ஐடி')}</dt><dd className="break-all font-mono">{selected.razorpay_payment_id || '—'}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Status', 'நிலை')}</dt><dd className="font-bold uppercase">{selected.status}</dd></div>
+              {selected.failure_reason && <div className="flex justify-between gap-2 text-red-600"><dt>{tr('Failure Reason', 'காரணம்')}</dt><dd>{selected.failure_reason}</dd></div>}
             </dl>
           </div>
         </div>
@@ -341,7 +360,7 @@ export function InboxAndAuditPage({
   onNotify: (msg: string, isErr?: boolean) => void;
   currentUser?: { id: string; email: string; role: AdminRole };
 }) {
-  const { tr } = useAdminUi();
+  const { lang, tr } = useAdminUi();
   const [rows, setRows] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -373,10 +392,10 @@ export function InboxAndAuditPage({
   async function updateStatus(id: string, status: string) {
     try {
       await adminApi(`/${mode}/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
-      onNotify(tr('Status updated.', 'Status Update ஆச்சு.'));
+      onNotify(tr('Status updated.', 'நிலை மாத்தியாச்சுங்க.'));
       load(true);
     } catch (err) {
-      onNotify(err instanceof Error ? err.message : 'Failed to update status.', true);
+      onNotify(err instanceof Error ? err.message : tr('Failed to update status.', 'நிலை மாத்த முடியலைங்க.'), true);
     }
   }
 
@@ -394,11 +413,11 @@ export function InboxAndAuditPage({
           role: newUser.role
         })
       });
-      onNotify(tr('New team user created.', 'புதிய User சேர்த்தாச்சு.'));
+      onNotify(tr('New team user created.', 'புது யூசர் சேர்த்தாச்சுங்க.'));
       setNewUser({ full_name: '', email: '', password: '', role: 'editor' });
       load(true);
     } catch (err) {
-      onNotify(err instanceof Error ? err.message : 'Failed to create user.', true);
+      onNotify(err instanceof Error ? err.message : tr('Failed to create user.', 'யூசர் சேர்க்க முடியலைங்க.'), true);
     } finally {
       setCreating(false);
     }
@@ -407,133 +426,126 @@ export function InboxAndAuditPage({
   async function updateUserRole(id: string, role: string, isActive: boolean) {
     try {
       await adminApi(`/users/${id}`, { method: 'PATCH', body: JSON.stringify({ role, is_active: isActive }) });
-      onNotify(tr('Admin permissions updated.', 'Role / Access Update ஆச்சு.'));
+      onNotify(tr('Admin permissions updated.', 'அனுமதி & ரோல் மாத்தியாச்சுங்க.'));
       load(true);
     } catch (err) {
-      onNotify(err instanceof Error ? err.message : 'Failed to update admin permissions.', true);
+      onNotify(err instanceof Error ? err.message : tr('Failed to update admin permissions.', 'மாத்த முடியலைங்க.'), true);
     }
   }
 
   async function deleteUser(id: string, email: string) {
-    if (!confirm(tr(`Remove "${email}" from Admin access?`, `"${email}" Access-ஐ Remove பண்ணலாமா?`))) return;
+    if (!confirm(tr(`Remove "${email}" from Admin access?`, `"${email}" அனுமதியை முழுசா நீக்கலாமா?`))) return;
     try {
       await adminApi(`/users/${id}`, { method: 'DELETE' });
-      onNotify(tr('User access removed.', 'User Access நீக்கப்பட்டது.'));
+      onNotify(tr('User access removed.', 'யூசர் அனுமதி நீக்கியாச்சுங்க.'));
       load(true);
     } catch (err) {
-      onNotify(err instanceof Error ? err.message : 'Failed to remove user.', true);
+      onNotify(err instanceof Error ? err.message : tr('Failed to remove user.', 'நீக்க முடியலைங்க.'), true);
     }
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-3 px-4 lg:px-0">
-        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 admin-skeleton rounded-2xl" />)}
-      </div>
-    );
+  if (loading && rows.length === 0) {
+    return <InboxUsersSkeleton mode={mode} />;
   }
 
   return (
-    <div className="space-y-3 lg:space-y-4">
+    <div className="space-y-3.5">
       {mode === 'users' && (
-        <>
-          {/* Add User Form (Super Admin Only) */}
-          <form onSubmit={handleCreateUser} className="admin-card space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <UserPlus className="h-5 w-5 text-brand-700" />
-                <h2 className="text-base font-bold text-brand-900">
-                  {tr('Add New Portal User (RBAC)', 'புதிய User சேர்க்க (RBAC)')}
-                </h2>
-              </div>
-              <span className="rounded-full bg-sand-100 px-3 py-1 text-[11px] font-bold text-slate-600">
-                super_admin • admin • editor • visitor
-              </span>
+        <form onSubmit={handleCreateUser} className="admin-card space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-blue-600" />
+              <h2 className="text-base font-bold text-slate-900">
+                {tr('Add New Portal User (RBAC)', 'புது யூசர் சேர் (ரோல் அனுமதி)')}
+              </h2>
             </div>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-slate-600">
+              {tr('super_admin • admin • editor • visitor', 'சூப்பர் அட்மின் • அட்மின் • எடிட்டர் • விசிட்டர்')}
+            </span>
+          </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <label className="admin-label">
-                <span>{tr('Full Name *', 'பெயர் *')}</span>
-                <input
-                  required
-                  placeholder="Full Name"
-                  value={newUser.full_name}
-                  onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
-                  className="admin-input"
-                />
-              </label>
-              <label className="admin-label">
-                <span>{tr('Email Address *', 'Email *')}</span>
-                <input
-                  type="email"
-                  required
-                  placeholder="member@ilangathirtrust.org"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  className="admin-input"
-                />
-              </label>
-              <label className="admin-label">
-                <span>{tr('Password (min 8 chars) *', 'Password (8+ எழுத்து) *')}</span>
-                <input
-                  type="password"
-                  required
-                  minLength={8}
-                  placeholder="••••••••"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  className="admin-input"
-                />
-              </label>
-              <label className="admin-label">
-                <span>{tr('Access Role *', 'Role தேர்வு *')}</span>
-                <select
-                  value={newUser.role}
-                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value as AdminRole })}
-                  className="admin-input"
-                >
-                  <option value="super_admin">super_admin ({tr('Full RBAC Control', 'முழு Control')})</option>
-                  <option value="admin">admin ({tr('Operations + Donations', 'நிர்வாகம் + Donate')})</option>
-                  <option value="editor">editor ({tr('Content CMS Only', 'Content மட்டும்')})</option>
-                  <option value="visitor">visitor ({tr('Read-Only Viewer', 'பார்க்க மட்டும்')})</option>
-                </select>
-              </label>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-              <p className="text-[11px] text-slate-500">
-                {tr(
-                  'Self role changes are locked for everyone. Primary owner (ilangathirtrust@gmail.com) is permanently Super Admin.',
-                  'யாருமே தங்களோட Role-ஐ மாத்த முடியாது. ilangathirtrust@gmail.com எப்போதும் Super Admin-ஆ தான் இருக்கும்.'
-                )}
-              </p>
-              <button
-                type="submit"
-                disabled={!canCreateUser || creating}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-900 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-45"
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="admin-label">
+              <span>{tr('Full Name *', 'முழுப் பெயர் *')}</span>
+              <input
+                required
+                placeholder={tr('Full Name', 'பெயர்')}
+                value={newUser.full_name}
+                onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
+                className="admin-input"
+              />
+            </label>
+            <label className="admin-label">
+              <span>{tr('Email Address *', 'ஈமெயில் அட்ரஸ் *')}</span>
+              <input
+                type="email"
+                required
+                placeholder="member@ilangathirtrust.org"
+                value={newUser.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                className="admin-input"
+              />
+            </label>
+            <label className="admin-label">
+              <span>{tr('Password (min 8 chars) *', 'பாஸ்வேர்டு (8+ எழுத்து) *')}</span>
+              <input
+                type="password"
+                required
+                minLength={8}
+                placeholder="••••••••"
+                value={newUser.password}
+                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                className="admin-input"
+              />
+            </label>
+            <label className="admin-label">
+              <span>{tr('Access Role *', 'ரோல் தேர்வு *')}</span>
+              <select
+                value={newUser.role}
+                onChange={(e) => setNewUser({ ...newUser, role: e.target.value as AdminRole })}
+                className="admin-input"
               >
-                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-                <span>{tr('Create User', 'User சேர்க்க')}</span>
-              </button>
-            </div>
-          </form>
-        </>
+                <option value="super_admin">{tr('super_admin (Full RBAC Control)', 'சூப்பர் அட்மின் (முழு கண்ட்ரோல்)')}</option>
+                <option value="admin">{tr('admin (Operations + Donations)', 'அட்மின் (நிர்வாகம் + நன்கொடை)')}</option>
+                <option value="editor">{tr('editor (Content CMS Only)', 'எடிட்டர் (கன்டென்ட் மட்டும்)')}</option>
+                <option value="visitor">{tr('visitor (Read-Only Viewer)', 'விசிட்டர் (பார்க்க மட்டும்)')}</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <p className="text-[11px] text-slate-500">
+              {tr(
+                'Self role changes are locked for everyone. Primary owner (ilangathirtrust@gmail.com) is permanently Super Admin.',
+                'யாருமே அவங்க சொந்த ரோலை மாத்த முடியாது. ilangathirtrust@gmail.com எப்பவும் நிரந்தர சூப்பர் அட்மின் தான்.'
+              )}
+            </p>
+            <button
+              type="submit"
+              disabled={!canCreateUser || creating}
+              className="admin-btn-primary px-5 py-2.5"
+            >
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+              <span>{tr('Create User', 'யூசர் சேர்')}</span>
+            </button>
+          </div>
+        </form>
       )}
 
       {rows.length === 0 ? (
-        <div className="admin-card border-dashed p-10 text-center text-sm text-slate-500">
-          {tr('No records available.', 'இப்போதைக்கு எந்த Record-உம் இல்லை.')}
+        <div className="admin-card border-dashed py-10 text-center text-sm text-slate-500">
+          {tr('No records available.', 'இப்போதைக்கு எந்த விவரமும் இல்லீங்க.')}
         </div>
       ) : (
         rows.map((r) => (
-          <div key={String(r.id)} className="admin-card">
+          <div key={String(r.id)} className="admin-card p-3.5 sm:p-4">
             {mode === 'audit' ? (
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="min-w-0">
                   <span className="font-bold text-slate-900">{String(r.action)}</span>{' '}
-                  <span className="text-slate-500">on</span>{' '}
-                  <span className="font-mono text-brand-700">{String(r.entity_type)}</span>
-                  <p className="mt-1 truncate text-slate-500">By: {String(r.actor_email || 'System')}</p>
+                  <span className="text-slate-500">•</span>{' '}
+                  <span className="font-mono text-blue-600">{String(r.entity_type)}</span>
+                  <p className="mt-1 truncate text-slate-500">{tr('By:', 'யார்:')} {String(r.actor_email || tr('System', 'சிஸ்டம்'))}</p>
                 </div>
                 <span className="tabular-nums text-slate-400">{new Date(String(r.created_at)).toLocaleString()}</span>
               </div>
@@ -545,6 +557,7 @@ export function InboxAndAuditPage({
                 const roleLocked = isProtectedOwner || isSelf;
                 const isActive = Boolean(r.is_active);
                 const roleStr = String(r.role);
+                const roleDisplay = lang === 'ta' ? (ROLE_LABELS_TA[roleStr] || roleStr) : roleStr;
 
                 return (
                   <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
@@ -554,28 +567,28 @@ export function InboxAndAuditPage({
                           {String(r.full_name)} ({String(r.email)})
                         </p>
                         {isProtectedOwner && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-brand-800">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-brand-700">
                             <Lock className="h-3 w-3" />
-                            {tr('Protected Owner', 'நிரந்தர Owner')}
+                            {tr('Protected Owner', 'நிரந்தர ஓனர்')}
                           </span>
                         )}
                         {isSelf && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-emerald-700">
                             <Shield className="h-3 w-3" />
-                            {tr('You (Self Locked)', 'நீங்கள்')}
+                            {tr('You (Self Locked)', 'நீங்க (மாத்த முடியாது)')}
                           </span>
                         )}
                       </div>
                       <p className="mt-0.5 text-xs text-slate-500">
-                        Role: <strong className="uppercase">{roleStr}</strong> • {isActive ? tr('Active', 'Active') : tr('Suspended', 'Suspended')}
+                        {tr('Role:', 'ரோல்:')} <strong className="uppercase">{roleDisplay}</strong> • {isActive ? tr('Active', 'செயலில்') : tr('Suspended', 'நிறுத்தம்')}
                       </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
                       {roleLocked ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-xl border border-sand-200 bg-sand-50 px-3 py-1.5 text-xs font-bold text-slate-500">
+                        <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-500">
                           <Lock className="h-3.5 w-3.5" />
-                          {roleStr}
+                          {roleDisplay}
                         </span>
                       ) : (
                         <>
@@ -584,10 +597,10 @@ export function InboxAndAuditPage({
                             onChange={(e) => updateUserRole(String(r.id), e.target.value, isActive)}
                             className="admin-input w-36 py-1.5 text-xs font-bold"
                           >
-                            <option value="super_admin">super_admin</option>
-                            <option value="admin">admin</option>
-                            <option value="editor">editor</option>
-                            <option value="visitor">visitor</option>
+                            <option value="super_admin">{tr('super_admin', 'சூப்பர் அட்மின்')}</option>
+                            <option value="admin">{tr('admin', 'அட்மின்')}</option>
+                            <option value="editor">{tr('editor', 'எடிட்டர்')}</option>
+                            <option value="visitor">{tr('visitor', 'விசிட்டர்')}</option>
                           </select>
                           <button
                             type="button"
@@ -598,13 +611,13 @@ export function InboxAndAuditPage({
                                 : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                             }`}
                           >
-                            {isActive ? tr('Suspend', 'Suspend') : tr('Activate', 'Activate')}
+                            {isActive ? tr('Suspend', 'நிறுத்து') : tr('Activate', 'இயக்கு')}
                           </button>
                           <button
                             type="button"
                             onClick={() => deleteUser(String(r.id), email)}
                             className="rounded-xl p-2 text-red-600 transition hover:bg-red-50"
-                            title={tr('Remove User', 'User-ஐ Remove பண்ணு')}
+                            title={tr('Remove User', 'யூசரை நீக்கு')}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -615,13 +628,16 @@ export function InboxAndAuditPage({
                 );
               })()
             ) : (
-              <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1 space-y-1 text-sm">
                   <p className="font-bold text-slate-900">
-                    {String(r.name || r.full_name)} • <span className="break-all text-xs font-normal text-slate-500">{String(r.email)} {r.phone ? `• ${r.phone}` : ''}</span>
+                    {String(r.name || r.full_name)} •{' '}
+                    <span className="break-all text-xs font-normal text-slate-500">
+                      {String(r.email)} {r.phone ? `• ${r.phone}` : ''}
+                    </span>
                   </p>
                   {Boolean(r.subject || r.interest) && (
-                    <p className="text-xs font-bold text-brand-700">
+                    <p className="text-xs font-bold text-blue-600">
                       {String(r.subject || `${r.interest} (${r.district})`)}
                     </p>
                   )}

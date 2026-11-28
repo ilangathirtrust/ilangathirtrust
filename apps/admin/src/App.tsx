@@ -56,26 +56,34 @@ const ALL_ROLES: AdminRole[] = ['super_admin', 'admin', 'editor', 'visitor'];
 const OPS_ROLES: AdminRole[] = ['super_admin', 'admin'];
 const OWNER_ROLES: AdminRole[] = ['super_admin'];
 
+const ROLE_LABELS_TA: Record<AdminRole, string> = {
+  super_admin: 'சூப்பர் அட்மின்',
+  admin: 'அட்மின்',
+  editor: 'எடிட்டர்',
+  visitor: 'விசிட்டர்'
+};
+
 const NAV_ITEMS = [
-  { id: 'overview', label: 'Dashboard', labelTa: 'Dashboard', shortLabel: 'Home', shortLabelTa: 'முகப்பு', icon: LayoutDashboard, group: 'Workspace', groupTa: 'பணிப்பகுதி', roles: ALL_ROLES },
-  { id: 'enquiries', label: 'Contact Enquiries', labelTa: 'Enquiries & மெசேஜ்', shortLabel: 'Enquiries', shortLabelTa: 'Enquiries', icon: Inbox, group: 'Operations', groupTa: 'நிர்வாகம்', roles: ALL_ROLES },
-  { id: 'events', label: 'Events Management', labelTa: 'Events மேலாண்மை', shortLabel: 'Events', shortLabelTa: 'Events', icon: CalendarDays, group: 'Content CMS', groupTa: 'Content மேலாண்மை', roles: ALL_ROLES },
-  { id: 'gallery', label: 'Gallery Folders', labelTa: 'Gallery ஃபோல்டர்', shortLabel: 'Gallery', shortLabelTa: 'Gallery', icon: FolderOpen, group: 'Media & Blog', groupTa: 'Media & Blog', roles: ALL_ROLES },
-  { id: 'donations', label: 'Donations & Payments', labelTa: 'நன்கொடை & Payment', shortLabel: 'Donate', shortLabelTa: 'நன்கொடை', icon: IndianRupee, group: 'Operations', groupTa: 'நிர்வாகம்', roles: OPS_ROLES },
-  { id: 'pages', label: 'Pages & Hero', labelTa: 'Pages & Banner', shortLabel: 'Pages', shortLabelTa: 'Pages', icon: FileCode2, group: 'Content CMS', groupTa: 'Content மேலாண்மை', roles: ALL_ROLES },
-  { id: 'navigation', label: 'Menus & Marquee', labelTa: 'Menu & Marquee', shortLabel: 'Menus', shortLabelTa: 'Menus', icon: Navigation, group: 'Content CMS', groupTa: 'Content மேலாண்மை', roles: ALL_ROLES },
-  { id: 'activities', label: 'Activities & Services', labelTa: 'நலப்பணிகள் & Activities', shortLabel: 'Activities', shortLabelTa: 'பணிகள்', icon: Layers, group: 'Content CMS', groupTa: 'Content மேலாண்மை', roles: ALL_ROLES },
-  { id: 'media', label: 'Media Library', labelTa: 'Media ஃபைல்கள்', shortLabel: 'Media', shortLabelTa: 'Media', icon: ImageIcon, group: 'Media & Blog', groupTa: 'Media & Blog', roles: ALL_ROLES },
-  { id: 'blogs', label: 'Blog & Articles', labelTa: 'Blog கட்டுரைகள்', shortLabel: 'Blog', shortLabelTa: 'Blog', icon: BookOpen, group: 'Media & Blog', groupTa: 'Media & Blog', roles: ALL_ROLES },
-  { id: 'team', label: 'Team & Trustees', labelTa: 'Team & அறங்காவலர்கள்', shortLabel: 'Team', shortLabelTa: 'Team', icon: Users, group: 'Media & Blog', groupTa: 'Media & Blog', roles: ALL_ROLES },
-  { id: 'volunteers', label: 'Volunteers', labelTa: 'Volunteers விண்ணப்பம்', shortLabel: 'Volunteers', shortLabelTa: 'தன்னார்வலர்', icon: Heart, group: 'Operations', groupTa: 'நிர்வாகம்', roles: ALL_ROLES },
-  { id: 'security', label: 'Security & Devices', labelTa: 'Security & Device', shortLabel: 'Security', shortLabelTa: 'Security', icon: ShieldCheck, group: 'Security', groupTa: 'பாதுகாப்பு', roles: ALL_ROLES },
-  { id: 'audit', label: 'Audit Logs', labelTa: 'Audit Log', shortLabel: 'Audit', shortLabelTa: 'Audit', icon: Activity, group: 'Security', groupTa: 'பாதுகாப்பு', roles: OPS_ROLES },
-  { id: 'users', label: 'Admin Roles & Users', labelTa: 'Users & Roles', shortLabel: 'Users', shortLabelTa: 'Users', icon: Shield, group: 'Security', groupTa: 'பாதுகாப்பு', roles: OWNER_ROLES }
+  { id: 'overview', label: 'Dashboard', labelTa: 'டாஷ்போர்டு', shortLabel: 'Home', shortLabelTa: 'முகப்பு', icon: LayoutDashboard, group: 'Workspace', groupTa: 'பணிப்பகுதி', roles: ALL_ROLES },
+  { id: 'events', label: 'Events Management', labelTa: 'ஈவென்ட்ஸ்', shortLabel: 'Events', shortLabelTa: 'ஈவென்ட்ஸ்', icon: CalendarDays, group: 'Content CMS', groupTa: 'கன்டென்ட் மேலாண்மை', roles: ALL_ROLES },
+  { id: 'gallery', label: 'Gallery Folders', labelTa: 'கேலரி ஃபோல்டர்கள்', shortLabel: 'Gallery', shortLabelTa: 'கேலரி', icon: FolderOpen, group: 'Media & Blog', groupTa: 'மீடியா & பிளாக்', roles: ALL_ROLES },
+  { id: 'enquiries', label: 'Contact Enquiries', labelTa: 'தொடர்பு மெசேஜ்கள்', shortLabel: 'Enquiries', shortLabelTa: 'மெசேஜ்', icon: Inbox, group: 'Operations', groupTa: 'அன்றாட நிர்வாகம்', roles: ALL_ROLES },
+  { id: 'donations', label: 'Donations & Payments', labelTa: 'நன்கொடை & பேமெண்ட்', shortLabel: 'Donate', shortLabelTa: 'நன்கொடை', icon: IndianRupee, group: 'Operations', groupTa: 'அன்றாட நிர்வாகம்', roles: OPS_ROLES },
+  { id: 'pages', label: 'Pages & Hero', labelTa: 'பேஜஸ் & பேனர்', shortLabel: 'Pages', shortLabelTa: 'பேஜஸ்', icon: FileCode2, group: 'Content CMS', groupTa: 'கன்டென்ட் மேலாண்மை', roles: ALL_ROLES },
+  { id: 'navigation', label: 'Menus & Marquee', labelTa: 'மெனு & மார்க்யூ', shortLabel: 'Menus', shortLabelTa: 'மெனு', icon: Navigation, group: 'Content CMS', groupTa: 'கன்டென்ட் மேலாண்மை', roles: ALL_ROLES },
+  { id: 'activities', label: 'Activities & Services', labelTa: 'நலப்பணிகள்', shortLabel: 'Activities', shortLabelTa: 'பணிகள்', icon: Layers, group: 'Content CMS', groupTa: 'கன்டென்ட் மேலாண்மை', roles: ALL_ROLES },
+  { id: 'media', label: 'Media Library', labelTa: 'மீடியா ஃபைல்கள்', shortLabel: 'Media', shortLabelTa: 'மீடியா', icon: ImageIcon, group: 'Media & Blog', groupTa: 'மீடியா & பிளாக்', roles: ALL_ROLES },
+  { id: 'blogs', label: 'Blog & Articles', labelTa: 'பிளாக் & கட்டுரைகள்', shortLabel: 'Blog', shortLabelTa: 'பிளாக்', icon: BookOpen, group: 'Media & Blog', groupTa: 'மீடியா & பிளாக்', roles: ALL_ROLES },
+  { id: 'team', label: 'Team & Trustees', labelTa: 'டீம் & நிர்வாகிகள்', shortLabel: 'Team', shortLabelTa: 'டீம்', icon: Users, group: 'Media & Blog', groupTa: 'மீடியா & பிளாக்', roles: ALL_ROLES },
+  { id: 'volunteers', label: 'Volunteers', labelTa: 'தன்னார்வலர்கள்', shortLabel: 'Volunteers', shortLabelTa: 'தன்னார்வலர்', icon: Heart, group: 'Operations', groupTa: 'அன்றாட நிர்வாகம்', roles: ALL_ROLES },
+  { id: 'security', label: 'Security & Devices', labelTa: 'செக்யூரிட்டி & டிவைஸ்', shortLabel: 'Security', shortLabelTa: 'செக்யூரிட்டி', icon: ShieldCheck, group: 'Security', groupTa: 'பாதுகாப்பு', roles: ALL_ROLES },
+  { id: 'audit', label: 'Audit Logs', labelTa: 'ஆடிட் லாக்', shortLabel: 'Audit', shortLabelTa: 'ஆடிட்', icon: Activity, group: 'Security', groupTa: 'பாதுகாப்பு', roles: OPS_ROLES },
+  { id: 'users', label: 'Admin Roles & Users', labelTa: 'யூசர்ஸ் & ரோல்கள்', shortLabel: 'Users', shortLabelTa: 'யூசர்ஸ்', icon: Shield, group: 'Security', groupTa: 'பாதுகாப்பு', roles: OWNER_ROLES }
 ];
 
 const VALID_TAB_IDS = new Set(NAV_ITEMS.map((item) => item.id));
-const MOBILE_BOTTOM_IDS = ['overview', 'enquiries', 'events', 'gallery', 'donations'];
+// Top 5 most essential daily links for mobile bottom navigation (with smart fallback if role hides Donations)
+const MOBILE_BOTTOM_IDS = ['overview', 'events', 'gallery', 'enquiries', 'donations'];
 
 function resolveRouteTab(pathname: string): string | null {
   const clean = pathname.replace(/\/+$/, '') || '/';
@@ -134,7 +142,11 @@ export default function App() {
       prefetchAdminRoutes(res.admin.role);
     } catch (err) {
       setAdminUser(null);
-      setAuthError(err instanceof Error ? err.message : 'Unable to verify admin access.');
+      setAuthError(
+        err instanceof Error
+          ? err.message
+          : tr('Unable to verify admin access.', 'அட்மின் அனுமதியை சரிபார்க்க முடியலைங்க.')
+      );
     } finally {
       setCheckingAuth(false);
     }
@@ -161,10 +173,10 @@ export default function App() {
       const code = typeof detail === 'object' && detail ? detail.code : undefined;
 
       if (code === 'SESSION_REVOKED' && isSupabaseConfigured()) {
-        getSupabaseClient().auth.signOut({ scope: 'local' }).catch(() => { });
+        getSupabaseClient().auth.signOut({ scope: 'local' }).catch(() => {});
       }
       setAdminUser(null);
-      setAuthError(msg || 'Your session expired. Please sign in again.');
+      setAuthError(msg || tr('Your session expired. Please sign in again.', 'செஷன் முடிஞ்சிடுச்சு, மறுபடியும் லாகின் பண்ணுங்க.'));
     };
     window.addEventListener('ilangathir:session-expired', handleExpired);
 
@@ -209,15 +221,17 @@ export default function App() {
 
   if (checkingAuth) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-sand-50 p-6 text-center">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#F6F7F9] p-6 text-center dark:bg-[#0F1117]">
         <img
           src="/logos/icon.webp"
           alt="Ilangathir Trust"
-          className="h-16 w-16 object-contain"
+          className="h-14 w-14 object-contain"
         />
-        <p className="mt-4 text-sm font-bold text-brand-900">Loading Operations Console…</p>
-        <div className="mt-4 h-1 w-32 overflow-hidden rounded-full bg-sand-200">
-          <div className="h-full w-1/2 animate-pulse rounded-full bg-gradient-to-r from-brand-800 via-saffron-500 to-brand-800" />
+        <p className="mt-4 text-sm font-bold text-slate-900 dark:text-slate-100">
+          {tr('Loading Operations Console…', 'அட்மின் பக்கம் லோடு ஆகுதுங்க…')}
+        </p>
+        <div className="mt-4 h-1 w-32 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+          <div className="h-full w-1/2 animate-pulse rounded-full bg-blue-600" />
         </div>
       </div>
     );
@@ -225,26 +239,28 @@ export default function App() {
 
   if (activeTab === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-sand-50 p-4">
-        <div className="w-full max-w-md rounded-3xl border border-sand-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-saffron-50 text-saffron-600">
+      <div className="flex min-h-screen items-center justify-center bg-[#F6F7F9] p-4 dark:bg-[#0F1117]">
+        <div className="admin-card w-full max-w-md p-8 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
             <Compass className="h-7 w-7" />
           </div>
-          <p className="mt-4 text-xs font-extrabold uppercase tracking-widest text-saffron-600">
-            404 — Page Not Found
+          <p className="mt-4 text-xs font-extrabold uppercase tracking-widest text-amber-600">
+            {tr('404 — Page Not Found', '404 — இந்த பக்கம் இல்லீங்க')}
           </p>
-          <h1 className="mt-2 text-2xl font-extrabold text-brand-900">
-            Admin page not found
+          <h1 className="mt-2 text-2xl font-extrabold text-slate-900">
+            {tr('Admin page not found', 'அட்மின் பக்கம் கிடைக்கல')}
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
-            The requested route does not exist.
+          <p className="mt-2 text-sm text-slate-500">
+            {tr('The requested route does not exist.', 'நீங்க தேடுற பக்கம் இங்க இல்லங்க.')}
           </p>
           <button
             type="button"
             onClick={() => navigateTab('overview')}
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-brand-900 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-800"
+            className="admin-btn-primary mt-6 px-5 py-2.5 text-sm"
           >
-            {adminUser ? 'Go to Dashboard' : 'Go to Sign In'}
+            {adminUser
+              ? tr('Go to Dashboard', 'முகப்புக்குப் போ')
+              : tr('Go to Sign In', 'லாகின் பக்கத்துக்குப் போ')}
           </button>
         </div>
       </div>
@@ -261,26 +277,27 @@ export default function App() {
   const primaryBottomItems = MOBILE_BOTTOM_IDS
     .map((id) => allowedNavItems.find((n) => n.id === id))
     .filter((item): item is (typeof NAV_ITEMS)[number] => Boolean(item));
-  const fallbackExtra = allowedNavItems.find((n) => n.id === 'activities');
-  if (primaryBottomItems.length < 5 && fallbackExtra && !primaryBottomItems.some((i) => i.id === fallbackExtra.id)) {
-    primaryBottomItems.push(fallbackExtra);
+  const fallbackFifth = allowedNavItems.find((n) => n.id === 'pages');
+  if (primaryBottomItems.length < 5 && fallbackFifth && !primaryBottomItems.some((i) => i.id === fallbackFifth.id)) {
+    primaryBottomItems.push(fallbackFifth);
   }
   const groups = ['Workspace', 'Content CMS', 'Media & Blog', 'Operations', 'Security'];
   const isVisitor = adminUser.role === 'visitor';
+  const displayRole = lang === 'ta' ? ROLE_LABELS_TA[adminUser.role] : adminUser.role;
 
   return (
-    <div className="flex min-h-screen bg-sand-50 dark:bg-[#18191B]">
+    <div className="flex min-h-screen bg-[#F6F7F9] dark:bg-[#0F1117]">
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-[1px] lg:hidden"
         />
       )}
 
       {/* Desktop Fixed Independent Left Rail & Mobile Drawer */}
       <aside
-        aria-label="Admin navigation menu"
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#121316] text-slate-200 shadow-2xl transition-transform duration-200 lg:w-64 lg:border-r lg:border-white/10 lg:translate-x-0 lg:shadow-none ${
+        aria-label={tr('Admin navigation menu', 'அட்மின் மெனு')}
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/10 bg-[#111318] text-slate-200 shadow-2xl transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -289,14 +306,14 @@ export default function App() {
             type="button"
             onClick={() => navigateTab('overview')}
             className="min-w-0 text-left focus:outline-none"
-            aria-label="Ilangathir Trust Dashboard"
+            aria-label={tr('Ilangathir Trust Dashboard', 'இளங்கதிர் அறக்கட்டளை முகப்பு')}
           >
-            <img src="/logos/logo-white.webp" alt="Ilangathir Trust" className="h-12 w-auto object-contain object-left" />
+            <img src="/logos/logo-white.webp" alt="Ilangathir Trust" className="h-11 w-auto object-contain object-left" />
           </button>
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
-            aria-label={tr('Close menu', 'Menu மூடு')}
+            aria-label={tr('Close menu', 'மெனு மூடு')}
             className="rounded-lg p-1.5 text-slate-300 hover:bg-white/10 lg:hidden"
           >
             <X className="h-5 w-5" />
@@ -310,7 +327,7 @@ export default function App() {
             const grpLabel = grpItems[0]?.groupTa || grp;
             return (
               <div key={grp}>
-                <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+                <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                   {lang === 'ta' ? grpLabel : grp}
                 </p>
                 <div className="space-y-1">
@@ -322,9 +339,9 @@ export default function App() {
                         key={item.id}
                         type="button"
                         onClick={() => navigateTab(item.id)}
-                        className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-xs font-semibold transition ${
+                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-semibold transition ${
                           active
-                            ? 'bg-saffron-600 text-white shadow-xs'
+                            ? 'bg-blue-600 text-white shadow-xs'
                             : 'text-slate-300 hover:bg-white/10 hover:text-white'
                         }`}
                       >
@@ -339,14 +356,14 @@ export default function App() {
           })}
         </nav>
 
-        <div className="shrink-0 space-y-2 border-t border-white/10 p-4">
+        <div className="shrink-0 space-y-2 border-t border-white/10 p-3.5">
           {installPrompt && (
             <button
               type="button"
               onClick={handleInstallApp}
-              className="flex w-full items-center justify-between rounded-xl bg-saffron-600 px-3.5 py-2.5 text-xs font-bold text-white transition hover:bg-saffron-700"
+              className="flex w-full items-center justify-between rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-blue-700"
             >
-              <span>{tr('Install Admin App', 'Admin App நிறுவு')}</span>
+              <span>{tr('Install Admin App', 'ஆப் இன்ஸ்டால் பண்ணு')}</span>
               <Download className="h-3.5 w-3.5" />
             </button>
           )}
@@ -354,42 +371,42 @@ export default function App() {
             href={PUBLIC_SITE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between rounded-xl bg-white/5 px-3.5 py-2.5 text-xs font-semibold text-slate-200 hover:bg-white/10"
+            className="flex items-center justify-between rounded-xl bg-white/5 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-white/10"
           >
-            <span>{tr('Public Website', 'Website பாரு')}</span>
+            <span>{tr('Public Website', 'வெப்சைட் பாரு')}</span>
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex w-full items-center gap-2 rounded-xl bg-red-500/15 px-3.5 py-2.5 text-xs font-bold text-red-200 hover:bg-red-500/25"
+            className="flex w-full items-center gap-2 rounded-xl bg-red-500/15 px-3.5 py-2 text-xs font-bold text-red-200 hover:bg-red-500/25"
           >
             <LogOut className="h-4 w-4" />
-            <span>{tr('Sign Out', 'Logout பண்ணு')}</span>
+            <span>{tr('Sign Out', 'வெளியேறு')}</span>
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-        <header className="sticky top-0 z-30 transform-gpu border-b border-sand-200 bg-white px-3 py-2.5 dark:border-[#31343B] dark:bg-[#212225] min-[360px]:px-3.5 lg:px-8 lg:py-3">
-          {/* Mobile Header (< lg) */}
+        <header className="sticky top-0 z-30 transform-gpu border-b border-slate-200/90 bg-white/95 px-3.5 py-2.5 backdrop-blur-md dark:border-[#262A34] dark:bg-[#161920]/95 sm:px-5 lg:px-8 lg:py-3">
+          {/* Mobile Header (< lg) — No install/download icon button */}
           <div className="flex items-center justify-between gap-2 lg:hidden">
-            <div className="flex min-w-0 items-center gap-1.5 min-[360px]:gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <button
                 type="button"
                 onClick={() => setSidebarOpen(true)}
-                aria-label="Open admin menu"
-                className="-ml-1 inline-flex h-9 w-9 shrink-0 items-center justify-center bg-transparent p-0 text-brand-900 hover:text-saffron-600 focus:outline-none dark:text-slate-100"
+                aria-label={tr('Open admin menu', 'மெனு திற')}
+                className="-ml-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-700 transition hover:bg-slate-100 focus:outline-none dark:text-slate-200 dark:hover:bg-[#1C2029]"
               >
-                <Menu className="h-6 w-6" strokeWidth={2.2} />
+                <Menu className="h-5 w-5" strokeWidth={2.2} />
               </button>
-              <img src="/logos/icon.webp" alt="Ilangathir Trust" className="hidden h-7 w-7 shrink-0 object-contain min-[380px]:block" />
+              <img src="/logos/icon.webp" alt="Ilangathir Trust" className="hidden h-7 w-7 shrink-0 object-contain min-[370px]:block" />
               <div className="min-w-0">
-                <p className="truncate text-xs font-extrabold text-brand-900 dark:text-slate-100">
+                <p className="truncate text-xs font-extrabold text-slate-900 dark:text-slate-100">
                   {lang === 'ta' ? currentNav.labelTa : currentNav.label}
                 </p>
-                <p className="truncate text-[10px] font-bold uppercase text-saffron-600 dark:text-amber-400">
+                <p className="truncate text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">
                   {lang === 'ta' ? currentNav.groupTa : currentNav.group}
                 </p>
               </div>
@@ -400,8 +417,8 @@ export default function App() {
               <button
                 type="button"
                 onClick={toggleTheme}
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sand-200 bg-sand-100 text-slate-700 transition hover:text-brand-900 dark:border-[#363940] dark:bg-[#292B30] dark:text-amber-300"
+                aria-label={theme === 'dark' ? tr('Switch to light mode', 'லைட் மோட்') : tr('Switch to dark mode', 'டார்க் மோட்')}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-700 transition hover:text-slate-900 dark:border-[#2C313D] dark:bg-[#1C2029] dark:text-amber-300"
               >
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
@@ -409,8 +426,8 @@ export default function App() {
               {/* Segmented En / த Toggle */}
               <div
                 role="group"
-                aria-label="Language switcher"
-                className="inline-flex items-center rounded-full border border-sand-200 bg-sand-100 p-0.5 dark:border-[#363940] dark:bg-[#292B30]"
+                aria-label={tr('Language switcher', 'மொழி மாற்றம்')}
+                className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 p-0.5 dark:border-[#2C313D] dark:bg-[#1C2029]"
               >
                 <button
                   type="button"
@@ -418,7 +435,7 @@ export default function App() {
                   aria-pressed={lang === 'en'}
                   className={`rounded-full px-2 py-0.5 text-[11px] font-bold transition ${
                     lang === 'en'
-                      ? 'bg-brand-900 text-white dark:bg-blue-600'
+                      ? 'bg-blue-600 text-white'
                       : 'text-slate-600 dark:text-slate-300'
                   }`}
                 >
@@ -430,7 +447,7 @@ export default function App() {
                   aria-pressed={lang === 'ta'}
                   className={`rounded-full px-2 py-0.5 text-[11px] font-bold transition ${
                     lang === 'ta'
-                      ? 'bg-brand-900 text-white dark:bg-blue-600'
+                      ? 'bg-blue-600 text-white'
                       : 'text-slate-600 dark:text-slate-300'
                   }`}
                 >
@@ -438,23 +455,11 @@ export default function App() {
                 </button>
               </div>
 
-              {installPrompt && (
-                <button
-                  type="button"
-                  onClick={handleInstallApp}
-                  aria-label="Install Admin App"
-                  className="inline-flex h-8 items-center gap-1 rounded-full bg-saffron-600 px-2.5 text-[11px] font-bold text-white"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  <span className="hidden min-[420px]:inline">App</span>
-                </button>
-              )}
-
               <button
                 type="button"
                 onClick={() => navigateTab('security')}
-                aria-label="Security & Sessions"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-900 text-xs font-bold text-white dark:bg-blue-600"
+                aria-label={tr('Security & Sessions', 'செக்யூரிட்டி & டிவைஸ்')}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white"
               >
                 {adminUser.email.slice(0, 2).toUpperCase()}
               </button>
@@ -464,10 +469,10 @@ export default function App() {
           {/* Desktop Header */}
           <div className="hidden items-center justify-between gap-4 lg:flex">
             <div className="min-w-0">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-saffron-600 dark:text-amber-400">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
                 {lang === 'ta' ? currentNav.groupTa : currentNav.group}
               </p>
-              <h1 className="truncate text-xl font-extrabold text-brand-900 dark:text-slate-100">
+              <h1 className="truncate text-lg font-extrabold text-slate-900 dark:text-slate-100">
                 {lang === 'ta' ? currentNav.labelTa : currentNav.label}
               </h1>
             </div>
@@ -477,9 +482,9 @@ export default function App() {
               <button
                 type="button"
                 onClick={toggleTheme}
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                title={theme === 'dark' ? tr('Light Mode', 'Light Theme') : tr('Dark Mode', 'Dark Theme')}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-sand-200 bg-sand-100 text-slate-700 transition hover:border-brand-700 dark:border-[#363940] dark:bg-[#292B30] dark:text-amber-300"
+                aria-label={theme === 'dark' ? tr('Switch to light mode', 'லைட் மோட்') : tr('Switch to dark mode', 'டார்க் மோட்')}
+                title={theme === 'dark' ? tr('Light Mode', 'லைட் மோட்') : tr('Dark Mode', 'டார்க் மோட்')}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-700 transition hover:border-blue-500 dark:border-[#2C313D] dark:bg-[#1C2029] dark:text-amber-300"
               >
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
@@ -487,8 +492,8 @@ export default function App() {
               {/* Segmented En / த Toggle */}
               <div
                 role="group"
-                aria-label="Language switcher"
-                className="inline-flex items-center rounded-full border border-sand-200 bg-sand-100 p-0.5 dark:border-[#363940] dark:bg-[#292B30]"
+                aria-label={tr('Language switcher', 'மொழி மாற்றம்')}
+                className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 p-0.5 dark:border-[#2C313D] dark:bg-[#1C2029]"
               >
                 <button
                   type="button"
@@ -496,8 +501,8 @@ export default function App() {
                   aria-pressed={lang === 'en'}
                   className={`rounded-full px-3 py-1 text-xs font-bold transition ${
                     lang === 'en'
-                      ? 'bg-brand-900 text-white shadow-xs dark:bg-blue-600'
-                      : 'text-slate-600 hover:text-brand-900 dark:text-slate-300'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
                   }`}
                 >
                   En
@@ -508,8 +513,8 @@ export default function App() {
                   aria-pressed={lang === 'ta'}
                   className={`rounded-full px-3 py-1 text-xs font-bold transition ${
                     lang === 'ta'
-                      ? 'bg-brand-900 text-white shadow-xs dark:bg-blue-600'
-                      : 'text-slate-600 hover:text-brand-900 dark:text-slate-300'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
                   }`}
                 >
                   த
@@ -520,35 +525,36 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleInstallApp}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-saffron-500/30 bg-saffron-50 px-3.5 py-1.5 text-xs font-bold text-saffron-700 transition hover:bg-saffron-100 dark:bg-amber-500/15 dark:text-amber-300"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-50 px-3.5 py-1.5 text-xs font-bold text-blue-700 transition hover:bg-blue-100 dark:bg-blue-500/15 dark:text-blue-300"
                 >
                   <Download className="h-3.5 w-3.5" />
-                  <span>{tr('Install App', 'App நிறுவு')}</span>
+                  <span>{tr('Install App', 'ஆப் நிறுவு')}</span>
                 </button>
               )}
+
               <button
                 type="button"
                 onClick={() => navigateTab('security')}
-                className="flex items-center gap-2.5 rounded-full border border-sand-200 bg-sand-50 px-3.5 py-1.5 transition hover:border-brand-700 dark:border-[#363940] dark:bg-[#292B30]"
-                title={tr('Manage Security & Active Sessions', 'Security & Active Device விவரங்கள்')}
+                className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 transition hover:border-blue-500 dark:border-[#2C313D] dark:bg-[#1C2029]"
+                title={tr('Manage Security & Active Sessions', 'செக்யூரிட்டி & டிவைஸ் விவரம்')}
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-900 text-xs font-bold text-white dark:bg-blue-600">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
                   {adminUser.email.slice(0, 2).toUpperCase()}
                 </span>
                 <div className="text-left">
                   <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{adminUser.email}</p>
-                  <p className="text-[10px] font-semibold uppercase text-saffron-600 dark:text-amber-400">{adminUser.role}</p>
+                  <p className="text-[10px] font-semibold uppercase text-blue-600 dark:text-blue-400">{displayRole}</p>
                 </div>
               </button>
             </div>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1400px] flex-1 px-0 pt-2 pb-28 sm:px-4 sm:pt-4 lg:p-8 lg:pb-12">
+        <main className="mx-auto w-full max-w-[1360px] flex-1 px-3.5 pt-3.5 pb-24 sm:px-6 sm:pt-5 lg:px-8 lg:py-6 lg:pb-12">
           {toast && (
             <div
               role={toast.isErr ? 'alert' : 'status'}
-              className={`mx-3 mb-4 flex items-start justify-between gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-sm lg:mx-0 lg:mb-6 ${
+              className={`mb-4 flex items-start justify-between gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-sm ${
                 toast.isErr
                   ? 'border-red-200 bg-red-50 text-red-800'
                   : 'border-emerald-200 bg-emerald-50 text-emerald-800'
@@ -558,7 +564,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setToast(null)}
-                aria-label="Dismiss message"
+                aria-label={tr('Dismiss message', 'மூடு')}
                 className="shrink-0 rounded-lg px-2 py-0.5 text-xs font-bold opacity-70 transition hover:bg-black/5 hover:opacity-100"
               >
                 {tr('Dismiss', 'மூடு')}
@@ -567,8 +573,11 @@ export default function App() {
           )}
 
           {isVisitor && (
-            <div className="mx-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800 lg:mx-0">
-              {tr('Read-Only Visitor Access — Editing and write actions are disabled for your role.', 'Read-Only Visitor Mode — இந்த Account-ல விவரம் பாக்க மட்டும் தான் முடியும்.')}
+            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800">
+              {tr(
+                'Read-Only Visitor Access — Editing and write actions are disabled for your role.',
+                'ரீட்-ஒன்லி விசிட்டர் மோட் — உங்களால விவரம் பார்க்க மட்டும்தான் முடியும், மாத்த முடியாதுங்க.'
+              )}
             </div>
           )}
 
@@ -592,10 +601,10 @@ export default function App() {
         </main>
       </div>
 
-      {/* Attached Docked Mobile Bottom Navbar (NOT floating) */}
+      {/* Reordered Top-5 Mobile Bottom Navbar */}
       <nav
-        aria-label="Mobile admin bottom navigation"
-        className="fixed inset-x-0 bottom-0 z-40 transform-gpu border-t border-sand-200 bg-white shadow-[0_-4px_20px_rgba(11,24,46,0.08)] pb-[env(safe-area-inset-bottom)] dark:border-[#31343B] dark:bg-[#212225] lg:hidden"
+        aria-label={tr('Mobile admin bottom navigation', 'மொபைல் கீழ் மெனு')}
+        className="fixed inset-x-0 bottom-0 z-40 transform-gpu border-t border-slate-200/90 bg-white/95 shadow-[0_-4px_20px_rgba(15,23,42,0.06)] backdrop-blur-md pb-[env(safe-area-inset-bottom)] dark:border-[#262A34] dark:bg-[#161920]/95 lg:hidden"
       >
         <ul
           className="grid items-stretch"
@@ -609,16 +618,16 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => navigateTab(item.id)}
-                  className={`relative flex w-full min-h-[56px] flex-col items-center justify-center gap-1 px-1 py-1.5 text-center transition ${
+                  className={`relative flex min-h-[56px] w-full flex-col items-center justify-center gap-1 px-1 py-1.5 text-center transition ${
                     active
-                      ? 'bg-brand-50/70 text-brand-900 font-bold dark:bg-blue-500/15 dark:text-blue-400'
-                      : 'text-slate-600 hover:bg-sand-50 hover:text-brand-900 dark:text-slate-400 dark:hover:bg-[#292B30] dark:hover:text-slate-200'
+                      ? 'bg-blue-50/70 font-bold text-blue-600 dark:bg-blue-500/15 dark:text-blue-400'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-[#1C2029] dark:hover:text-slate-200'
                   }`}
                 >
                   {active && (
                     <span
                       aria-hidden="true"
-                      className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-brand-900 dark:bg-blue-400"
+                      className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-blue-600 dark:bg-blue-400"
                     />
                   )}
                   <Icon className="h-[17px] w-[17px] shrink-0" strokeWidth={2.2} />

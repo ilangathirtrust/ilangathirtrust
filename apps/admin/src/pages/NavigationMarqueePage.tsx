@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react';
 import { Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
 import type { MarqueeItem, NavigationItem } from '@ilangathir/shared';
 import { adminApi } from '../lib/api';
+import { useAdminUi } from '../lib/admin-ui';
 import { MediaPickerModal } from '../components/MediaPickerModal';
+import { NavigationSkeleton } from '../components/PageSkeletons';
 
 export function NavigationMarqueePage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
+  const { tr } = useAdminUi();
   const [navItems, setNavItems] = useState<NavigationItem[]>([]);
   const [marqueeItems, setMarqueeItems] = useState<MarqueeItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,15 +53,15 @@ export function NavigationMarqueePage({ onNotify }: { onNotify: (msg: string, is
     try {
       await adminApi('/navigation', { method: 'POST', body: JSON.stringify(newNav) });
       setNewNav({ menu_location: 'header', label_en: '', label_ta: '', href: '/', icon_name: 'Circle', sort_order: 10 });
-      onNotify('Navigation link added.');
+      onNotify(tr('Navigation link added.', 'மெனு லிங்க் சேர்த்தாச்சுங்க.'));
       load();
     } catch (err) {
-      onNotify(err instanceof Error ? err.message : 'Failed to add link.', true);
+      onNotify(err instanceof Error ? err.message : tr('Failed to add link.', 'லிங்க் சேர்க்க முடியலைங்க.'), true);
     }
   }
 
   async function deleteNav(id: string) {
-    if (!confirm('Remove this navigation link?')) return;
+    if (!confirm(tr('Remove this navigation link?', 'இந்த மெனு லிங்க்கை நீக்கலாமா?'))) return;
     await adminApi(`/navigation/${id}`, { method: 'DELETE' });
     load();
   }
@@ -68,122 +71,131 @@ export function NavigationMarqueePage({ onNotify }: { onNotify: (msg: string, is
     try {
       await adminApi('/marquee', { method: 'POST', body: JSON.stringify(newMarquee) });
       setNewMarquee({ title_en: '', title_ta: '', alt_text_en: '', alt_text_ta: '', image_url: '', link_url: '/gallery', sort_order: 1 });
-      onNotify('Marquee item added to homepage.');
+      onNotify(tr('Marquee item added to homepage.', 'முகப்பு மார்க்யூ படம் சேர்த்தாச்சுங்க.'));
       load();
     } catch (err) {
-      onNotify(err instanceof Error ? err.message : 'Failed to add marquee item.', true);
+      onNotify(err instanceof Error ? err.message : tr('Failed to add marquee item.', 'மார்க்யூ சேர்க்க முடியலைங்க.'), true);
     }
   }
 
   async function deleteMarquee(id: string) {
-    if (!confirm('Delete this marquee highlight?')) return;
+    if (!confirm(tr('Delete this marquee highlight?', 'இந்த மார்க்யூ படத்தை நீக்கலாமா?'))) return;
     await adminApi(`/marquee/${id}`, { method: 'DELETE' });
     load();
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-48 admin-skeleton rounded-3xl" />
-        <div className="h-48 admin-skeleton rounded-3xl" />
-      </div>
-    );
+  if (loading && navItems.length === 0 && marqueeItems.length === 0) {
+    return <NavigationSkeleton />;
   }
 
   return (
-    <div className="space-y-3 lg:space-y-6">
+    <div className="space-y-4">
       {/* Homepage Marquee Showcase */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold text-brand-900">Homepage Activity Marquee Images</h2>
-        <p className="text-xs text-slate-500">Images here scroll smoothly in the homepage highlight marquee.</p>
+      <div className="admin-card space-y-4">
+        <div>
+          <h2 className="text-base font-bold text-slate-900 sm:text-lg">
+            {tr('Homepage Activity Marquee Images', 'முகப்பு மார்க்யூ படங்கள்')}
+          </h2>
+          <p className="text-xs text-slate-500">
+            {tr('Images here scroll smoothly in the homepage highlight marquee.', 'இங்க சேர்க்குற படங்கள் வெப்சைட் முகப்பு பக்கத்துல ஓடிக்கிட்டே இருக்கும்.')}
+          </p>
+        </div>
 
-        <form onSubmit={addMarquee} className="mt-4 grid gap-3 rounded-2xl bg-sand-50 p-4 sm:grid-cols-3">
+        <form onSubmit={addMarquee} className="admin-subcard grid gap-3 sm:grid-cols-3">
           <label className="admin-label">
-            <span>Title (EN) *</span>
-            <input required placeholder="Title (EN)" value={newMarquee.title_en} onChange={(e) => setNewMarquee({ ...newMarquee, title_en: e.target.value })} className="admin-input bg-white" />
+            <span>{tr('Title (EN) *', 'தலைப்பு (ஆங்கிலம்) *')}</span>
+            <input required placeholder={tr('Title (EN)', 'தலைப்பு (ஆங்கிலம்)')} value={newMarquee.title_en} onChange={(e) => setNewMarquee({ ...newMarquee, title_en: e.target.value })} className="admin-input" />
           </label>
           <label className="admin-label">
-            <span>Title (TA) *</span>
-            <input required placeholder="Title (TA)" value={newMarquee.title_ta} onChange={(e) => setNewMarquee({ ...newMarquee, title_ta: e.target.value })} className="admin-input bg-white" />
+            <span>{tr('Title (TA) *', 'தலைப்பு (தமிழ்) *')}</span>
+            <input required placeholder={tr('Title (TA)', 'தலைப்பு (தமிழ்)')} value={newMarquee.title_ta} onChange={(e) => setNewMarquee({ ...newMarquee, title_ta: e.target.value })} className="admin-input" />
           </label>
           <label className="admin-label">
-            <span>Image URL *</span>
+            <span>{tr('Image URL *', 'படத்தின் லிங்க் *')}</span>
             <div className="flex gap-2">
-              <input required placeholder="Image URL" value={newMarquee.image_url} onChange={(e) => setNewMarquee({ ...newMarquee, image_url: e.target.value })} className="admin-input flex-1 bg-white" />
-              <button type="button" onClick={() => setPickerOpen(true)} className="rounded-xl border border-sand-200 bg-white px-3 text-xs font-bold text-brand-800 hover:bg-sand-100">
-                <ImageIcon className="h-4 w-4" />
+              <input required placeholder={tr('Image URL', 'படம் லிங்க்')} value={newMarquee.image_url} onChange={(e) => setNewMarquee({ ...newMarquee, image_url: e.target.value })} className="admin-input flex-1" />
+              <button type="button" onClick={() => setPickerOpen(true)} className="admin-btn-secondary px-3">
+                <ImageIcon className="h-4 w-4 text-blue-600" />
               </button>
             </div>
           </label>
           <label className="admin-label">
-            <span>Alt Text (EN)</span>
-            <input placeholder="Alt Text (EN)" value={newMarquee.alt_text_en} onChange={(e) => setNewMarquee({ ...newMarquee, alt_text_en: e.target.value })} className="admin-input bg-white" />
+            <span>{tr('Alt Text (EN)', 'ஆல்ட் டெக்ஸ்ட்')}</span>
+            <input placeholder={tr('Alt Text (EN)', 'சிறிய குறிப்பு')} value={newMarquee.alt_text_en} onChange={(e) => setNewMarquee({ ...newMarquee, alt_text_en: e.target.value })} className="admin-input" />
           </label>
           <label className="admin-label">
-            <span>Link URL</span>
-            <input placeholder="/gallery" value={newMarquee.link_url} onChange={(e) => setNewMarquee({ ...newMarquee, link_url: e.target.value })} className="admin-input bg-white" />
+            <span>{tr('Link URL', 'கிளிக் பண்ணா போக வேண்டிய பக்கம்')}</span>
+            <input placeholder="/gallery" value={newMarquee.link_url} onChange={(e) => setNewMarquee({ ...newMarquee, link_url: e.target.value })} className="admin-input" />
           </label>
           <div className="flex items-end">
             <button
               type="submit"
               disabled={!newMarquee.title_en.trim() || !newMarquee.title_ta.trim() || !newMarquee.image_url.trim()}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-45"
+              className="admin-btn-primary w-full py-2.5"
             >
               <Plus className="h-4 w-4" />
-              <span>Add Marquee Slide</span>
+              <span>{tr('Add Marquee Slide', 'மார்க்யூ சேர்')}</span>
             </button>
           </div>
         </form>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {marqueeItems.map((m) => (
-            <div key={m.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <img src={m.image_url} alt={m.title_en} className="h-32 w-full object-cover" />
-              <div className="flex items-center justify-between p-3 text-xs">
-                <span className="truncate font-bold text-slate-800">{m.title_en}</span>
-                <button type="button" onClick={() => deleteMarquee(m.id)} className="text-red-600 hover:text-red-700">
-                  <Trash2 className="h-4 w-4" />
-                </button>
+        {marqueeItems.length === 0 ? (
+          <p className="py-4 text-center text-xs text-slate-500">
+            {tr('No marquee slides added yet.', 'இன்னும் எந்த மார்க்யூ படமும் சேர்க்கலீங்க.')}
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {marqueeItems.map((m) => (
+              <div key={m.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <img src={m.image_url} alt={m.title_en} className="h-28 w-full object-cover" />
+                <div className="flex items-center justify-between p-2.5 text-xs">
+                  <span className="truncate font-bold text-slate-800">{m.title_en}</span>
+                  <button type="button" onClick={() => deleteMarquee(m.id)} className="text-red-600 hover:text-red-700">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Navigation Menus */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold text-slate-900">Navigation Menu Manager</h2>
+      <div className="admin-card space-y-4">
+        <h2 className="text-base font-bold text-slate-900 sm:text-lg">
+          {tr('Navigation Menu Manager', 'மெனு லிங்க் மேலாண்மை')}
+        </h2>
 
-        <form onSubmit={addNav} className="mt-4 grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-6">
+        <form onSubmit={addNav} className="admin-subcard grid gap-2.5 sm:grid-cols-6">
           <select value={newNav.menu_location} onChange={(e) => setNewNav({ ...newNav, menu_location: e.target.value })} className="admin-input">
-            <option value="header">Header</option>
-            <option value="mobile_bottom">Mobile Bottom</option>
-            <option value="footer_explore">Footer Explore</option>
+            <option value="header">{tr('Header', 'மேல் மெனு')}</option>
+            <option value="mobile_bottom">{tr('Mobile Bottom', 'மொபைல் கீழ்')}</option>
+            <option value="footer_explore">{tr('Footer Explore', 'கீழ் பகுதி')}</option>
           </select>
-          <input required placeholder="Label (EN)" value={newNav.label_en} onChange={(e) => setNewNav({ ...newNav, label_en: e.target.value })} className="admin-input" />
-          <input required placeholder="Label (TA)" value={newNav.label_ta} onChange={(e) => setNewNav({ ...newNav, label_ta: e.target.value })} className="admin-input" />
-          <input required placeholder="Href (/about)" value={newNav.href} onChange={(e) => setNewNav({ ...newNav, href: e.target.value })} className="admin-input" />
-          <input type="number" placeholder="Order" value={newNav.sort_order} onChange={(e) => setNewNav({ ...newNav, sort_order: Number(e.target.value) })} className="admin-input" />
+          <input required placeholder={tr('Label (EN)', 'பெயர் (ஆங்கிலம்)')} value={newNav.label_en} onChange={(e) => setNewNav({ ...newNav, label_en: e.target.value })} className="admin-input" />
+          <input required placeholder={tr('Label (TA)', 'பெயர் (தமிழ்)')} value={newNav.label_ta} onChange={(e) => setNewNav({ ...newNav, label_ta: e.target.value })} className="admin-input" />
+          <input required placeholder={tr('Href (/about)', 'லிங்க் (/about)')} value={newNav.href} onChange={(e) => setNewNav({ ...newNav, href: e.target.value })} className="admin-input" />
+          <input type="number" placeholder={tr('Order', 'வரிசை')} value={newNav.sort_order} onChange={(e) => setNewNav({ ...newNav, sort_order: Number(e.target.value) })} className="admin-input" />
           <button
             type="submit"
             disabled={!newNav.label_en.trim() || !newNav.label_ta.trim() || !newNav.href.trim()}
-            className="inline-flex items-center justify-center gap-1 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-45"
+            className="admin-btn-primary py-2"
           >
             <Plus className="h-4 w-4" />
-            <span>Add</span>
+            <span>{tr('Add', 'சேர்')}</span>
           </button>
         </form>
 
-        <div className="mt-4 overflow-x-auto">
+        <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-500 uppercase">
-                <th className="py-2.5 pr-4">Location</th>
-                <th className="py-2.5 pr-4">English</th>
-                <th className="py-2.5 pr-4">Tamil</th>
-                <th className="py-2.5 pr-4">Href</th>
-                <th className="py-2.5 pr-4">Order</th>
-                <th className="py-2.5 text-right">Action</th>
+              <tr className="border-b border-slate-200 uppercase text-slate-500">
+                <th className="py-2.5 pr-4">{tr('Location', 'இடம்')}</th>
+                <th className="py-2.5 pr-4">{tr('English', 'ஆங்கிலம்')}</th>
+                <th className="py-2.5 pr-4">{tr('Tamil', 'தமிழ்')}</th>
+                <th className="py-2.5 pr-4">{tr('Href', 'லிங்க்')}</th>
+                <th className="py-2.5 pr-4">{tr('Order', 'வரிசை')}</th>
+                <th className="py-2.5 text-right">{tr('Action', 'செயல்')}</th>
               </tr>
             </thead>
             <tbody>
@@ -196,7 +208,7 @@ export function NavigationMarqueePage({ onNotify }: { onNotify: (msg: string, is
                   <td className="py-2.5 pr-4">{n.sort_order}</td>
                   <td className="py-2.5 text-right">
                     <button type="button" onClick={() => deleteNav(n.id)} className="text-red-600 hover:text-red-700">
-                      <Trash2 className="h-4 w-4 inline" />
+                      <Trash2 className="inline h-4 w-4" />
                     </button>
                   </td>
                 </tr>

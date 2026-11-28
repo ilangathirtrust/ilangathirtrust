@@ -48,7 +48,7 @@ export function LoginPage({
 
       await onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to sign in.');
+      setError(err instanceof Error ? err.message : tr('Unable to sign in.', 'உள்ள நுழைய முடியலைங்க.'));
     } finally {
       setLoading(false);
     }
@@ -70,30 +70,30 @@ export function LoginPage({
       setMfaStep(null);
       setMfaCode('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid 2FA verification code.');
+      setError(err instanceof Error ? err.message : tr('Invalid 2FA verification code.', '2FA கோடு தப்பா இருக்குங்க.'));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-sand-50 dark:bg-[#18191B] sm:p-6">
-      <div className="w-full min-h-screen sm:min-h-0 max-w-md sm:rounded-3xl border-0 sm:border border-sand-200 dark:border-[#31343B] bg-white dark:bg-[#212225] p-6 sm:shadow-[0_14px_40px_rgba(11,24,46,0.06)] sm:p-9">
+    <div className="flex min-h-screen items-center justify-center bg-[#F6F7F9] p-4 dark:bg-[#0F1117]">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm dark:border-[#262A34] dark:bg-[#161920] sm:p-8">
         <div className="mb-5 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sand-200 bg-sand-100 text-slate-700 dark:border-[#363940] dark:bg-[#292B30] dark:text-amber-300"
+            aria-label={theme === 'dark' ? tr('Switch to light mode', 'லைட் மோட்') : tr('Switch to dark mode', 'டார்க் மோட்')}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-700 dark:border-[#2C313D] dark:bg-[#1C2029] dark:text-amber-300"
           >
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
-          <div className="inline-flex items-center rounded-full border border-sand-200 bg-sand-100 p-0.5 dark:border-[#363940] dark:bg-[#292B30]">
+          <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 p-0.5 dark:border-[#2C313D] dark:bg-[#1C2029]">
             <button
               type="button"
               onClick={() => setLang('en')}
               className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                lang === 'en' ? 'bg-brand-900 text-white dark:bg-blue-600' : 'text-slate-600 dark:text-slate-300'
+                lang === 'en' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-300'
               }`}
             >
               En
@@ -102,43 +102,47 @@ export function LoginPage({
               type="button"
               onClick={() => setLang('ta')}
               className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                lang === 'ta' ? 'bg-brand-900 text-white dark:bg-blue-600' : 'text-slate-600 dark:text-slate-300'
+                lang === 'ta' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-300'
               }`}
             >
               த
             </button>
           </div>
         </div>
+
         <div className="text-center">
           <img
-            src="/logos/logo.webp"
+            src={theme === 'dark' ? '/logos/logo-white.webp' : '/logos/logo.webp'}
             alt="Ilangathir Trust"
-            className="mx-auto h-14 w-auto object-contain"
+            className="mx-auto h-12 w-auto object-contain"
           />
-          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-saffron-500/20 bg-saffron-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-saffron-700">
+          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-700">
             <Lock className="h-3 w-3" />
-            {tr('Authorized Access Only', 'அனுமதி பெற்ற Admin மட்டும்')}
+            {tr('Authorized Access Only', 'அனுமதி உள்ளவங்க மட்டும்')}
           </span>
-          <h1 className="mt-3 text-xl font-extrabold text-brand-900 sm:text-2xl">
-            {tr('Admin Ilangathir Trust', 'Ilangathir Admin பக்கம்')}
+          <h1 className="mt-3 text-xl font-extrabold text-slate-900">
+            {tr('Admin Ilangathir Trust', 'இளங்கதிர் அட்மின் பக்கம்')}
           </h1>
-          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+          <p className="mt-1 text-xs text-slate-500">
             {mfaStep
-              ? tr('Enter your 6-digit authenticator code', '6-digit Authenticator Code போடுங்க')
-              : tr('Protected by Supabase Authentication, 2FA & RBAC', 'Supabase Security, 2FA & RBAC பாதுகாப்பு')}
+              ? tr('Enter your 6-digit authenticator code', 'ஆதென்டிகேட்டர் ஆப்பில் உள்ள 6 நம்பரை போடுங்க')
+              : tr('Protected by 2FA, Device Signatures & RBAC', '2FA, டிவைஸ் சிக்னேச்சர் & ரோல் பாதுகாப்பு')}
           </p>
         </div>
 
         {!isSupabaseConfigured() && (
           <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs font-medium text-amber-900">
-            Configure <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to enable sign-in.
+            {tr(
+              'Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable sign-in.',
+              'உள்ள நுழைய சுப்பபேஸ் அமைப்புகள் தேவைப்படுதுங்க.'
+            )}
           </div>
         )}
 
         {mfaStep ? (
           <form onSubmit={handleMfaSubmit} className="mt-6 space-y-4">
             <label className="admin-label">
-              <span>Authenticator Code</span>
+              <span>{tr('Authenticator Code', 'ஆதென்டிகேட்டர் கோடு')}</span>
               <input
                 type="text"
                 inputMode="numeric"
@@ -174,7 +178,7 @@ export function LoginPage({
                       }}
                       className="rounded-lg bg-white px-2.5 py-1 text-[11px] font-bold text-slate-800 ring-1 ring-red-200 hover:bg-red-100/50"
                     >
-                      Retry access check
+                      {tr('Retry access check', 'மறுபடியும் செக் பண்ணு')}
                     </button>
                     {onSignOut && (
                       <button
@@ -182,7 +186,7 @@ export function LoginPage({
                         onClick={() => onSignOut()}
                         className="rounded-lg px-2 py-1 text-[11px] font-bold text-red-800 underline hover:no-underline"
                       >
-                        Sign out &amp; switch account
+                        {tr('Sign out & switch account', 'வெளியேறி வேற அக்கவுண்ட் போடு')}
                       </button>
                     )}
                   </div>
@@ -193,10 +197,10 @@ export function LoginPage({
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-800 disabled:opacity-60"
+              className="admin-btn-primary w-full py-2.5 text-sm"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-              <span>{loading ? 'Verifying…' : 'Verify & Continue'}</span>
+              <span>{loading ? tr('Verifying…', 'சரிபார்க்குது…') : tr('Verify & Continue', 'சரிபார்த்து உள்ள போ')}</span>
             </button>
 
             <button
@@ -208,13 +212,13 @@ export function LoginPage({
               }}
               className="w-full text-center text-xs font-semibold text-slate-500 hover:text-slate-800"
             >
-              Use a different account
+              {tr('Use a different account', 'வேற ஈமெயில் வச்சு உள்ள போ')}
             </button>
           </form>
         ) : (
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <label className="admin-label">
-              <span>Account Email</span>
+              <span>{tr('Account Email', 'ஈமெயில் அட்ரஸ்')}</span>
               <input
                 type="email"
                 required
@@ -227,7 +231,7 @@ export function LoginPage({
             </label>
 
             <label className="admin-label">
-              <span>Password</span>
+              <span>{tr('Password', 'பாஸ்வேர்டு')}</span>
               <div className="relative">
                 <input
                   type={showPass ? 'text' : 'password'}
@@ -240,7 +244,7 @@ export function LoginPage({
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
-                  aria-label="Toggle password visibility"
+                  aria-label={tr('Toggle password visibility', 'பாஸ்வேர்டு காட்டு')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
                 >
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -269,7 +273,7 @@ export function LoginPage({
                       }}
                       className="rounded-lg bg-white px-2.5 py-1 text-[11px] font-bold text-slate-800 ring-1 ring-red-200 hover:bg-red-100/50"
                     >
-                      Retry access check
+                      {tr('Retry access check', 'மறுபடியும் செக் பண்ணு')}
                     </button>
                     {onSignOut && (
                       <button
@@ -277,7 +281,7 @@ export function LoginPage({
                         onClick={() => onSignOut()}
                         className="rounded-lg px-2 py-1 text-[11px] font-bold text-red-800 underline hover:no-underline"
                       >
-                        Sign out &amp; switch account
+                        {tr('Sign out & switch account', 'வெளியேறி வேற அக்கவுண்ட் போடு')}
                       </button>
                     )}
                   </div>
@@ -288,17 +292,17 @@ export function LoginPage({
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-800 disabled:opacity-60"
+              className="admin-btn-primary w-full py-3 text-sm"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              <span>{loading ? 'Signing in…' : 'Sign in securely'}</span>
+              <span>{loading ? tr('Signing in…', 'உள்ள போகுது…') : tr('Sign in securely', 'பாதுகாப்பா உள்ள போ')}</span>
             </button>
           </form>
         )}
 
         <div className="mt-6 text-center">
-          <a href={PUBLIC_SITE_URL} className="text-xs font-semibold text-slate-500 hover:text-brand-800">
-            ← Return to public website
+          <a href={PUBLIC_SITE_URL} className="text-xs font-semibold text-slate-500 hover:text-blue-600">
+            {tr('← Return to public website', '← வெப்சைட்டுக்கு திரும்பிப் போ')}
           </a>
         </div>
       </div>

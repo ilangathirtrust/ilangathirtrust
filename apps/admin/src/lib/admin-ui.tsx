@@ -59,7 +59,7 @@ export function AdminUiProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.toggle('dark', isDark);
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) {
-      metaTheme.setAttribute('content', isDark ? '#18191B' : '#0D1B35');
+      metaTheme.setAttribute('content', isDark ? '#0F1117' : '#2563EB');
     }
     try {
       localStorage.setItem(THEME_KEY, theme);

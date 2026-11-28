@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, Film, FolderOpen, Plus, Trash2, Upload } from 'lucide-react';
 import type { GalleryFolder, GalleryItem } from '@ilangathir/shared';
 import { adminApi, uploadMediaWithProgress } from '../lib/api';
+import { useAdminUi } from '../lib/admin-ui';
+import { GallerySkeleton } from '../components/PageSkeletons';
 
 export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
+  const { tr } = useAdminUi();
   const [folders, setFolders] = useState<GalleryFolder[]>([]);
   const [activeFolder, setActiveFolder] = useState<GalleryFolder | null>(null);
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -48,17 +51,17 @@ export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr
         title_en: '', title_ta: '', category: 'Events', event_date: '',
         location_en: '', location_ta: '', description_en: '', description_ta: '', status: 'published'
       });
-      onNotify('Gallery folder created.');
+      onNotify(tr('Gallery folder created.', 'புது கேலரி ஃபோல்டர் உருவாக்கியாச்சுங்க.'));
       loadFolders();
     } catch (err) {
-      onNotify(err instanceof Error ? err.message : 'Failed to create folder.', true);
+      onNotify(err instanceof Error ? err.message : tr('Failed to create folder.', 'ஃபோல்டர் உருவாக்க முடியலைங்க.'), true);
     }
   }
 
   async function handleDeleteFolder(id: string) {
-    if (!confirm('Delete this gallery folder and all item links inside it?')) return;
+    if (!confirm(tr('Delete this gallery folder and all item links inside it?', 'இந்த கேலரி ஃபோல்டரையும் உள்ள உள்ள படங்களையும் நீக்கலாமா?'))) return;
     await adminApi(`/gallery/folders/${id}`, { method: 'DELETE' });
-    onNotify('Gallery folder deleted.');
+    onNotify(tr('Gallery folder deleted.', 'கேலரி ஃபோல்டர் நீக்கியாச்சுங்க.'));
     loadFolders();
   }
 
@@ -89,18 +92,23 @@ export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr
         sort_order: items.length + idx + 1
       }));
       await adminApi('/gallery/items', { method: 'POST', body: JSON.stringify({ items: galleryRows }) });
-      onNotify(`Added ${galleryRows.length} item(s) to "${activeFolder.title_en}".`);
+      onNotify(
+        tr(
+          `Added ${galleryRows.length} item(s) to "${activeFolder.title_en}".`,
+          `"${activeFolder.title_en}" ஃபோல்டர்ல ${galleryRows.length} ஃபைல் சேர்த்தாச்சுங்க.`
+        )
+      );
       openFolder(activeFolder);
       loadFolders();
     } catch (err) {
-      onNotify(err instanceof Error ? err.message : 'Upload failed.', true);
+      onNotify(err instanceof Error ? err.message : tr('Upload failed.', 'அப்லோட் ஆகலைங்க.'), true);
     } finally {
       setUploading(false);
     }
   }
 
   async function handleDeleteItem(id: string) {
-    if (!activeFolder || !confirm('Remove this item from folder?')) return;
+    if (!activeFolder || !confirm(tr('Remove this item from folder?', 'இந்த ஃபைலை ஃபோல்டரிலிருந்து நீக்கலாமா?'))) return;
     await adminApi(`/gallery/items/${id}`, { method: 'DELETE' });
     openFolder(activeFolder);
     loadFolders();
@@ -108,25 +116,27 @@ export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr
 
   if (activeFolder) {
     return (
-      <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setActiveFolder(null)}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-600 hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Back to all gallery folders</span>
+            <span>{tr('Back to all gallery folders', 'எல்லா ஃபோல்டர்களுக்கும் திரும்பு')}</span>
           </button>
           <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700">
-            {activeFolder.title_en} ({items.length} items)
+            {activeFolder.title_en} ({items.length} {tr('items', 'ஃபைல்கள்')})
           </span>
         </div>
 
-        <label className="flex cursor-pointer flex-col items-center justify-center rounded-none border-x-0 border-y-2 border-dashed border-brand-300 bg-white p-8 text-center transition hover:border-brand-600 lg:rounded-2xl lg:border-2">
-          <Upload className="h-8 w-8 text-brand-600" />
+        <label className="admin-card flex cursor-pointer flex-col items-center justify-center border-2 border-dashed border-blue-400/50 p-6 text-center transition hover:border-blue-600 sm:p-8">
+          <Upload className="h-7 w-7 text-blue-600" />
           <span className="mt-2 text-sm font-bold text-slate-900">
-            {uploading ? `Uploading media… ${progress}%` : `Upload images & videos directly into "${activeFolder.title_en}"`}
+            {uploading
+              ? tr(`Uploading media… ${progress}%`, `அப்லோட் ஆகுதுங்க… ${progress}%`)
+              : tr(`Upload images & videos into "${activeFolder.title_en}"`, `"${activeFolder.title_en}" உள்ள போட்டோ, வீடியோ அப்லோட் பண்ணுங்க`)}
           </span>
           <input
             type="file"
@@ -138,106 +148,118 @@ export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr
           />
         </label>
 
-        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {items.map((item) => (
-            <div key={item.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="relative h-44 bg-slate-100">
-                {item.media_type === 'video' ? (
-                  <div className="flex h-full items-center justify-center bg-slate-900 text-white">
-                    <Film className="h-9 w-9" />
-                  </div>
-                ) : (
-                  <img src={item.file_url} alt={item.title_en} className="h-full w-full object-cover" />
-                )}
+        {items.length === 0 ? (
+          <div className="admin-card border-dashed py-10 text-center text-sm text-slate-500">
+            {tr('This folder has no photos or videos yet.', 'இந்த ஃபோல்டர்ல இன்னும் எந்த போட்டோவும் இல்லீங்க.')}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {items.map((item) => (
+              <div key={item.id} className="admin-card overflow-hidden p-0">
+                <div className="relative h-40 bg-slate-100">
+                  {item.media_type === 'video' ? (
+                    <div className="flex h-full items-center justify-center bg-slate-900 text-white">
+                      <Film className="h-8 w-8" />
+                    </div>
+                  ) : (
+                    <img src={item.file_url} alt={item.title_en} className="h-full w-full object-cover" />
+                  )}
+                </div>
+                <div className="flex items-center justify-between p-3 text-xs">
+                  <span className="truncate font-semibold text-slate-800">{item.title_en || tr('Untitled', 'பெயர் இல்லை')}</span>
+                  <button type="button" onClick={() => handleDeleteItem(item.id)} className="text-red-600 hover:text-red-700">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center justify-between p-3 text-xs">
-                <span className="truncate font-semibold text-slate-800">{item.title_en || 'Untitled'}</span>
-                <button type="button" onClick={() => handleDeleteItem(item.id)} className="text-red-600 hover:text-red-700">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
 
+  if (loading && folders.length === 0) {
+    return <GallerySkeleton />;
+  }
+
   return (
-    <div className="space-y-3 lg:space-y-6">
+    <div className="space-y-4">
       <form onSubmit={handleCreateFolder} className="admin-card">
-        <h2 className="text-lg font-bold text-brand-900">Create Event / Programme Gallery Folder</h2>
+        <h2 className="text-base font-bold text-slate-900 sm:text-lg">
+          {tr('Create Event / Programme Gallery Folder', 'புது கேலரி ஃபோல்டர் உருவாக்கு')}
+        </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <label className="admin-label">
-            <span>Folder Title (EN) *</span>
-            <input required placeholder="Folder Title (EN)" value={newFolder.title_en} onChange={(e) => setNewFolder({ ...newFolder, title_en: e.target.value })} className="admin-input" />
+            <span>{tr('Folder Title (EN) *', 'ஃபோல்டர் பெயர் (ஆங்கிலம்) *')}</span>
+            <input required placeholder={tr('Folder Title (EN)', 'பெயர் (ஆங்கிலம்)')} value={newFolder.title_en} onChange={(e) => setNewFolder({ ...newFolder, title_en: e.target.value })} className="admin-input" />
           </label>
           <label className="admin-label">
-            <span>Folder Title (TA) *</span>
-            <input required placeholder="Folder Title (TA)" value={newFolder.title_ta} onChange={(e) => setNewFolder({ ...newFolder, title_ta: e.target.value })} className="admin-input" />
+            <span>{tr('Folder Title (TA) *', 'ஃபோல்டர் பெயர் (தமிழ்) *')}</span>
+            <input required placeholder={tr('Folder Title (TA)', 'பெயர் (தமிழ்)')} value={newFolder.title_ta} onChange={(e) => setNewFolder({ ...newFolder, title_ta: e.target.value })} className="admin-input" />
           </label>
           <label className="admin-label">
-            <span>Category</span>
-            <input placeholder="e.g. Health Camp, Education" value={newFolder.category} onChange={(e) => setNewFolder({ ...newFolder, category: e.target.value })} className="admin-input" />
+            <span>{tr('Category', 'பிரிவு')}</span>
+            <input placeholder={tr('e.g. Health Camp, Education', 'உதா: மருத்துவ முகாம், கல்வி')} value={newFolder.category} onChange={(e) => setNewFolder({ ...newFolder, category: e.target.value })} className="admin-input" />
           </label>
           <label className="admin-label">
-            <span>Event Date</span>
+            <span>{tr('Event Date', 'தேதி')}</span>
             <input type="date" value={newFolder.event_date} onChange={(e) => setNewFolder({ ...newFolder, event_date: e.target.value })} className="admin-input" />
           </label>
           <label className="admin-label">
-            <span>Location (EN)</span>
-            <input placeholder="Location (EN)" value={newFolder.location_en} onChange={(e) => setNewFolder({ ...newFolder, location_en: e.target.value })} className="admin-input" />
+            <span>{tr('Location (EN)', 'இடம் (ஆங்கிலம்)')}</span>
+            <input placeholder={tr('Location (EN)', 'இடம் (ஆங்கிலம்)')} value={newFolder.location_en} onChange={(e) => setNewFolder({ ...newFolder, location_en: e.target.value })} className="admin-input" />
           </label>
           <label className="admin-label">
-            <span>Location (TA)</span>
-            <input placeholder="Location (TA)" value={newFolder.location_ta} onChange={(e) => setNewFolder({ ...newFolder, location_ta: e.target.value })} className="admin-input" />
+            <span>{tr('Location (TA)', 'இடம் (தமிழ்)')}</span>
+            <input placeholder={tr('Location (TA)', 'இடம் (தமிழ்)')} value={newFolder.location_ta} onChange={(e) => setNewFolder({ ...newFolder, location_ta: e.target.value })} className="admin-input" />
           </label>
           <label className="admin-label sm:col-span-2">
-            <span>Description (EN)</span>
-            <textarea placeholder="Description (EN)" rows={2} value={newFolder.description_en} onChange={(e) => setNewFolder({ ...newFolder, description_en: e.target.value })} className="admin-input" />
+            <span>{tr('Description (EN)', 'விவரம்')}</span>
+            <textarea placeholder={tr('Description (EN)', 'சுருக்கமான விவரம்')} rows={2} value={newFolder.description_en} onChange={(e) => setNewFolder({ ...newFolder, description_en: e.target.value })} className="admin-input" />
           </label>
           <div className="flex items-end">
             <button
               type="submit"
               disabled={!newFolder.title_en.trim() || !newFolder.title_ta.trim()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-45"
+              className="admin-btn-primary w-full py-2.5"
             >
               <Plus className="h-4 w-4" />
-              <span>Create Folder</span>
+              <span>{tr('Create Folder', 'ஃபோல்டர் உருவாக்கு')}</span>
             </button>
           </div>
         </div>
       </form>
 
-      {loading ? (
-        <div className="space-y-3 px-4 lg:px-0">
-          <div className="h-40 admin-skeleton rounded-2xl" />
+      {folders.length === 0 ? (
+        <div className="admin-card border-dashed py-10 text-center text-sm text-slate-500">
+          {tr('No gallery folders created yet.', 'இன்னும் எந்த கேலரி ஃபோல்டரும் இல்லீங்க.')}
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {folders.map((f) => (
-            <div key={f.id} className="admin-card flex flex-col overflow-hidden">
+            <div key={f.id} className="admin-card flex flex-col justify-between overflow-hidden p-4">
               <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
                     <FolderOpen className="h-5 w-5" />
                   </span>
-                  <div>
-                    <h3 className="font-bold text-slate-900">{f.title_en}</h3>
-                    <p className="text-xs text-slate-500">{f.category} • {f.event_date || 'No date'}</p>
+                  <div className="min-w-0">
+                    <h3 className="truncate font-bold text-slate-900">{f.title_en}</h3>
+                    <p className="text-xs text-slate-500">{f.category} • {f.event_date || tr('No date', 'தேதி இல்லை')}</p>
                   </div>
                 </div>
-                <button type="button" onClick={() => handleDeleteFolder(f.id)} className="text-red-600 hover:text-red-700">
+                <button type="button" onClick={() => handleDeleteFolder(f.id)} className="shrink-0 text-red-600 hover:text-red-700">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
-              <p className="mt-3 text-xs text-slate-600">{f.item_count} media item(s)</p>
+              <p className="mt-3 text-xs text-slate-500">{f.item_count} {tr('media item(s)', 'ஃபைல்கள்')}</p>
               <button
                 type="button"
                 onClick={() => openFolder(f)}
-                className="mt-4 w-full rounded-xl bg-brand-50 py-2.5 text-xs font-bold text-brand-700 transition hover:bg-brand-100"
+                className="mt-3 w-full rounded-xl bg-brand-50 py-2 text-xs font-bold text-brand-700 transition hover:opacity-90"
               >
-                Open Folder & Manage Media →
+                {tr('Open Folder & Manage Media →', 'திறந்து போட்டோ போடு →')}
               </button>
             </div>
           ))}
