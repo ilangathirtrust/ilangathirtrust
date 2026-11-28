@@ -1,13 +1,13 @@
-const CACHE_NAME = 'ilangathir-web-v3';
+const CACHE_NAME = 'ilangathir-web-v4';
 const PRECACHE_URLS = [
   '/',
   '/offline.html',
-  '/logos/logo.png',
-  '/logos/logo-eng.png',
-  '/logos/logo-tam.png',
-  '/logos/logo-white.png',
-  '/logos/circular-icon.png',
-  '/logos/icon.png',
+  '/logos/logo.webp',
+  '/logos/logo-eng.webp',
+  '/logos/logo-tam.webp',
+  '/logos/logo-white.webp',
+  '/logos/circular-icon.webp',
+  '/logos/icon.webp',
   '/logos/icon-192.png',
   '/logos/icon-512.png'
 ];

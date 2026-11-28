@@ -1,9 +1,9 @@
-const ADMIN_CACHE = 'ilangathir-admin-shell-v2';
+const ADMIN_CACHE = 'ilangathir-admin-shell-v3';
 const SHELL_URLS = [
-  '/logos/logo.png',
-  '/logos/logo-white.png',
-  '/logos/circular-icon.png',
-  '/logos/icon.png',
+  '/logos/logo.webp',
+  '/logos/logo-white.webp',
+  '/logos/circular-icon.webp',
+  '/logos/icon.webp',
   '/logos/icon-192.png',
   '/logos/icon-512.png'
 ];

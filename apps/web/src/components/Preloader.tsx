@@ -35,29 +35,29 @@ export function Preloader() {
   return (
     <div
       aria-hidden="true"
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-sand-50 px-4 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-sand-50 px-6 transition-opacity duration-300 ${
         fading ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}
     >
-      <div className="relative flex h-24 w-24 items-center justify-center">
-        <span className="absolute inset-0 animate-ping rounded-full bg-saffron-400/20" />
-        <span className="absolute inset-0 animate-spin rounded-full border-[2.5px] border-sand-200 border-t-saffron-600 border-r-brand-700" />
-        <div className="flex h-[74px] w-[74px] items-center justify-center rounded-full bg-white p-1.5 shadow-md ring-1 ring-sand-200">
-          <img
-            src={STATIC_ASSETS.circularIcon}
-            alt="Ilangathir Trust"
-            className="h-full w-full object-contain"
-          />
-        </div>
-      </div>
+      <div className="flex flex-col items-center text-center">
+        <img
+          src={STATIC_ASSETS.icon}
+          alt="Ilangathir Trust"
+          className="h-16 w-16 object-contain sm:h-20 sm:w-20"
+        />
 
-      <div className="mt-5 text-center">
-        <p className="font-heading text-base font-extrabold tracking-tight text-brand-900">
-          Ilangathir Trust
-        </p>
-        <p className="mt-0.5 text-xs font-semibold text-saffron-600">
-          இளங்கதிர் அறக்கட்டளை
-        </p>
+        <div className="mt-4 space-y-1">
+          <p className="font-heading text-lg font-extrabold tracking-tight text-brand-900">
+            Ilangathir Trust
+          </p>
+          <p className="text-xs font-semibold text-saffron-600">
+            இளங்கதிர் அறக்கட்டளை
+          </p>
+        </div>
+
+        <div className="mt-5 h-1 w-32 overflow-hidden rounded-full bg-sand-200">
+          <div className="h-full w-1/2 animate-preloaderBar rounded-full bg-gradient-to-r from-brand-800 via-saffron-500 to-brand-800" />
+        </div>
       </div>
     </div>
   );

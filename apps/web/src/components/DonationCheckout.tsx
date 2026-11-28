@@ -104,7 +104,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
         currency: orderData.currency,
         name: 'Ilangathir Trust',
         description: `Donation — ${purpose}`,
-        image: '/logos/icon.png',
+        image: '/logos/icon.webp',
         order_id: orderData.order_id,
         prefill: {
           name: donorName,
@@ -206,12 +206,12 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
       <div className="rounded-3xl border border-emerald-200 bg-white p-8 text-center shadow-xl">
         <div className="mb-5 flex justify-center">
           <img
-            src="/logos/logo-navy-monochrome.png"
+            src="/logos/logo-navy-monochrome.webp"
             alt="Ilangathir Trust"
             className="h-12 w-12 object-contain print:hidden"
           />
           <img
-            src="/logos/logo-black-monochrome.png"
+            src="/logos/logo-black-monochrome.webp"
             alt="Ilangathir Trust"
             className="hidden h-12 w-12 object-contain print:block"
           />

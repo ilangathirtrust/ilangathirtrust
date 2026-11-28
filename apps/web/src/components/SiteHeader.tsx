@@ -141,7 +141,7 @@ export function SiteHeader({
             </div>
           </div>
 
-          {/* Desktop Header (>= lg): Primary /logos/logo.png with original aspect ratio */}
+          {/* Desktop Header (>= lg): Primary /logos/logo.webp with original aspect ratio */}
           <div className="hidden h-[84px] items-center justify-between gap-4 lg:flex">
             <Link
               href="/"

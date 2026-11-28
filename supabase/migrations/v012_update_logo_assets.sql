@@ -7,20 +7,20 @@
 
 INSERT INTO public.site_settings (key, category, value_en, value_ta, json_value, is_public)
 VALUES
-  ('logo_url', 'brand', '/logos/logo.png', '/logos/logo.png', NULL, TRUE),
+  ('logo_url', 'brand', '/logos/logo.webp', '/logos/logo.webp', NULL, TRUE),
   ('favicon_url', 'brand', '/logos/favicon.ico', '/logos/favicon.ico', NULL, TRUE)
 ON CONFLICT (key) DO NOTHING;
 
 UPDATE public.site_settings
 SET
   value_en = CASE
-    WHEN COALESCE(BTRIM(value_en), '') = '' OR value_en LIKE '/assets/%' OR value_en LIKE '/icons/%'
-      THEN '/logos/logo.png'
+    WHEN COALESCE(BTRIM(value_en), '') = '' OR value_en LIKE '/assets/%' OR value_en LIKE '/icons/%' OR value_en = '/logos/logo.png'
+      THEN '/logos/logo.webp'
     ELSE value_en
   END,
   value_ta = CASE
-    WHEN COALESCE(BTRIM(value_ta), '') = '' OR value_ta LIKE '/assets/%' OR value_ta LIKE '/icons/%'
-      THEN '/logos/logo.png'
+    WHEN COALESCE(BTRIM(value_ta), '') = '' OR value_ta LIKE '/assets/%' OR value_ta LIKE '/icons/%' OR value_ta = '/logos/logo.png'
+      THEN '/logos/logo.webp'
     ELSE value_ta
   END
 WHERE key = 'logo_url';

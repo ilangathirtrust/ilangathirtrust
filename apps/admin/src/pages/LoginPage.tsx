@@ -79,7 +79,7 @@ export function LoginPage({
       <div className="w-full max-w-md rounded-3xl border border-sand-200 bg-white p-6 shadow-[0_14px_40px_rgba(11,24,46,0.06)] sm:p-9">
         <div className="text-center">
           <img
-            src="/logos/logo.png"
+            src="/logos/logo.webp"
             alt="Ilangathir Trust"
             className="mx-auto h-14 w-auto object-contain"
           />

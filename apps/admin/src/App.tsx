@@ -200,18 +200,16 @@ export default function App() {
 
   if (checkingAuth) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-sand-50 p-4">
-        <div className="relative flex h-20 w-20 items-center justify-center">
-          <span className="absolute inset-0 animate-spin rounded-full border-2 border-sand-200 border-t-saffron-600 border-r-brand-900" />
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white p-1 shadow-sm">
-            <img
-              src="/logos/circular-icon.png"
-              alt="Ilangathir Trust"
-              className="h-full w-full object-contain"
-            />
-          </div>
-        </div>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-sand-50 p-6 text-center">
+        <img
+          src="/logos/icon.webp"
+          alt="Ilangathir Trust"
+          className="h-16 w-16 object-contain"
+        />
         <p className="mt-4 text-sm font-bold text-brand-900">Loading Operations Console…</p>
+        <div className="mt-4 h-1 w-32 overflow-hidden rounded-full bg-sand-200">
+          <div className="h-full w-1/2 animate-pulse rounded-full bg-gradient-to-r from-brand-800 via-saffron-500 to-brand-800" />
+        </div>
       </div>
     );
   }
@@ -269,7 +267,7 @@ export default function App() {
       >
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-5 py-4">
           <div className="min-w-0">
-            <img src="/logos/logo-white.png" alt="Ilangathir Trust" className="h-9 w-auto object-contain object-left" />
+            <img src="/logos/logo-white.webp" alt="Ilangathir Trust" className="h-9 w-auto object-contain object-left" />
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-saffron-400">Operations Console</p>
           </div>
           <button type="button" onClick={() => setSidebarOpen(false)} aria-label="Close menu" className="rounded-lg p-1 text-slate-300 hover:bg-white/10 lg:hidden">
@@ -355,7 +353,7 @@ export default function App() {
               >
                 <Menu className="h-6 w-6" strokeWidth={2.2} />
               </button>
-              <img src="/logos/circular-icon.png" alt="Ilangathir Trust" className="h-8 w-8 shrink-0 object-contain" />
+              <img src="/logos/circular-icon.webp" alt="Ilangathir Trust" className="h-8 w-8 shrink-0 object-contain" />
               <div className="min-w-0">
                 <p className="truncate text-xs font-extrabold text-brand-900">{currentNav.label}</p>
                 <p className="truncate text-[10px] font-bold uppercase text-saffron-600">{currentNav.group}</p>

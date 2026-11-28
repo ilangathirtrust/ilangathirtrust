@@ -8,16 +8,16 @@ const sourceDir = path.join(repoRoot, 'logos');
 const targetArg = process.argv[2] || 'all';
 
 const WEB_FILES = [
-  'logo.png',
-  'logo-eng.png',
-  'logo-tam.png',
-  'logo-white.png',
-  'logo-white-eng.png',
-  'logo-white-tam.png',
-  'logo-black-monochrome.png',
-  'logo-navy-monochrome.png',
-  'icon.png',
-  'circular-icon.png',
+  'logo.webp',
+  'logo-eng.webp',
+  'logo-tam.webp',
+  'logo-white.webp',
+  'logo-white-eng.webp',
+  'logo-white-tam.webp',
+  'logo-black-monochrome.webp',
+  'logo-navy-monochrome.webp',
+  'icon.webp',
+  'circular-icon.webp',
   'favicon.ico',
   'favicon.svg',
   'favicon-16x16.png',
@@ -47,11 +47,11 @@ const WEB_FILES = [
 ];
 
 const ADMIN_FILES = [
-  'logo.png',
-  'logo-white.png',
-  'logo-navy-monochrome.png',
-  'icon.png',
-  'circular-icon.png',
+  'logo.webp',
+  'logo-white.webp',
+  'logo-navy-monochrome.webp',
+  'icon.webp',
+  'circular-icon.webp',
   'favicon.ico',
   'favicon.svg',
   'favicon-16x16.png',

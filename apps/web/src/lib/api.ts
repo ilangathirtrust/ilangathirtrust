@@ -46,7 +46,7 @@ export const DEFAULT_BOOTSTRAP: BootstrapPayload = {
       value_ta: 'ஒன்றிணைந்து, நாம் ஒரு ஒளிரும் நாளையை உருவாக்குவோம்.',
       json_value: null
     },
-    logo_url: { value_en: '/logos/logo.png', value_ta: '/logos/logo.png', json_value: null },
+    logo_url: { value_en: '/logos/logo.webp', value_ta: '/logos/logo.webp', json_value: null },
     favicon_url: { value_en: '/logos/favicon.ico', value_ta: '/logos/favicon.ico', json_value: null },
     phone: { value_en: '+91 93630 15050', value_ta: '+91 93630 15050', json_value: null },
     email: { value_en: 'ilangathirtrust@gmail.com', value_ta: 'ilangathirtrust@gmail.com', json_value: null },

@@ -1,16 +1,16 @@
 import type { BilingualFaq, Language, NavigationItem } from '@ilangathir/shared';
 
 export const STATIC_ASSETS = {
-  logo: '/logos/logo.png',
-  logoEng: '/logos/logo-eng.png',
-  logoTam: '/logos/logo-tam.png',
-  logoWhite: '/logos/logo-white.png',
-  logoWhiteEng: '/logos/logo-white-eng.png',
-  logoWhiteTam: '/logos/logo-white-tam.png',
-  logoBlackMono: '/logos/logo-black-monochrome.png',
-  logoNavyMono: '/logos/logo-navy-monochrome.png',
-  icon: '/logos/icon.png',
-  circularIcon: '/logos/circular-icon.png',
+  logo: '/logos/logo.webp',
+  logoEng: '/logos/logo-eng.webp',
+  logoTam: '/logos/logo-tam.webp',
+  logoWhite: '/logos/logo-white.webp',
+  logoWhiteEng: '/logos/logo-white-eng.webp',
+  logoWhiteTam: '/logos/logo-white-tam.webp',
+  logoBlackMono: '/logos/logo-black-monochrome.webp',
+  logoNavyMono: '/logos/logo-navy-monochrome.webp',
+  icon: '/logos/icon.webp',
+  circularIcon: '/logos/circular-icon.webp',
   favicon: '/logos/favicon.ico',
   adaptiveForeground: '/logos/adaptive-icon-foreground.png',
   adaptiveBackground: '/logos/adaptive-icon-background.png',
@@ -22,7 +22,10 @@ export const STATIC_ASSETS = {
 export function normalizeBrandAssetUrl(raw: string | undefined | null, fallback: string): string {
   const val = (raw || '').trim();
   if (!val) return fallback;
-  if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('/logos/')) {
+  if (val.startsWith('http://') || val.startsWith('https://')) {
+    return val;
+  }
+  if (val.startsWith('/logos/') && (val.endsWith('.webp') || val.endsWith('.svg') || val.endsWith('.ico'))) {
     return val;
   }
   return fallback;

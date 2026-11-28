@@ -83,12 +83,17 @@ const config: Config = {
         fadeInUp: {
           '0%': { opacity: '0', transform: 'translateY(14px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' }
+        },
+        preloaderBar: {
+          '0%': { transform: 'translateX(-110%)' },
+          '100%': { transform: 'translateX(220%)' }
         }
       },
       animation: {
         marquee: 'marquee 44s linear infinite',
         shimmer: 'shimmer 1.7s ease-in-out infinite',
-        fadeInUp: 'fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+        fadeInUp: 'fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        preloaderBar: 'preloaderBar 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite'
       }
     }
   },
