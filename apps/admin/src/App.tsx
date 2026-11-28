@@ -113,10 +113,18 @@ export default function App() {
     }
   };
 
+  function scrollPageToTop() {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+
   function navigateTab(tabId: string) {
     const safeTab = VALID_TAB_IDS.has(tabId) ? tabId : 'overview';
     setActiveTab(safeTab);
     setSidebarOpen(false);
+    scrollPageToTop();
     if (typeof window !== 'undefined') {
       const targetPath = safeTab === 'overview' ? '/' : `/${safeTab}`;
       if (window.location.pathname !== targetPath) {
@@ -275,6 +283,10 @@ export default function App() {
 
   const allowedNavItems = NAV_ITEMS.filter((n) => n.roles.includes(adminUser.role));
   const resolvedActive = allowedNavItems.some((n) => n.id === activeTab) ? activeTab! : 'overview';
+
+  useEffect(() => {
+    scrollPageToTop();
+  }, [resolvedActive]);
   const currentNav = allowedNavItems.find((n) => n.id === resolvedActive) || allowedNavItems[0];
   const primaryBottomItems = MOBILE_BOTTOM_IDS
     .map((id) => allowedNavItems.find((n) => n.id === id))
@@ -390,8 +402,8 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-        <header className="sticky top-0 z-30 transform-gpu border-b border-slate-200/90 bg-white/95 px-3.5 py-2.5 backdrop-blur-md dark:border-[#262A34] dark:bg-[#161920]/95 sm:px-5 lg:px-8 lg:py-3">
+      <div className="flex min-w-0 max-w-full flex-1 flex-col overflow-x-clip lg:pl-64">
+        <header className="sticky top-0 z-30 transform-gpu border-b border-slate-200/90 bg-white/95 px-2.5 py-2.5 backdrop-blur-md dark:border-[#262A34] dark:bg-[#161920]/95 min-[360px]:px-3.5 sm:px-5 lg:px-8 lg:py-3">
           {/* Mobile Header (< lg) — No install/download icon button */}
           <div className="flex items-center justify-between gap-2 lg:hidden">
             <div className="flex min-w-0 items-center gap-2">
@@ -552,7 +564,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1360px] flex-1 px-3.5 pt-3.5 pb-24 sm:px-6 sm:pt-5 lg:px-8 lg:py-6 lg:pb-12">
+        <main className="mx-auto w-full min-w-0 max-w-[1360px] flex-1 px-2.5 pt-3 pb-24 min-[360px]:px-3.5 sm:px-6 sm:pt-5 lg:px-8 lg:py-6 lg:pb-12">
           {toast && (
             <div
               role={toast.isErr ? 'alert' : 'status'}

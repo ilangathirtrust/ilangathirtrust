@@ -717,18 +717,18 @@ export function AnalyticsPage({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 max-w-full space-y-3.5 sm:space-y-4">
       {/* Top Filters & Date Range Bar */}
-      <div className="admin-card space-y-3 p-3.5 sm:p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
+      <div className="admin-card space-y-3 p-3 sm:p-4">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
           {/* Date Presets */}
-          <div className="flex flex-wrap items-center gap-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-1">
             {presets.map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => setPreset(p.id)}
-                className={`rounded-xl px-2.5 py-1.5 text-[11px] font-bold transition sm:px-3 sm:text-xs ${
+                className={`rounded-xl px-2 py-1 text-[11px] font-bold transition min-[360px]:px-2.5 min-[360px]:py-1.5 sm:px-3 sm:text-xs ${
                   preset === p.id
                     ? 'bg-blue-600 text-white shadow-xs'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-[#1C2029] dark:text-slate-300 dark:hover:bg-[#242936]'
@@ -740,7 +740,7 @@ export function AnalyticsPage({
           </div>
 
           {/* Action Controls */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
             <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 dark:border-[#2C313D] dark:bg-[#1C2029]">
               <input
                 type="checkbox"
@@ -802,8 +802,8 @@ export function AnalyticsPage({
 
         {/* Custom Range Picker Row */}
         {preset === 'custom' && (
-          <div className="admin-subcard flex flex-wrap items-end gap-2.5">
-            <label className="admin-label min-w-[130px] flex-1">
+          <div className="admin-subcard grid gap-2.5 sm:flex sm:flex-wrap sm:items-end">
+            <label className="admin-label min-w-0 sm:min-w-[140px] sm:flex-1">
               <span>{tr('Start Date (IST)', 'தொடக்க தேதி')}</span>
               <input
                 type="date"
@@ -813,7 +813,7 @@ export function AnalyticsPage({
                 className="admin-input py-1.5 text-xs"
               />
             </label>
-            <label className="admin-label min-w-[130px] flex-1">
+            <label className="admin-label min-w-0 sm:min-w-[140px] sm:flex-1">
               <span>{tr('End Date (IST)', 'முடிவு தேதி')}</span>
               <input
                 type="date"
@@ -823,7 +823,7 @@ export function AnalyticsPage({
                 className="admin-input py-1.5 text-xs"
               />
             </label>
-            <button type="button" onClick={() => loadReports(true)} className="admin-btn-primary py-2 px-4">
+            <button type="button" onClick={() => loadReports(true)} className="admin-btn-primary w-full py-2 px-4 sm:w-auto">
               {tr('Apply Range', 'பொருத்து')}
             </button>
           </div>
@@ -889,7 +889,7 @@ export function AnalyticsPage({
       </div>
 
       {/* Horizontal Section Tabs */}
-      <div className="admin-sidebar-scroll flex gap-1.5 overflow-x-auto pb-1">
+      <div className="admin-sidebar-scroll flex w-full min-w-0 max-w-full gap-1.5 overflow-x-auto pb-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
@@ -898,7 +898,7 @@ export function AnalyticsPage({
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-bold transition min-[360px]:px-3.5 min-[360px]:py-2 sm:text-xs ${
                 active
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'border border-slate-200/90 bg-white text-slate-700 hover:bg-slate-50 dark:border-[#262A34] dark:bg-[#161920] dark:text-slate-300'
@@ -922,8 +922,8 @@ export function AnalyticsPage({
 
       {/* ==================== 1. OVERVIEW ==================== */}
       {activeTab === 'overview' && data && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        <div className="min-w-0 space-y-4">
+          <div className="grid grid-cols-2 gap-2.5 min-[360px]:gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {[
               { label: tr('Total Users', 'மொத்த யூசர்ஸ்'), m: data.overview.totalUsers, val: data.overview.totalUsers.value.toLocaleString('en-IN') },
               { label: tr('Active Users', 'ஆக்டிவ் யூசர்ஸ்'), m: data.overview.activeUsers, val: data.overview.activeUsers.value.toLocaleString('en-IN') },
@@ -938,7 +938,7 @@ export function AnalyticsPage({
               { label: tr('Event Count', 'மொத்த ஈவென்ட்ஸ்'), m: data.overview.eventCount, val: data.overview.eventCount.value.toLocaleString('en-IN') },
               { label: tr('Key Events', 'முக்கிய இலக்குகள்'), m: data.overview.conversions, val: data.overview.conversions.value.toLocaleString('en-IN') }
             ].map((card) => (
-              <div key={card.label} className="admin-card flex flex-col justify-between p-3.5">
+              <div key={card.label} className="admin-card flex min-w-0 flex-col justify-between p-2.5 min-[360px]:p-3.5">
                 <span className="truncate text-[11px] font-bold text-slate-500">{card.label}</span>
                 <p className="mt-1.5 text-lg font-extrabold tracking-tight tabular-nums text-slate-900 sm:text-xl">
                   {card.val}
@@ -1348,7 +1348,7 @@ export function AnalyticsPage({
                 <tbody>
                   {data.pages.topPages.map((p, idx) => (
                     <tr key={idx} className="border-t border-slate-100 hover:bg-slate-50/50">
-                      <td className="p-3 max-w-[260px]">
+                      <td className="p-2.5 sm:p-3 max-w-[130px] sm:max-w-[260px]">
                         <p className="truncate font-mono font-bold text-slate-900">{p.path}</p>
                         <p className="truncate text-[11px] text-slate-500">{p.title}</p>
                       </td>
@@ -1383,7 +1383,7 @@ export function AnalyticsPage({
                 <tbody>
                   {data.pages.landingPages.map((lp, idx) => (
                     <tr key={idx} className="border-t border-slate-100 hover:bg-slate-50/50">
-                      <td className="p-3 max-w-[260px] truncate font-mono font-bold text-slate-900">{lp.landingPage}</td>
+                      <td className="p-2.5 sm:p-3 max-w-[140px] sm:max-w-[260px] truncate font-mono font-bold text-slate-900">{lp.landingPage}</td>
                       <td className="p-3 text-right font-bold tabular-nums">{lp.sessions.toLocaleString('en-IN')}</td>
                       <td className="p-3 text-right tabular-nums">{lp.activeUsers.toLocaleString('en-IN')}</td>
                       <td className="p-3 text-right tabular-nums">{lp.engagementRate}%</td>

@@ -193,7 +193,7 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 pt-1">
-          <input placeholder={tr('Featured Image URL', 'முகப்பு போட்டோ லிங்க்')} value={form.featured_image_url} onChange={(e) => setForm({ ...form, featured_image_url: e.target.value })} className="admin-input min-w-[200px] flex-1" />
+          <input placeholder={tr('Featured Image URL', 'முகப்பு போட்டோ லிங்க்')} value={form.featured_image_url} onChange={(e) => setForm({ ...form, featured_image_url: e.target.value })} className="admin-input min-w-0 w-full sm:w-auto sm:min-w-[200px] sm:flex-1" />
           <button type="button" onClick={() => setPickerOpen(true)} className="admin-btn-secondary py-2.5">
             <ImageIcon className="h-4 w-4 text-blue-600" />
             <span>{tr('Select Featured Image', 'போட்டோ எடு')}</span>

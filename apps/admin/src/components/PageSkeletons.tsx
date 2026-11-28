@@ -86,7 +86,7 @@ export function PagesSkeleton() {
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="h-10 min-w-[200px] flex-1 rounded-xl admin-skeleton" />
+          <div className="h-10 min-w-0 w-full sm:w-auto sm:min-w-[200px] sm:flex-1 rounded-xl admin-skeleton" />
           <div className="h-10 w-36 rounded-xl admin-skeleton" />
         </div>
         <div className="flex justify-end">
@@ -117,7 +117,7 @@ export function EventsActivitiesSkeleton({ isTeam = false }: { isTeam?: boolean 
           </div>
         )}
         <div className="flex flex-wrap gap-2">
-          <div className="h-10 min-w-[180px] flex-1 rounded-xl admin-skeleton" />
+          <div className="h-10 min-w-0 w-full sm:w-auto sm:min-w-[180px] sm:flex-1 rounded-xl admin-skeleton" />
           <div className="h-10 w-32 rounded-xl admin-skeleton" />
           <div className="h-10 w-28 rounded-xl admin-skeleton" />
         </div>
@@ -196,7 +196,7 @@ export function BlogSkeleton() {
           <div className="h-28 rounded-xl admin-skeleton" />
         </div>
         <div className="flex flex-wrap gap-2">
-          <div className="h-10 min-w-[180px] flex-1 rounded-xl admin-skeleton" />
+          <div className="h-10 min-w-0 w-full sm:w-auto sm:min-w-[180px] sm:flex-1 rounded-xl admin-skeleton" />
           <div className="h-10 w-32 rounded-xl admin-skeleton" />
         </div>
       </div>
@@ -231,7 +231,7 @@ export function MediaSkeleton() {
       </div>
 
       <div className="admin-card flex flex-wrap items-center gap-2.5 p-3.5">
-        <div className="h-10 min-w-[180px] flex-1 rounded-xl admin-skeleton" />
+        <div className="h-10 min-w-0 w-full sm:w-auto sm:min-w-[180px] sm:flex-1 rounded-xl admin-skeleton" />
         <div className="h-10 w-32 rounded-xl admin-skeleton" />
         <div className="h-10 w-24 rounded-xl admin-skeleton" />
       </div>
@@ -312,7 +312,7 @@ export function DonationsSkeleton() {
       </div>
 
       <div className="admin-card flex flex-wrap gap-2.5 p-3.5">
-        <div className="h-10 min-w-[180px] flex-1 rounded-xl admin-skeleton" />
+        <div className="h-10 min-w-0 w-full sm:w-auto sm:min-w-[180px] sm:flex-1 rounded-xl admin-skeleton" />
         <div className="h-10 w-32 rounded-xl admin-skeleton" />
         <div className="h-10 w-24 rounded-xl admin-skeleton" />
       </div>
@@ -353,7 +353,7 @@ export function InboxUsersSkeleton({ mode }: { mode: 'enquiries' | 'volunteers' 
             mode === 'audit' ? 'p-3.5' : 'p-4'
           }`}
         >
-          <div className="space-y-1.5 flex-1 min-w-[180px]">
+          <div className="space-y-1.5 flex-1 min-w-0 sm:min-w-[180px]">
             <div className="h-4 w-56 max-w-full rounded admin-skeleton" />
             <div className="h-3 w-40 rounded admin-skeleton" />
             {(mode === 'enquiries' || mode === 'volunteers') && (

@@ -84,7 +84,7 @@ export function TrendLineChart({
   const activeCoord = hoverIdx !== null ? currCoords[hoverIdx] : null;
 
   return (
-    <div className="relative w-full select-none">
+    <div className="relative w-full min-w-0 overflow-hidden select-none">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto w-full overflow-visible"
@@ -270,8 +270,8 @@ export function DonutChartCard({
   const focused = hoverIdx !== null ? segments[hoverIdx] : null;
 
   return (
-    <div className="flex flex-col items-center gap-4 sm:flex-row">
-      <div className="relative h-40 w-40 shrink-0">
+    <div className="flex min-w-0 flex-col items-center gap-4 sm:flex-row">
+      <div className="relative h-32 w-32 shrink-0 min-[360px]:h-40 min-[360px]:w-40">
         <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90">
           <circle
             cx={cx}
@@ -367,7 +367,7 @@ export function HorizontalBarList({
             type="button"
             disabled={!onSelect}
             onClick={() => onSelect?.(item.label)}
-            className={`block w-full text-left ${onSelect ? 'group cursor-pointer' : 'cursor-default'}`}
+            className={`block w-full min-w-0 overflow-hidden text-left ${onSelect ? 'group cursor-pointer' : 'cursor-default'}`}
           >
             <div className="flex items-baseline justify-between gap-2 text-xs">
               <span className="truncate font-semibold text-slate-800 group-hover:text-blue-600">{item.label}</span>

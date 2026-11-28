@@ -245,7 +245,7 @@ export function EventsActivitiesPage({
             placeholder={tr('Image / Banner URL', 'போட்டோ / பேனர் லிங்க்')}
             value={String(form[imgField] || '')}
             onChange={(e) => setForm({ ...form, [imgField]: e.target.value })}
-            className="admin-input min-w-[200px] flex-1"
+            className="admin-input min-w-0 w-full sm:w-auto sm:min-w-[200px] sm:flex-1"
           />
           <button type="button" onClick={() => setPickerOpen(true)} className="admin-btn-secondary py-2.5">
             <ImageIcon className="h-4 w-4 text-blue-600" />

@@ -203,7 +203,7 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
         </div>
 
         <div className="flex flex-wrap items-end gap-2.5">
-          <label className="admin-label min-w-[200px] flex-1">
+          <label className="admin-label min-w-0 w-full sm:w-auto sm:min-w-[200px] sm:flex-1">
             <span>{tr('Hero Banner Image URL', 'ஹீரோ பேனர் போட்டோ லிங்க்')}</span>
             <input value={form.hero_image_url || ''} onChange={(e) => setForm({ ...form, hero_image_url: e.target.value })} className="admin-input" />
           </label>

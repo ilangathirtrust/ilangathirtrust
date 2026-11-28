@@ -10,6 +10,12 @@ export function AnalyticsTracker() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, [pathname]);
+
+  useEffect(() => {
     if (!GA4_ID) return;
     const query = searchParams?.toString();
     const fullPath = query ? `${pathname}?${query}` : pathname;

@@ -170,7 +170,7 @@ export function MediaLibraryPage({ onNotify }: { onNotify: (msg: string, isErr?:
 
       {/* Filters */}
       <div className="admin-card flex flex-wrap items-center gap-2.5 p-3.5">
-        <div className="relative min-w-[200px] flex-1">
+        <div className="relative min-w-0 w-full sm:w-auto sm:min-w-[200px] sm:flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="search"
