@@ -1,8 +1,10 @@
+import crypto from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import type { AdminRole } from '@ilangathir/shared';
 import { isServiceRoleKeyLikelyValid } from '../config/env.js';
 import { getSupabaseAdmin } from '../config/supabase.js';
-import { verifyAndSyncAdminSession } from '../services/device.js';
+import { apiCache } from '../services/cache.js';
+import { parseDeviceMetadata, verifyAndSyncAdminSession } from '../services/device.js';
 
 export interface AuthenticatedAdmin {
   id: string;
@@ -40,6 +42,15 @@ export async function requireAdminAuth(req: Request, res: Response, next: NextFu
         error: 'Server configuration error: SUPABASE_SERVICE_ROLE_KEY in ilangathir-api is invalid (not a service_role key). Update it in Vercel and redeploy.',
         code: 'INVALID_SERVICE_ROLE_KEY'
       });
+      return;
+    }
+
+    const reqDevice = parseDeviceMetadata(req);
+    const authCacheKey = `auth:${crypto.createHash('sha256').update(`${token}:${reqDevice.deviceId}`).digest('hex').slice(0, 24)}`;
+    const cachedAdmin = apiCache.get<AuthenticatedAdmin>(authCacheKey);
+    if (cachedAdmin) {
+      req.admin = cachedAdmin;
+      next();
       return;
     }
 
@@ -84,6 +95,7 @@ export async function requireAdminAuth(req: Request, res: Response, next: NextFu
     });
 
     if (!sessionCheck.allowed) {
+      apiCache.invalidatePrefix(authCacheKey);
       res.status(401).json({
         error: sessionCheck.reason || 'This session has been signed out remotely.',
         code: 'SESSION_REVOKED'
@@ -99,6 +111,7 @@ export async function requireAdminAuth(req: Request, res: Response, next: NextFu
       sessionId: sessionCheck.sessionId,
       deviceId: sessionCheck.device.deviceId
     };
+    apiCache.set(authCacheKey, req.admin, 20);
 
     next();
   } catch (err) {

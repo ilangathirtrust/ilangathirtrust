@@ -91,9 +91,9 @@ export function NavigationMarqueePage({ onNotify }: { onNotify: (msg: string, is
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3 lg:space-y-6">
       {/* Homepage Marquee Showcase */}
-      <div className="admin-card p-5 sm:p-6">
+      <div className="admin-card">
         <h2 className="text-lg font-bold text-brand-900">Homepage Activity Marquee Images</h2>
         <p className="text-xs text-slate-500">Images here scroll smoothly in the homepage highlight marquee.</p>
 
@@ -147,7 +147,7 @@ export function NavigationMarqueePage({ onNotify }: { onNotify: (msg: string, is
       </div>
 
       {/* Navigation Menus */}
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="admin-card">
         <h2 className="text-lg font-bold text-slate-900">Navigation Menu Manager</h2>
 
         <form onSubmit={addNav} className="mt-4 grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-6">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { History, Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
 import type { ActivityItem, EventItem, GalleryFolder, TeamMember } from '@ilangathir/shared';
 import { adminApi } from '../lib/api';
+import { useAdminUi } from '../lib/admin-ui';
 import { MediaPickerModal } from '../components/MediaPickerModal';
 import { VersionHistoryModal } from '../components/VersionHistoryModal';
 
@@ -12,36 +13,54 @@ export function EventsActivitiesPage({
   mode: 'events' | 'activities' | 'team';
   onNotify: (msg: string, isErr?: boolean) => void;
 }) {
+  const { tr } = useAdminUi();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [folders, setFolders] = useState<GalleryFolder[]>([]);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [historyTarget, setHistoryTarget] = useState<{ type: string; id: string } | null>(null);
 
   const [form, setForm] = useState<Record<string, unknown>>({ status: 'published' });
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const load = () => {
+  const load = (force = false) => {
     setLoading(true);
+    setLoadError('');
     if (mode === 'events') {
-      Promise.all([adminApi<EventItem[]>('/events'), adminApi<GalleryFolder[]>('/gallery/folders')])
+      Promise.all([
+        adminApi<EventItem[]>('/events', { forceRefresh: force }),
+        adminApi<GalleryFolder[]>('/gallery/folders', { forceRefresh: force })
+      ])
         .then(([ev, gf]) => {
           setEvents(ev);
           setFolders(gf);
         })
-        .catch((e) => onNotify(e.message, true))
+        .catch((e) => {
+          const msg = e instanceof Error ? e.message : 'Unable to load events.';
+          setLoadError(msg);
+          onNotify(msg, true);
+        })
         .finally(() => setLoading(false));
     } else if (mode === 'activities') {
-      adminApi<ActivityItem[]>('/activities')
+      adminApi<ActivityItem[]>('/activities', { forceRefresh: force })
         .then(setActivities)
-        .catch((e) => onNotify(e.message, true))
+        .catch((e) => {
+          const msg = e instanceof Error ? e.message : 'Unable to load activities.';
+          setLoadError(msg);
+          onNotify(msg, true);
+        })
         .finally(() => setLoading(false));
     } else {
-      adminApi<TeamMember[]>('/team')
+      adminApi<TeamMember[]>('/team', { forceRefresh: force })
         .then(setTeam)
-        .catch((e) => onNotify(e.message, true))
+        .catch((e) => {
+          const msg = e instanceof Error ? e.message : 'Unable to load team members.';
+          setLoadError(msg);
+          onNotify(msg, true);
+        })
         .finally(() => setLoading(false));
     }
   };
@@ -49,7 +68,7 @@ export function EventsActivitiesPage({
   useEffect(() => {
     setForm({ status: 'published', is_active: true, sort_order: 0 });
     setEditingId(null);
-    load();
+    load(false);
   }, [mode]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -58,25 +77,25 @@ export function EventsActivitiesPage({
       const endpoint = mode === 'events' ? '/events' : mode === 'activities' ? '/activities' : '/team';
       if (editingId) {
         await adminApi(`${endpoint}/${editingId}`, { method: 'PUT', body: JSON.stringify(form) });
-        onNotify('Updated successfully.');
+        onNotify(tr('Updated successfully.', 'Update ஆச்சு.'));
       } else {
         await adminApi(endpoint, { method: 'POST', body: JSON.stringify(form) });
-        onNotify('Created successfully.');
+        onNotify(tr('Created successfully.', 'புதுசா Add பண்ணியாச்சு.'));
       }
       setForm({ status: 'published', is_active: true, sort_order: 0 });
       setEditingId(null);
-      load();
+      load(true);
     } catch (err) {
       onNotify(err instanceof Error ? err.message : 'Save failed.', true);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this entry permanently?')) return;
+    if (!confirm(tr('Delete this entry permanently?', 'இதை நிரந்தரமா Delete பண்ணலாமா?'))) return;
     const endpoint = mode === 'events' ? '/events' : mode === 'activities' ? '/activities' : '/team';
     await adminApi(`${endpoint}/${id}`, { method: 'DELETE' });
-    onNotify('Deleted.');
-    load();
+    onNotify(tr('Deleted.', 'Delete பண்ணியாச்சு.'));
+    load(true);
   }
 
   async function togglePublish(item: { id: string; status?: string }) {
@@ -84,17 +103,26 @@ export function EventsActivitiesPage({
     const endpoint = mode === 'events' ? '/events' : '/activities';
     await adminApi(`${endpoint}/${item.id}`, { method: 'PUT', body: JSON.stringify({ status: next }) });
     onNotify(`Status changed to ${next}.`);
-    load();
+    load(true);
   }
 
   const imgField = mode === 'events' ? 'banner_url' : 'image_url';
+  const currentList = mode === 'events' ? events : mode === 'activities' ? activities : team;
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="space-y-3 lg:space-y-6">
+      <form onSubmit={handleSubmit} className="admin-card space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-900">
-            {editingId ? 'Edit' : 'Add New'} {mode === 'events' ? 'Event' : mode === 'activities' ? 'Activity' : 'Team Member'}
+            {editingId
+              ? tr(
+                  `Edit ${mode === 'events' ? 'Event' : mode === 'activities' ? 'Activity' : 'Team Member'}`,
+                  `${mode === 'events' ? 'Event' : mode === 'activities' ? 'Activity' : 'Team Member'} Edit பண்ணு`
+                )
+              : tr(
+                  `Add New ${mode === 'events' ? 'Event' : mode === 'activities' ? 'Activity' : 'Team Member'}`,
+                  `புதிய ${mode === 'events' ? 'Event' : mode === 'activities' ? 'Activity' : 'Team Member'} சேர்க்க`
+                )}
           </h2>
           {editingId && (
             <button
@@ -105,7 +133,7 @@ export function EventsActivitiesPage({
               }}
               className="text-xs font-bold text-slate-500 hover:text-slate-900"
             >
-              Cancel editing
+              {tr('Cancel editing', 'Cancel பண்ணு')}
             </button>
           )}
         </div>
@@ -198,36 +226,51 @@ export function EventsActivitiesPage({
 
         <div className="flex flex-wrap items-center gap-3">
           <input
-            placeholder="Image / Banner URL"
+            placeholder={tr('Image / Banner URL', 'போட்டோ / Banner Link')}
             value={String(form[imgField] || '')}
             onChange={(e) => setForm({ ...form, [imgField]: e.target.value })}
-            className="admin-input flex-1"
+            className="admin-input min-w-[200px] flex-1"
           />
           <button type="button" onClick={() => setPickerOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700">
             <ImageIcon className="h-4 w-4 text-brand-600" />
-            <span>Select / Upload Banner</span>
+            <span>{tr('Select / Upload Banner', 'Banner போட்டோ எடு')}</span>
           </button>
           <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-700">
             <Plus className="h-4 w-4" />
-            <span>{editingId ? 'Save Changes' : 'Create'}</span>
+            <span>{editingId ? tr('Save Changes', 'Save பண்ணு') : tr('Create', 'Add பண்ணு')}</span>
           </button>
         </div>
       </form>
 
       {loading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 admin-skeleton rounded-2xl" />)}
+        <div className="space-y-3 px-4 lg:px-0">
+          {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-20 admin-skeleton rounded-2xl" />)}
+        </div>
+      ) : loadError ? (
+        <div className="admin-card flex flex-wrap items-center justify-between gap-3 border-red-200 bg-red-50 text-sm font-semibold text-red-800">
+          <span>{loadError}</span>
+          <button
+            type="button"
+            onClick={() => load(true)}
+            className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700"
+          >
+            {tr('Retry', 'Retry பண்ணு')}
+          </button>
+        </div>
+      ) : currentList.length === 0 ? (
+        <div className="admin-card text-center text-sm text-slate-500">
+          {tr('No entries added yet. Use the form above to add one.', 'இப்போதைக்கு எந்த Record-உம் இல்லை. மேல இருக்கிற Form-ல Add பண்ணுங்க.')}
         </div>
       ) : (
         <div className="space-y-3">
-          {(mode === 'events' ? events : mode === 'activities' ? activities : team).map((item) => {
+          {currentList.map((item) => {
             const rec = item as unknown as Record<string, unknown>;
             const id = String(rec.id);
             const title = String(rec.title_en || rec.name_en || '');
             const sub = String(rec.event_date || rec.activity_date || rec.designation_en || '');
             const status = String(rec.status || '');
             return (
-              <div key={id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div key={id} className="admin-card flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h3 className="font-bold text-slate-900">{title}</h3>
                   <p className="text-xs text-slate-500">{sub}</p>
@@ -249,7 +292,7 @@ export function EventsActivitiesPage({
                       type="button"
                       onClick={() => setHistoryTarget({ type: mode, id })}
                       className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50"
-                      title="Version History"
+                      title={tr('Version History', 'பழைய History')}
                     >
                       <History className="h-4 w-4" />
                     </button>
@@ -262,7 +305,7 @@ export function EventsActivitiesPage({
                     }}
                     className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
                   >
-                    Edit
+                    {tr('Edit', 'Edit')}
                   </button>
                   <button type="button" onClick={() => handleDelete(id)} className="rounded-lg p-2 text-red-600 hover:bg-red-50">
                     <Trash2 className="h-4 w-4" />

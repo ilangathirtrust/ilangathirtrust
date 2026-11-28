@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { AlertCircle, Eye, EyeOff, Loader2, Lock, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, Loader2, Lock, Moon, ShieldCheck, Sun } from 'lucide-react';
 import { getSupabaseClient, isSupabaseConfigured, PUBLIC_SITE_URL } from '../lib/supabase';
+import { useAdminUi } from '../lib/admin-ui';
 
 export function LoginPage({
   onSuccess,
@@ -11,6 +12,7 @@ export function LoginPage({
   onSignOut?: () => Promise<void> | void;
   externalError?: string;
 }) {
+  const { lang, setLang, theme, toggleTheme, tr } = useAdminUi();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -75,8 +77,38 @@ export function LoginPage({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-sand-50 p-3.5 sm:p-6">
-      <div className="w-full max-w-md rounded-3xl border border-sand-200 bg-white p-6 shadow-[0_14px_40px_rgba(11,24,46,0.06)] sm:p-9">
+    <div className="flex min-h-screen items-center justify-center bg-sand-50 dark:bg-[#18191B] sm:p-6">
+      <div className="w-full min-h-screen sm:min-h-0 max-w-md sm:rounded-3xl border-0 sm:border border-sand-200 dark:border-[#31343B] bg-white dark:bg-[#212225] p-6 sm:shadow-[0_14px_40px_rgba(11,24,46,0.06)] sm:p-9">
+        <div className="mb-5 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sand-200 bg-sand-100 text-slate-700 dark:border-[#363940] dark:bg-[#292B30] dark:text-amber-300"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+          <div className="inline-flex items-center rounded-full border border-sand-200 bg-sand-100 p-0.5 dark:border-[#363940] dark:bg-[#292B30]">
+            <button
+              type="button"
+              onClick={() => setLang('en')}
+              className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                lang === 'en' ? 'bg-brand-900 text-white dark:bg-blue-600' : 'text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              En
+            </button>
+            <button
+              type="button"
+              onClick={() => setLang('ta')}
+              className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                lang === 'ta' ? 'bg-brand-900 text-white dark:bg-blue-600' : 'text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              த
+            </button>
+          </div>
+        </div>
         <div className="text-center">
           <img
             src="/logos/logo.webp"
@@ -85,13 +117,15 @@ export function LoginPage({
           />
           <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-saffron-500/20 bg-saffron-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-saffron-700">
             <Lock className="h-3 w-3" />
-            Authorized Access Only
+            {tr('Authorized Access Only', 'அனுமதி பெற்ற Admin மட்டும்')}
           </span>
           <h1 className="mt-3 text-xl font-extrabold text-brand-900 sm:text-2xl">
-            Ilangathir Operations Console
+            {tr('Admin Ilangathir Trust', 'Ilangathir Admin பக்கம்')}
           </h1>
           <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-            {mfaStep ? 'Enter your 6-digit authenticator code' : 'Protected by Supabase Authentication, 2FA & RBAC'}
+            {mfaStep
+              ? tr('Enter your 6-digit authenticator code', '6-digit Authenticator Code போடுங்க')
+              : tr('Protected by Supabase Authentication, 2FA & RBAC', 'Supabase Security, 2FA & RBAC பாதுகாப்பு')}
           </p>
         </div>
 

@@ -79,8 +79,8 @@ export function SiteHeader({
         </div>
       </div>
 
-      {/* Main Sticky Header */}
-      <header className="sticky top-0 z-40 border-b border-sand-200 bg-white/95 shadow-[0_2px_12px_rgba(11,24,46,0.04)] backdrop-blur-md">
+      {/* Main Sticky Header (opaque + GPU-composited to prevent scroll jitter) */}
+      <header className="sticky top-0 z-40 transform-gpu border-b border-sand-200 bg-white shadow-[0_2px_12px_rgba(11,24,46,0.04)]">
         <div className="container-max">
           {/* Mobile Header (< lg): Left bare menu icon | Balanced centered language-switched logo | Right full "En" "த" toggle | NO donate icon */}
           <div className="grid h-[66px] grid-cols-[auto_1fr_auto] items-center gap-2 min-[360px]:h-[70px] lg:hidden">

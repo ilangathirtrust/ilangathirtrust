@@ -23,12 +23,8 @@ export async function generateMetadata({
   const event = await getEventBySlug(slug);
   if (!event) return { title: 'Event Not Found | Ilangathir Trust' };
 
-  const title =
-    pickLocalized(event as unknown as Record<string, unknown>, 'seo_title', lang) ||
-    `${pickLocalized(event as unknown as Record<string, unknown>, 'title', lang)} | Ilangathir Trust`;
-  const description =
-    pickLocalized(event as unknown as Record<string, unknown>, 'seo_description', lang) ||
-    pickLocalized(event as unknown as Record<string, unknown>, 'summary', lang);
+  const title = `${pickLocalized(event as unknown as Record<string, unknown>, 'title', lang)} | Ilangathir Trust`;
+  const description = pickLocalized(event as unknown as Record<string, unknown>, 'summary', lang);
 
   return buildPageMetadata({
     title,

@@ -6,7 +6,13 @@
   html, body {
     font-family: 'Inter', 'Noto Sans Tamil', system-ui, sans-serif;
     background-color: #F8FAFC;
+    color: #0F172A;
     overflow-x: clip;
+  }
+
+  html.dark, html.dark body {
+    background-color: #18191B;
+    color: #F1F3F5;
   }
 
   h1, h2, h3, h4 {
@@ -18,18 +24,149 @@
   @apply w-full min-w-0 rounded-xl border border-sand-200 bg-sand-50/70 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-700 focus:bg-white focus:ring-2 focus:ring-brand-700/15;
 }
 
+html.dark .admin-input {
+  background-color: #292B30;
+  border-color: #363940;
+  color: #F1F3F5;
+}
+
+html.dark .admin-input::placeholder {
+  color: #8E95A2;
+}
+
+html.dark .admin-input:focus {
+  border-color: #F59E0B;
+  background-color: #2E3137;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.18);
+}
+
 .admin-label {
   @apply block space-y-1.5 text-xs font-bold text-slate-700;
 }
 
+html.dark .admin-label {
+  color: #D1D5DB;
+}
+
+/* Mobile: borderless full-width sections (no cramped side boxes); Desktop (lg+): crisp elevated cards */
 .admin-card {
-  @apply rounded-2xl border border-sand-200 bg-white shadow-[0_2px_12px_rgba(11,24,46,0.03)];
+  @apply rounded-none border-x-0 border-y border-sand-200 bg-white px-4 py-5 shadow-none lg:rounded-2xl lg:border lg:p-6 lg:shadow-[0_2px_12px_rgba(11,24,46,0.03)];
+}
+
+html.dark .admin-card {
+  background-color: #212225;
+  border-color: #31343B;
+}
+
+@media (min-width: 1024px) {
+  html.dark .admin-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
 }
 
 .admin-skeleton {
   background: linear-gradient(90deg, #eef2f6 25%, #e2e8f0 50%, #eef2f6 75%);
   background-size: 200% 100%;
   animation: adminShimmer 1.6s ease-in-out infinite;
+}
+
+html.dark .admin-skeleton {
+  background: linear-gradient(90deg, #25272C 25%, #30333A 50%, #25272C 75%);
+  background-size: 200% 100%;
+}
+
+/* Harmonized Soft Charcoal Surfaces inside Dark Mode (ChatGPT/Supabase/Gemini style) */
+html.dark .bg-white {
+  background-color: #212225;
+}
+
+html.dark .bg-sand-50,
+html.dark .bg-slate-50 {
+  background-color: #18191B;
+}
+
+html.dark .bg-sand-100,
+html.dark .bg-slate-100 {
+  background-color: #292B30;
+}
+
+html.dark .border-slate-200,
+html.dark .border-sand-200,
+html.dark .border-sand-100,
+html.dark .border-slate-100 {
+  border-color: #31343B;
+}
+
+html.dark .text-slate-900,
+html.dark .text-brand-900 {
+  color: #F3F4F6;
+}
+
+html.dark .text-slate-800,
+html.dark .text-slate-700 {
+  color: #D1D5DB;
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500 {
+  color: #9CA3AF;
+}
+
+html.dark .bg-brand-900 {
+  background-color: #2563EB;
+}
+
+html.dark .bg-brand-600 {
+  background-color: #2563EB;
+}
+
+html.dark .text-brand-600,
+html.dark .text-brand-700,
+html.dark .text-brand-800 {
+  color: #93C5FD;
+}
+
+html.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.14);
+}
+
+html.dark .text-red-800,
+html.dark .text-red-700 {
+  color: #FCA5A5;
+}
+
+html.dark .border-red-200 {
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+html.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.14);
+}
+
+html.dark .text-emerald-800,
+html.dark .text-emerald-700 {
+  color: #6EE7B7;
+}
+
+html.dark .border-emerald-200 {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-saffron-50 {
+  background-color: rgba(245, 158, 11, 0.14);
+}
+
+html.dark .text-amber-800,
+html.dark .text-amber-700,
+html.dark .text-saffron-700,
+html.dark .text-saffron-600 {
+  color: #FCD34D;
+}
+
+html.dark .border-amber-300,
+html.dark .border-amber-200 {
+  border-color: rgba(245, 158, 11, 0.35);
 }
 
 @keyframes adminShimmer {

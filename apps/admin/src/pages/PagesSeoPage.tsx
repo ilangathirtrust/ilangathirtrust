@@ -1,33 +1,43 @@
 import { useEffect, useState } from 'react';
-import { History, Image as ImageIcon, Loader2, Plus, Save, Trash2 } from 'lucide-react';
-import type { BilingualFaq, PageContent } from '@ilangathir/shared';
+import { History, Image as ImageIcon, Loader2, Save } from 'lucide-react';
+import type { PageContent } from '@ilangathir/shared';
 import { adminApi } from '../lib/api';
+import { useAdminUi } from '../lib/admin-ui';
 import { MediaPickerModal } from '../components/MediaPickerModal';
 import { VersionHistoryModal } from '../components/VersionHistoryModal';
 
 export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
+  const { tr } = useAdminUi();
   const [pages, setPages] = useState<PageContent[]>([]);
   const [selectedSlug, setSelectedSlug] = useState('home');
   const [form, setForm] = useState<PageContent | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [saving, setSaving] = useState(false);
-  const [pickerField, setPickerField] = useState<'hero_image_url' | 'og_image_url' | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  const load = () => {
+  const load = (force = false) => {
     setLoading(true);
-    adminApi<PageContent[]>('/pages')
+    setLoadError('');
+    adminApi<PageContent[]>('/pages', { forceRefresh: force })
       .then((list) => {
         setPages(list);
         const found = list.find((p) => p.slug === selectedSlug) || list[0] || null;
         setForm(found);
         if (found) setSelectedSlug(found.slug);
       })
-      .catch((e) => onNotify(e.message, true))
+      .catch((e) => {
+        const msg = e instanceof Error ? e.message : 'Unable to load pages.';
+        setLoadError(msg);
+        onNotify(msg, true);
+      })
       .finally(() => setLoading(false));
   };
 
-  useEffect(load, []);
+  useEffect(() => {
+    load(false);
+  }, []);
 
   function selectPage(slug: string) {
     setSelectedSlug(slug);
@@ -42,11 +52,32 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
     try {
       const updated = await adminApi<PageContent>(`/pages/${form.slug}`, {
         method: 'PUT',
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          slug: form.slug,
+          page_name: form.page_name,
+          hero_eyebrow_en: form.hero_eyebrow_en,
+          hero_eyebrow_ta: form.hero_eyebrow_ta,
+          hero_title_en: form.hero_title_en,
+          hero_title_ta: form.hero_title_ta,
+          hero_subtitle_en: form.hero_subtitle_en,
+          hero_subtitle_ta: form.hero_subtitle_ta,
+          hero_image_url: form.hero_image_url,
+          hero_cta_primary_en: form.hero_cta_primary_en,
+          hero_cta_primary_ta: form.hero_cta_primary_ta,
+          hero_cta_primary_href: form.hero_cta_primary_href,
+          hero_cta_secondary_en: form.hero_cta_secondary_en,
+          hero_cta_secondary_ta: form.hero_cta_secondary_ta,
+          hero_cta_secondary_href: form.hero_cta_secondary_href
+        })
       });
       setPages((prev) => prev.map((p) => (p.slug === updated.slug ? updated : p)));
       setForm(updated);
-      onNotify(`Saved page "${updated.page_name}" & SEO metadata.`);
+      onNotify(
+        tr(
+          `Saved "${updated.page_name}" hero content.`,
+          `"${updated.page_name}" Banner விவரம் Save ஆச்சு.`
+        )
+      );
     } catch (err) {
       onNotify(err instanceof Error ? err.message : 'Save failed.', true);
     } finally {
@@ -54,26 +85,41 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
     }
   }
 
-  function updateFaq(idx: number, field: keyof BilingualFaq, val: string) {
-    if (!form) return;
-    const next = [...(form.faqs || [])];
-    next[idx] = { ...next[idx], [field]: val };
-    setForm({ ...form, faqs: next });
-  }
-
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 px-4 lg:px-0">
         <div className="h-12 admin-skeleton rounded-2xl" />
-        <div className="h-96 admin-skeleton rounded-3xl" />
+        <div className="h-80 admin-skeleton rounded-2xl" />
       </div>
     );
   }
-  if (!form) return <p className="text-sm text-slate-500">No page records found.</p>;
+
+  if (loadError) {
+    return (
+      <div className="admin-card flex flex-wrap items-center justify-between gap-3 border-red-200 bg-red-50 text-sm font-semibold text-red-800">
+        <span>{loadError}</span>
+        <button
+          type="button"
+          onClick={() => load(true)}
+          className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700"
+        >
+          {tr('Retry', 'Retry பண்ணு')}
+        </button>
+      </div>
+    );
+  }
+
+  if (!form) {
+    return (
+      <p className="px-4 text-sm text-slate-500 lg:px-0">
+        {tr('No page records found.', 'Page விவரங்கள் இன்னும் இல்லை.')}
+      </p>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-3 lg:space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 lg:px-0">
         <div className="flex flex-wrap gap-2">
           {pages.map((p) => (
             <button
@@ -97,12 +143,22 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
           className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
         >
           <History className="h-4 w-4" />
-          <span>Version History</span>
+          <span>{tr('Version History', 'பழைய History')}</span>
         </button>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-900">Hero Section & Call-to-Action ({form.page_name})</h2>
+      <form onSubmit={handleSave} className="admin-card space-y-5">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900">
+            {tr(`Hero Banner Content (${form.page_name})`, `${form.page_name} — Hero & Banner Text`)}
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            {tr(
+              'SEO titles, descriptions, and FAQs are managed directly in the frontend codebase.',
+              'SEO & FAQ எல்லாம் நேரடியா Website Code-ல Update பண்ணிக்கலாம்; இங்க Banner Text மட்டும் மாத்தலாம்.'
+            )}
+          </p>
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="admin-label">
@@ -131,104 +187,41 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
           </label>
         </div>
 
-        <div className="flex flex-wrap items-end gap-4">
-          <label className="admin-label flex-1">
-            <span>Hero Banner Image URL</span>
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="admin-label min-w-[200px] flex-1">
+            <span>{tr('Hero Banner Image URL', 'Hero Banner போட்டோ Link')}</span>
             <input value={form.hero_image_url || ''} onChange={(e) => setForm({ ...form, hero_image_url: e.target.value })} className="admin-input" />
           </label>
           <button
             type="button"
-            onClick={() => setPickerField('hero_image_url')}
+            onClick={() => setPickerOpen(true)}
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-brand-50"
           >
             <ImageIcon className="h-4 w-4 text-brand-600" />
-            <span>Select Hero Banner</span>
+            <span>{tr('Select Hero Banner', 'Banner போட்டோ எடு')}</span>
           </button>
-        </div>
-
-        <hr className="border-slate-200" />
-        <h3 className="text-base font-bold text-slate-900">Bilingual SEO, Open Graph & GEO Metadata</h3>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="admin-label">
-            <span>SEO Title (EN)</span>
-            <input value={form.seo_title_en} onChange={(e) => setForm({ ...form, seo_title_en: e.target.value })} className="admin-input" />
-          </label>
-          <label className="admin-label">
-            <span>SEO Title (TA)</span>
-            <input value={form.seo_title_ta} onChange={(e) => setForm({ ...form, seo_title_ta: e.target.value })} className="admin-input" />
-          </label>
-          <label className="admin-label">
-            <span>SEO Meta Description (EN)</span>
-            <textarea rows={2} value={form.seo_description_en} onChange={(e) => setForm({ ...form, seo_description_en: e.target.value })} className="admin-input" />
-          </label>
-          <label className="admin-label">
-            <span>SEO Meta Description (TA)</span>
-            <textarea rows={2} value={form.seo_description_ta} onChange={(e) => setForm({ ...form, seo_description_ta: e.target.value })} className="admin-input" />
-          </label>
-        </div>
-
-        <hr className="border-slate-200" />
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-slate-900">AEO FAQ Structured Data</h3>
-          <button
-            type="button"
-            onClick={() =>
-              setForm({
-                ...form,
-                faqs: [...(form.faqs || []), { question_en: '', question_ta: '', answer_en: '', answer_ta: '' }]
-              })
-            }
-            className="inline-flex items-center gap-1 rounded-xl bg-brand-50 px-3 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-100"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>Add FAQ</span>
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {(form.faqs || []).map((faq, idx) => (
-            <div key={idx} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-600">FAQ #{idx + 1}</span>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, faqs: form.faqs.filter((_, i) => i !== idx) })}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input placeholder="Question (EN)" value={faq.question_en} onChange={(e) => updateFaq(idx, 'question_en', e.target.value)} className="admin-input" />
-                <input placeholder="Question (TA)" value={faq.question_ta} onChange={(e) => updateFaq(idx, 'question_ta', e.target.value)} className="admin-input" />
-                <textarea placeholder="Answer (EN)" rows={2} value={faq.answer_en} onChange={(e) => updateFaq(idx, 'answer_en', e.target.value)} className="admin-input" />
-                <textarea placeholder="Answer (TA)" rows={2} value={faq.answer_ta} onChange={(e) => updateFaq(idx, 'answer_ta', e.target.value)} className="admin-input" />
-              </div>
-            </div>
-          ))}
         </div>
 
         <div className="flex justify-end">
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow hover:bg-brand-700 disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow hover:bg-brand-700 disabled:opacity-60 sm:w-auto"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            <span>Save Page & SEO</span>
+            <span>{tr('Save Page Content', 'Page-ஐ Save பண்ணு')}</span>
           </button>
         </div>
       </form>
 
       <MediaPickerModal
-        open={pickerField !== null}
+        open={pickerOpen}
         bucket="media"
         folderName="banners"
-        onClose={() => setPickerField(null)}
+        onClose={() => setPickerOpen(false)}
         onSelect={(url) => {
-          if (pickerField && form) setForm({ ...form, [pickerField]: url });
-          setPickerField(null);
+          if (form) setForm({ ...form, hero_image_url: url });
+          setPickerOpen(false);
         }}
       />
 
@@ -238,8 +231,8 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
         entityId={form.slug}
         onClose={() => setShowHistory(false)}
         onRestored={() => {
-          onNotify('Restored earlier page content version.');
-          load();
+          onNotify(tr('Restored earlier page content version.', 'பழைய Page Version Restore ஆச்சு.'));
+          load(true);
         }}
       />
     </div>

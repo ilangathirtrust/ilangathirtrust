@@ -23,12 +23,8 @@ export async function generateMetadata({
   if (!data) return { title: 'Article Not Found | Ilangathir Trust' };
 
   const { post } = data;
-  const title =
-    pickLocalized(post as unknown as Record<string, unknown>, 'seo_title', lang) ||
-    `${pickLocalized(post as unknown as Record<string, unknown>, 'title', lang)} | Ilangathir Trust`;
-  const description =
-    pickLocalized(post as unknown as Record<string, unknown>, 'seo_description', lang) ||
-    pickLocalized(post as unknown as Record<string, unknown>, 'excerpt', lang);
+  const title = `${pickLocalized(post as unknown as Record<string, unknown>, 'title', lang)} | Ilangathir Trust`;
+  const description = pickLocalized(post as unknown as Record<string, unknown>, 'excerpt', lang);
 
   return buildPageMetadata({
     title,

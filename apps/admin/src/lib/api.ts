@@ -79,64 +79,113 @@ async function getAccessToken(): Promise<string> {
   return token;
 }
 
-export async function adminApi<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = await getAccessToken();
-  const isFormData = options.body instanceof FormData;
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${token}`,
-    'X-Device-Id': getOrCreateDeviceId(),
-    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-    ...((options.headers as Record<string, string>) || {})
-  };
+const ADMIN_GET_TTL_MS = 20_000;
+const getCache = new Map<string, { expiresAt: number; data: unknown }>();
+const inflightGets = new Map<string, Promise<unknown>>();
 
-  let res: Response;
-  try {
-    res = await fetch(`${API_URL}/api/admin${path}`, {
-      ...options,
-      headers
-    });
-  } catch (err) {
-    const isAbort = err instanceof DOMException && err.name === 'AbortError';
-    if (isAbort) throw err;
-    throw new AdminApiError(
-      'Cannot reach the API server right now. Check your internet connection and try again.',
-      0,
-      'NETWORK_ERROR'
-    );
+export function clearAdminApiCache(): void {
+  getCache.clear();
+  inflightGets.clear();
+}
+
+export async function adminApi<T = unknown>(
+  path: string,
+  options: RequestInit & { forceRefresh?: boolean } = {}
+): Promise<T> {
+  const method = (options.method || 'GET').toUpperCase();
+  const isGet = method === 'GET';
+
+  if (isGet && !options.forceRefresh) {
+    const hit = getCache.get(path);
+    if (hit && hit.expiresAt > Date.now()) {
+      return hit.data as T;
+    }
+    const existingFlight = inflightGets.get(path);
+    if (existingFlight) {
+      return existingFlight as Promise<T>;
+    }
   }
 
-  const text = await res.text();
-  let json: Record<string, unknown> = {};
-  try {
-    json = text ? (JSON.parse(text) as Record<string, unknown>) : {};
-  } catch {
-    json = {};
+  if (!isGet) {
+    clearAdminApiCache();
   }
 
-  if (!res.ok) {
-    if (res.status === 401 && (path !== '/me' || json.code === 'SESSION_REVOKED') && typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('ilangathir:session-expired', {
-          detail: {
-            message: typeof json.error === 'string' ? json.error : undefined,
-            code: typeof json.code === 'string' ? json.code : undefined
-          }
-        })
+  const runFetch = async (): Promise<T> => {
+    const token = await getAccessToken();
+    const isFormData = options.body instanceof FormData;
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+      'X-Device-Id': getOrCreateDeviceId(),
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...((options.headers as Record<string, string>) || {})
+    };
+
+    const { forceRefresh: _ignore, ...fetchOptions } = options;
+
+    let res: Response;
+    try {
+      res = await fetch(`${API_URL}/api/admin${path}`, {
+        ...fetchOptions,
+        headers
+      });
+    } catch (err) {
+      const isAbort = err instanceof DOMException && err.name === 'AbortError';
+      if (isAbort) throw err;
+      throw new AdminApiError(
+        'Cannot reach the API server right now. Check your internet connection and try again.',
+        0,
+        'NETWORK_ERROR'
       );
     }
-    const serverMsg = typeof json.error === 'string' && json.error.trim() ? json.error.trim() : '';
-    const fieldMsg = firstIssueMessage(json.issues);
-    const combined =
-      serverMsg && fieldMsg && !serverMsg.includes(fieldMsg)
-        ? `${serverMsg} (${fieldMsg})`
-        : serverMsg || fieldMsg || friendlyStatusFallback(res.status);
-    throw new AdminApiError(
-      combined,
-      res.status,
-      typeof json.code === 'string' ? json.code : undefined
-    );
+
+    const text = await res.text();
+    let json: Record<string, unknown> = {};
+    try {
+      json = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+    } catch {
+      json = {};
+    }
+
+    if (!res.ok) {
+      if (res.status === 401 && (path !== '/me' || json.code === 'SESSION_REVOKED') && typeof window !== 'undefined') {
+        clearAdminApiCache();
+        window.dispatchEvent(
+          new CustomEvent('ilangathir:session-expired', {
+            detail: {
+              message: typeof json.error === 'string' ? json.error : undefined,
+              code: typeof json.code === 'string' ? json.code : undefined
+            }
+          })
+        );
+      }
+      const serverMsg = typeof json.error === 'string' && json.error.trim() ? json.error.trim() : '';
+      const fieldMsg = firstIssueMessage(json.issues);
+      const combined =
+        serverMsg && fieldMsg && !serverMsg.includes(fieldMsg)
+          ? `${serverMsg} (${fieldMsg})`
+          : serverMsg || fieldMsg || friendlyStatusFallback(res.status);
+      throw new AdminApiError(
+        combined,
+        res.status,
+        typeof json.code === 'string' ? json.code : undefined
+      );
+    }
+
+    if (isGet) {
+      getCache.set(path, { expiresAt: Date.now() + ADMIN_GET_TTL_MS, data: json });
+    }
+    return json as T;
+  };
+
+  if (isGet) {
+    const promise = runFetch().finally(() => {
+      inflightGets.delete(path);
+    });
+    inflightGets.set(path, promise);
+    return promise;
   }
-  return json as T;
+
+  return runFetch();
 }
 
 /**

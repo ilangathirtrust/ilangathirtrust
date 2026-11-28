@@ -123,7 +123,7 @@ export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr
           </span>
         </div>
 
-        <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-brand-300 bg-white p-8 text-center transition hover:border-brand-600">
+        <label className="flex cursor-pointer flex-col items-center justify-center rounded-none border-x-0 border-y-2 border-dashed border-brand-300 bg-white p-8 text-center transition hover:border-brand-600 lg:rounded-2xl lg:border-2">
           <Upload className="h-8 w-8 text-brand-600" />
           <span className="mt-2 text-sm font-bold text-slate-900">
             {uploading ? `Uploading media… ${progress}%` : `Upload images & videos directly into "${activeFolder.title_en}"`}
@@ -164,8 +164,8 @@ export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr
   }
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleCreateFolder} className="admin-card p-5 sm:p-6">
+    <div className="space-y-3 lg:space-y-6">
+      <form onSubmit={handleCreateFolder} className="admin-card">
         <h2 className="text-lg font-bold text-brand-900">Create Event / Programme Gallery Folder</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <label className="admin-label">
@@ -206,11 +206,13 @@ export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr
       </form>
 
       {loading ? (
-        <div className="h-48 animate-pulse rounded-2xl bg-slate-200" />
+        <div className="space-y-3 px-4 lg:px-0">
+          <div className="h-40 admin-skeleton rounded-2xl" />
+        </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {folders.map((f) => (
-            <div key={f.id} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div key={f.id} className="admin-card flex flex-col overflow-hidden">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { History, Image as ImageIcon, Loader2, Save } from 'lucide-react';
 import { adminApi } from '../lib/api';
+import { useAdminUi } from '../lib/admin-ui';
 import { MediaPickerModal } from '../components/MediaPickerModal';
 import { VersionHistoryModal } from '../components/VersionHistoryModal';
 
@@ -13,6 +14,7 @@ interface SettingRow {
 }
 
 export function SiteSettingsPage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
+  const { tr } = useAdminUi();
   const [rows, setRows] = useState<SettingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,11 +68,18 @@ export function SiteSettingsPage({ onNotify }: { onNotify: (msg: string, isErr?:
   const imageKeys = new Set(['logo_url', 'favicon_url', 'founder_image_url']);
 
   return (
-    <form onSubmit={handleSave} className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <form onSubmit={handleSave} className="space-y-3 lg:space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 lg:px-0">
         <div>
-          <h2 className="text-lg font-bold text-brand-900">Global Trust Settings, Brand, Founder &amp; Contact</h2>
-          <p className="text-xs text-slate-500">All changes automatically update English &amp; Tamil website headers, footers, and pages.</p>
+          <h2 className="text-lg font-bold text-brand-900">
+            {tr('Global Trust Settings, Brand, Founder & Contact', 'Trust Settings, Logo, Founder & Contact')}
+          </h2>
+          <p className="text-xs text-slate-500">
+            {tr(
+              'All changes automatically update English & Tamil website headers, footers, and pages.',
+              'இங்க மாத்துறது எல்லாம் Website-ல English & Tamil-ல உடனே Update ஆகும்.'
+            )}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -79,7 +88,7 @@ export function SiteSettingsPage({ onNotify }: { onNotify: (msg: string, isErr?:
             className="inline-flex items-center gap-1.5 rounded-xl border border-sand-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-sand-50"
           >
             <History className="h-4 w-4" />
-            <span>Version History</span>
+            <span>{tr('Version History', 'பழைய History')}</span>
           </button>
           <button
             type="submit"
@@ -87,14 +96,14 @@ export function SiteSettingsPage({ onNotify }: { onNotify: (msg: string, isErr?:
             className="inline-flex items-center gap-2 rounded-xl bg-brand-900 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-brand-800 disabled:opacity-60"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            <span>Save All Settings</span>
+            <span>{tr('Save All Settings', 'எல்லாம் Save பண்ணு')}</span>
           </button>
         </div>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3 lg:gap-4">
         {rows.map((row) => (
-          <div key={row.key} className="admin-card p-4 sm:p-5">
+          <div key={row.key} className="admin-card">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <span className="font-mono text-xs font-bold text-brand-700">{row.key}</span>
               <span className="rounded-full bg-sand-100 px-2.5 py-0.5 text-[10px] font-bold uppercase text-slate-600">

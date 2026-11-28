@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import { Eye, History, Image as ImageIcon, Plus, Trash2, X } from 'lucide-react';
 import type { BlogCategory, BlogPost } from '@ilangathir/shared';
 import { adminApi } from '../lib/api';
+import { useAdminUi } from '../lib/admin-ui';
 import { MediaPickerModal } from '../components/MediaPickerModal';
 import { VersionHistoryModal } from '../components/VersionHistoryModal';
 
 export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
+  const { tr } = useAdminUi();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [previewPost, setPreviewPost] = useState<Record<string, unknown> | null>(null);
   const [historyId, setHistoryId] = useState<string | null>(null);
@@ -29,25 +32,31 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
     tags: '',
     author_name: 'Ilangathir Trust Editorial',
     reading_time_minutes: 3,
-    seo_title_en: '',
-    seo_title_ta: '',
-    seo_description_en: '',
-    seo_description_ta: '',
     status: 'draft'
   });
 
-  const load = () => {
+  const load = (force = false) => {
     setLoading(true);
-    Promise.all([adminApi<BlogPost[]>('/blogs'), adminApi<BlogCategory[]>('/blog-categories')])
+    setLoadError('');
+    Promise.all([
+      adminApi<BlogPost[]>('/blogs', { forceRefresh: force }),
+      adminApi<BlogCategory[]>('/blog-categories', { forceRefresh: force })
+    ])
       .then(([p, c]) => {
         setPosts(p);
         setCategories(c);
       })
-      .catch((e) => onNotify(e.message, true))
+      .catch((e) => {
+        const msg = e instanceof Error ? e.message : 'Unable to load blog posts.';
+        setLoadError(msg);
+        onNotify(msg, true);
+      })
       .finally(() => setLoading(false));
   };
 
-  useEffect(load, []);
+  useEffect(() => {
+    load(false);
+  }, []);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -60,20 +69,19 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
     try {
       if (editingId) {
         await adminApi(`/blogs/${editingId}`, { method: 'PUT', body: JSON.stringify(payload) });
-        onNotify('Blog post updated.');
+        onNotify(tr('Blog post updated.', 'Blog Update ஆச்சு.'));
       } else {
         await adminApi('/blogs', { method: 'POST', body: JSON.stringify(payload) });
-        onNotify('Blog post created.');
+        onNotify(tr('Blog post created.', 'புதிய Blog சேர்த்தாச்சு.'));
       }
       setEditingId(null);
       setForm({
         title_en: '', title_ta: '', slug: '', category_id: '', excerpt_en: '', excerpt_ta: '',
         content_en: '', content_ta: '', featured_image_url: '', featured_image_alt_en: '',
         featured_image_alt_ta: '', tags: '', author_name: 'Ilangathir Trust Editorial',
-        reading_time_minutes: 3, seo_title_en: '', seo_title_ta: '',
-        seo_description_en: '', seo_description_ta: '', status: 'draft'
+        reading_time_minutes: 3, status: 'draft'
       });
-      load();
+      load(true);
     } catch (err) {
       onNotify(err instanceof Error ? err.message : 'Save failed.', true);
     }
@@ -83,21 +91,23 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
     const next = post.status === 'published' ? 'draft' : 'published';
     await adminApi(`/blogs/${post.id}`, { method: 'PUT', body: JSON.stringify({ status: next }) });
     onNotify(`Blog ${next}.`);
-    load();
+    load(true);
   }
 
   async function deletePost(id: string) {
-    if (!confirm('Delete this blog post permanently?')) return;
+    if (!confirm(tr('Delete this blog post permanently?', 'இந்த Blog-ஐ நிரந்தரமா Delete பண்ணலாமா?'))) return;
     await adminApi(`/blogs/${id}`, { method: 'DELETE' });
-    onNotify('Blog deleted.');
-    load();
+    onNotify(tr('Blog deleted.', 'Blog Delete பண்ணியாச்சு.'));
+    load(true);
   }
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSave} className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="space-y-3 lg:space-y-6">
+      <form onSubmit={handleSave} className="admin-card space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-bold text-slate-900">{editingId ? 'Edit Blog Post' : 'Write New Blog Article'}</h2>
+          <h2 className="text-lg font-bold text-slate-900">
+            {editingId ? tr('Edit Blog Post', 'Blog-ஐ Edit பண்ணு') : tr('Write New Blog Article', 'புதிய Blog எழுது')}
+          </h2>
           <div className="flex gap-2">
             <button
               type="button"
@@ -105,7 +115,7 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-700"
             >
               <Eye className="h-4 w-4" />
-              <span>Preview</span>
+              <span>{tr('Preview', 'Preview பாரு')}</span>
             </button>
           </div>
         </div>
@@ -152,54 +162,47 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
           </label>
           <div className="grid grid-cols-2 gap-2">
             <label className="admin-label">
-              <span>Author Name</span>
+              <span>{tr('Author Name', 'எழுதியவர்')}</span>
               <input placeholder="Author Name" value={form.author_name} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className="admin-input" />
             </label>
             <label className="admin-label">
-              <span>Status</span>
+              <span>{tr('Status', 'Status')}</span>
               <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="admin-input">
-                <option value="draft">Draft</option>
-                <option value="published">Publish Now</option>
+                <option value="draft">{tr('Draft', 'Draft')}</option>
+                <option value="published">{tr('Publish Now', 'Publish பண்ணு')}</option>
               </select>
             </label>
           </div>
-          <label className="admin-label">
-            <span>SEO Title (EN)</span>
-            <input placeholder="SEO Title (EN)" value={form.seo_title_en} onChange={(e) => setForm({ ...form, seo_title_en: e.target.value })} className="admin-input" />
-          </label>
-          <label className="admin-label">
-            <span>SEO Title (TA)</span>
-            <input placeholder="SEO Title (TA)" value={form.seo_title_ta} onChange={(e) => setForm({ ...form, seo_title_ta: e.target.value })} className="admin-input" />
-          </label>
-          <label className="admin-label">
-            <span>SEO Description (EN)</span>
-            <input placeholder="SEO Description (EN)" value={form.seo_description_en} onChange={(e) => setForm({ ...form, seo_description_en: e.target.value })} className="admin-input" />
-          </label>
-          <label className="admin-label">
-            <span>SEO Description (TA)</span>
-            <input placeholder="SEO Description (TA)" value={form.seo_description_ta} onChange={(e) => setForm({ ...form, seo_description_ta: e.target.value })} className="admin-input" />
-          </label>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <input placeholder="Featured Image URL" value={form.featured_image_url} onChange={(e) => setForm({ ...form, featured_image_url: e.target.value })} className="admin-input flex-1" />
+          <input placeholder={tr('Featured Image URL', 'Image URL')} value={form.featured_image_url} onChange={(e) => setForm({ ...form, featured_image_url: e.target.value })} className="admin-input min-w-[200px] flex-1" />
           <button type="button" onClick={() => setPickerOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700">
             <ImageIcon className="h-4 w-4 text-brand-600" />
-            <span>Select Featured Image</span>
+            <span>{tr('Select Featured Image', 'போட்டோ எடு')}</span>
           </button>
           <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-6 py-2.5 text-xs font-bold text-white hover:bg-brand-700">
             <Plus className="h-4 w-4" />
-            <span>{editingId ? 'Save Article' : 'Create Article'}</span>
+            <span>{editingId ? tr('Save Article', 'Save பண்ணு') : tr('Create Article', 'Article போடு')}</span>
           </button>
         </div>
       </form>
 
       {loading ? (
-        <div className="h-48 animate-pulse rounded-2xl bg-slate-200" />
+        <div className="space-y-3 px-4 lg:px-0">
+          {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-20 admin-skeleton rounded-2xl" />)}
+        </div>
+      ) : loadError ? (
+        <div className="admin-card flex flex-wrap items-center justify-between gap-3 border-red-200 bg-red-50 text-sm font-semibold text-red-800">
+          <span>{loadError}</span>
+          <button type="button" onClick={() => load(true)} className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white">
+            {tr('Retry', 'Retry பண்ணு')}
+          </button>
+        </div>
       ) : (
         <div className="space-y-3">
           {posts.map((p) => (
-            <div key={p.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div key={p.id} className="admin-card flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h3 className="font-bold text-slate-900">{p.title_en}</h3>
                 <p className="text-xs text-slate-500">/{p.slug} • {p.author_name}</p>
@@ -230,14 +233,12 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                       featured_image_alt_ta: p.featured_image_alt_ta || '',
                       tags: (p.tags || []).join(', '), author_name: p.author_name,
                       reading_time_minutes: p.reading_time_minutes,
-                      seo_title_en: p.seo_title_en || '', seo_title_ta: p.seo_title_ta || '',
-                      seo_description_en: p.seo_description_en || '', seo_description_ta: p.seo_description_ta || '',
                       status: p.status || 'draft'
                     });
                   }}
                   className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700"
                 >
-                  Edit
+                  {tr('Edit', 'Edit')}
                 </button>
                 <button type="button" onClick={() => deletePost(p.id)} className="rounded-lg p-2 text-red-600">
                   <Trash2 className="h-4 w-4" />

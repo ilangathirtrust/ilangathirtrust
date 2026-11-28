@@ -302,7 +302,28 @@ adminRouter.delete('/navigation/:id', async (req, res, next) => {
   }
 });
 
-// ======================== PAGE CONTENTS & SEO ========================
+// ======================== PAGE HERO CONTENTS ========================
+const STRIPPED_SEO_FAQ_KEYS = [
+  'seo_title_en',
+  'seo_title_ta',
+  'seo_description_en',
+  'seo_description_ta',
+  'seo_keywords_en',
+  'seo_keywords_ta',
+  'og_image_url',
+  'canonical_url',
+  'robots_directive',
+  'faqs'
+] as const;
+
+function stripSeoAndFaqFields(obj: Record<string, unknown>): Record<string, unknown> {
+  const clean = { ...obj };
+  for (const k of STRIPPED_SEO_FAQ_KEYS) {
+    delete clean[k];
+  }
+  return clean;
+}
+
 adminRouter.get('/pages', async (_req, res, next) => {
   try {
     const supabase = getSupabaseAdmin();
@@ -330,7 +351,7 @@ adminRouter.put('/pages/:slug', async (req, res, next) => {
       });
     }
 
-    const payload = { ...req.body, slug, updated_by: req.admin?.id ?? null };
+    const payload: Record<string, unknown> = { ...stripSeoAndFaqFields(req.body), slug, updated_by: req.admin?.id ?? null };
     delete payload.change_note;
     const { data, error } = await supabase
       .from('page_contents')
@@ -776,7 +797,7 @@ adminRouter.post('/blogs', async (req, res, next) => {
     const { data, error } = await supabase
       .from('blog_posts')
       .insert({
-        ...req.body,
+        ...stripSeoAndFaqFields(req.body),
         slug,
         category_id: req.body.category_id || null,
         published_at: publishedAt,
@@ -809,7 +830,7 @@ adminRouter.put('/blogs/:id', async (req, res, next) => {
       });
     }
 
-    const payload = { ...req.body, category_id: req.body.category_id || null, updated_by: req.admin?.id ?? null };
+    const payload: Record<string, unknown> = { ...stripSeoAndFaqFields(req.body), category_id: req.body.category_id || null, updated_by: req.admin?.id ?? null };
     delete payload.change_note;
     if (payload.status === 'published' && !payload.published_at && !existing?.published_at) {
       payload.published_at = new Date().toISOString();
@@ -1425,6 +1446,7 @@ adminRouter.patch('/users/:id', requireRole(['super_admin']), async (req, res, n
       details: { role: req.body.role, is_active: req.body.is_active },
       req
     });
+    apiCache.invalidatePrefix('auth:');
     res.json(data);
   } catch (err) {
     next(err);
@@ -1533,6 +1555,7 @@ adminRouter.post('/security/sessions/revoke-others', async (req, res, next) => {
       entityId: req.admin?.id,
       req
     });
+    apiCache.invalidatePrefix('auth:');
 
     res.json({ revoked: true });
   } catch (err) {
@@ -1570,6 +1593,7 @@ adminRouter.delete('/security/sessions/:id', async (req, res, next) => {
       device: parseDeviceMetadata(req),
       details: { target_session_id: data.id, device_name: data.device_name }
     });
+    apiCache.invalidatePrefix('auth:');
 
     res.json({ revoked: true, id: data.id });
   } catch (err) {

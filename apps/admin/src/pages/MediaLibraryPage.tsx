@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FileText, Film, RefreshCw, Search, Trash2, Upload } from 'lucide-react';
 import { adminApi, uploadMediaWithProgress } from '../lib/api';
+import { useAdminUi } from '../lib/admin-ui';
 
 interface MediaAsset {
   id: string;
@@ -22,8 +23,10 @@ interface MediaAsset {
 }
 
 export function MediaLibraryPage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
+  const { tr } = useAdminUi();
   const [assets, setAssets] = useState<MediaAsset[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [folderInput, setFolderInput] = useState('general');
@@ -32,18 +35,25 @@ export function MediaLibraryPage({ onNotify }: { onNotify: (msg: string, isErr?:
   const [progress, setProgress] = useState(0);
   const [editing, setEditing] = useState<MediaAsset | null>(null);
 
-  const load = () => {
+  const load = (force = false) => {
     setLoading(true);
+    setLoadError('');
     const q = new URLSearchParams();
     if (search) q.set('search', search);
     if (typeFilter) q.set('type', typeFilter);
-    adminApi<MediaAsset[]>(`/media?${q.toString()}`)
+    adminApi<MediaAsset[]>(`/media?${q.toString()}`, { forceRefresh: force })
       .then(setAssets)
-      .catch((e) => onNotify(e.message, true))
+      .catch((e) => {
+        const msg = e instanceof Error ? e.message : 'Unable to load media.';
+        setLoadError(msg);
+        onNotify(msg, true);
+      })
       .finally(() => setLoading(false));
   };
 
-  useEffect(load, [typeFilter]);
+  useEffect(() => {
+    load(false);
+  }, [typeFilter]);
 
   async function handleMultiUpload(files: FileList | null) {
     if (!files?.length) return;
@@ -108,9 +118,9 @@ export function MediaLibraryPage({ onNotify }: { onNotify: (msg: string, isErr?:
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 lg:space-y-6">
       {/* Multi-file Upload Box */}
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="admin-card">
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <select value={bucketInput} onChange={(e) => setBucketInput(e.target.value)} className="admin-input w-40">
             <option value="media">Bucket: media</option>
@@ -163,18 +173,25 @@ export function MediaLibraryPage({ onNotify }: { onNotify: (msg: string, isErr?:
           <option value="video">Videos</option>
           <option value="document">Documents</option>
         </select>
-        <button type="button" onClick={load} className="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white">
-          Filter
+        <button type="button" onClick={() => load(true)} className="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white">
+          {tr('Filter', 'Search பண்ணு')}
         </button>
       </div>
 
       {/* Asset Grid */}
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-52 animate-pulse rounded-2xl bg-slate-200" />)}
+        <div className="grid gap-4 px-4 sm:grid-cols-3 lg:grid-cols-4 lg:px-0">
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-52 admin-skeleton rounded-2xl" />)}
+        </div>
+      ) : loadError ? (
+        <div className="admin-card flex flex-wrap items-center justify-between gap-3 border-red-200 bg-red-50 text-sm font-semibold text-red-800">
+          <span>{loadError}</span>
+          <button type="button" onClick={() => load(true)} className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white">
+            {tr('Retry', 'Retry பண்ணு')}
+          </button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-3 px-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-4 lg:px-0">
           {assets.map((a) => (
             <div key={a.id} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="relative h-44 bg-slate-100">
