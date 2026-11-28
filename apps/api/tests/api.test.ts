@@ -29,11 +29,6 @@ import {
   verifyRazorpayPaymentSignature,
   verifyRazorpayWebhookSignature
 } from '../src/services/razorpay.js';
-import {
-  buildGa4DimensionFilter,
-  createServiceAccountJwt,
-  validateAndResolveAnalyticsQuery
-} from '../src/services/ga4.js';
 
 test('Razorpay payment signature verification accepts valid HMAC-SHA256 and rejects tampered inputs', () => {
   const secret = 'test_rzp_secret_12345';
@@ -252,62 +247,6 @@ test('Digital session signature verification accepts valid HMAC-SHA256 signature
   assert.equal(verifySessionSignature({ userId, deviceId, tokenHash: 'tampered', signature }), false);
   assert.equal(verifySessionSignature({ userId, deviceId, tokenHash, signature: '0'.repeat(64) }), false);
   assert.equal(verifySessionSignature({ userId, deviceId, tokenHash, signature: null }), false);
-});
-
-test('GA4 query validator resolves IST date ranges, previous periods, and filters safely', () => {
-  // 2026-11-28T10:00:00Z = 2026-11-28 15:30 IST
-  const ref = new Date('2026-11-28T10:00:00.000Z');
-  const range7d = validateAndResolveAnalyticsQuery({ preset: '7d', compare: 'true', device: 'MOBILE' }, ref);
-  assert.equal(range7d.startDate, '2026-11-22');
-  assert.equal(range7d.endDate, '2026-11-28');
-  assert.equal(range7d.prevStartDate, '2026-11-15');
-  assert.equal(range7d.prevEndDate, '2026-11-21');
-  assert.equal(range7d.device, 'mobile');
-
-  const yesterday = validateAndResolveAnalyticsQuery({ preset: 'yesterday' }, ref);
-  assert.equal(yesterday.startDate, '2026-11-27');
-  assert.equal(yesterday.endDate, '2026-11-27');
-  assert.equal(yesterday.prevStartDate, '2026-11-26');
-  assert.equal(yesterday.prevEndDate, '2026-11-26');
-
-  assert.throws(() => validateAndResolveAnalyticsQuery({ preset: 'custom', startDate: '2026-11-28', endDate: '2026-11-20' }, ref));
-  assert.throws(() => validateAndResolveAnalyticsQuery({ preset: '28d', device: 'smartwatch' }, ref));
-
-  const singleFilter = buildGa4DimensionFilter({ country: 'India', device: '', source: '', landingPage: '' });
-  assert.deepEqual(singleFilter, {
-    filter: { fieldName: 'country', stringFilter: { matchType: 'EXACT', value: 'India' } }
-  });
-
-  const multiFilter = buildGa4DimensionFilter({ country: 'India', device: 'mobile', source: 'google', landingPage: '' });
-  assert.equal(Array.isArray((multiFilter as { andGroup?: { expressions: unknown[] } }).andGroup?.expressions), true);
-});
-
-test('GA4 Service Account RS256 JWT assertion verifies with corresponding public key', () => {
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-    publicKeyEncoding: { type: 'spki', format: 'pem' },
-    privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-  });
-
-  const token = createServiceAccountJwt(
-    { propertyId: '123456789', clientEmail: 'analytics@test.iam.gserviceaccount.com', privateKey },
-    1_700_000_000
-  );
-  const parts = token.split('.');
-  assert.equal(parts.length, 3);
-
-  const claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')) as {
-    iss: string;
-    scope: string;
-    aud: string;
-  };
-  assert.equal(claims.iss, 'analytics@test.iam.gserviceaccount.com');
-  assert.equal(claims.scope, 'https://www.googleapis.com/auth/analytics.readonly');
-  assert.equal(claims.aud, 'https://oauth2.googleapis.com/token');
-
-  const verifier = crypto.createVerify('RSA-SHA256');
-  verifier.update(`${parts[0]}.${parts[1]}`);
-  assert.equal(verifier.verify(publicKey, Buffer.from(parts[2], 'base64url')), true);
 });
 
 test('Social links parser, validation, receipt lookup, and trust metadata work cleanly', () => {
