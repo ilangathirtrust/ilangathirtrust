@@ -235,7 +235,8 @@ export async function queryGa4CoreReports(
   const currOnlyRange = [{ startDate: filters.startDate, endDate: filters.endDate }];
   const withFilter = (req: Record<string, unknown>) => (dimensionFilter ? { ...req, dimensionFilter } : req);
 
-  // Run batches sequentially (max 5 sub-reports per call) to stay strictly under GA4's 10-concurrent-request quota
+  // 2 sequential batches (5 + 5 = 10 reports max, <= 5 concurrent requests to respect GA4 quotas)
+  // Batch 1: Overview (10 metrics in 1 req), newVsReturning, Daily Trend, Geo, Languages
   const b1 = await callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
       requests: [
         withFilter({
@@ -246,14 +247,12 @@ export async function queryGa4CoreReports(
             { name: 'newUsers' },
             { name: 'sessions' },
             { name: 'screenPageViews' },
-            { name: 'screenPageViewsPerSession' },
             { name: 'userEngagementDuration' },
-            { name: 'engagementRate' }
+            { name: 'engagementRate' },
+            { name: 'bounceRate' },
+            { name: 'eventCount' },
+            { name: 'keyEvents' }
           ]
-        }),
-        withFilter({
-          dateRanges,
-          metrics: [{ name: 'bounceRate' }, { name: 'eventCount' }, { name: 'keyEvents' }]
         }),
         withFilter({
           dateRanges,
@@ -282,11 +281,19 @@ export async function queryGa4CoreReports(
           dimensions: [{ name: 'country' }, { name: 'countryId' }, { name: 'city' }],
           metrics: [{ name: 'activeUsers' }, { name: 'totalUsers' }, { name: 'sessions' }, { name: 'engagementRate' }],
           orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
-          limit: 60
+          limit: 50
+        }),
+        withFilter({
+          dateRanges: currOnlyRange,
+          dimensions: [{ name: 'language' }],
+          metrics: [{ name: 'activeUsers' }, { name: 'totalUsers' }, { name: 'sessions' }],
+          orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+          limit: 15
         })
       ]
     });
 
+  // Batch 2: Sources, Top Pages, Landing Pages, Events, Device+OS+Browser (combined)
   const b2 = await callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
       requests: [
         withFilter({
@@ -306,7 +313,7 @@ export async function queryGa4CoreReports(
             { name: 'keyEvents' }
           ],
           orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-          limit: 60
+          limit: 45
         }),
         withFilter({
           dateRanges: currOnlyRange,
@@ -319,7 +326,7 @@ export async function queryGa4CoreReports(
             { name: 'bounceRate' }
           ],
           orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
-          limit: 50
+          limit: 40
         }),
         withFilter({
           dateRanges: currOnlyRange,
@@ -332,30 +339,18 @@ export async function queryGa4CoreReports(
             { name: 'keyEvents' }
           ],
           orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-          limit: 40
+          limit: 30
         }),
         withFilter({
           dateRanges: currOnlyRange,
           dimensions: [{ name: 'eventName' }],
           metrics: [{ name: 'eventCount' }, { name: 'totalUsers' }, { name: 'keyEvents' }],
           orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
-          limit: 50
+          limit: 40
         }),
         withFilter({
           dateRanges: currOnlyRange,
-          dimensions: [{ name: 'language' }],
-          metrics: [{ name: 'activeUsers' }, { name: 'totalUsers' }, { name: 'sessions' }],
-          orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
-          limit: 20
-        })
-      ]
-    });
-
-  const b3 = await callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
-      requests: [
-        withFilter({
-          dateRanges: currOnlyRange,
-          dimensions: [{ name: 'deviceCategory' }],
+          dimensions: [{ name: 'deviceCategory' }, { name: 'operatingSystem' }, { name: 'browser' }],
           metrics: [
             { name: 'activeUsers' },
             { name: 'sessions' },
@@ -364,22 +359,15 @@ export async function queryGa4CoreReports(
             { name: 'bounceRate' },
             { name: 'keyEvents' }
           ],
-          orderBys: [{ metric: { metricName: 'sessions' }, desc: true }]
-        }),
-        withFilter({
-          dateRanges: currOnlyRange,
-          dimensions: [{ name: 'operatingSystem' }],
-          metrics: [{ name: 'activeUsers' }, { name: 'sessions' }],
           orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-          limit: 15
-        }),
-        withFilter({
-          dateRanges: currOnlyRange,
-          dimensions: [{ name: 'browser' }],
-          metrics: [{ name: 'activeUsers' }, { name: 'sessions' }],
-          orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-          limit: 15
-        }),
+          limit: 45
+        })
+      ]
+    });
+
+  // Batch 3 (1 tiny report for screen resolutions)
+  const b3 = await callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
+      requests: [
         withFilter({
           dateRanges: currOnlyRange,
           dimensions: [{ name: 'screenResolution' }],
@@ -401,14 +389,12 @@ export async function queryGa4CoreReports(
     return rows.find((r) => dim(r, 0) === targetTag) || rows[rangeIdx];
   };
 
-  const ov1Curr = extractRangeRow(r1[0], 0);
-  const ov1Prev = filters.compare ? extractRangeRow(r1[0], 1) : undefined;
-  const ov2Curr = extractRangeRow(r1[1], 0);
-  const ov2Prev = filters.compare ? extractRangeRow(r1[1], 1) : undefined;
+  const ovCurr = extractRangeRow(r1[0], 0);
+  const ovPrev = filters.compare ? extractRangeRow(r1[0], 1) : undefined;
 
   let currReturning = 0;
   let prevReturning = 0;
-  for (const row of r1[2]?.rows || []) {
+  for (const row of r1[1]?.rows || []) {
     if (filters.compare) {
       if (dim(row, 0) === 'returning' && dim(row, 1) === 'date_range_0') currReturning += met(row, 0);
       if (dim(row, 0) === 'returning' && dim(row, 1) === 'date_range_1') prevReturning += met(row, 0);
@@ -417,32 +403,33 @@ export async function queryGa4CoreReports(
     }
   }
 
-  const currTotalUsers = ov1Curr ? met(ov1Curr, 0) : 0;
-  const prevTotalUsers = ov1Prev ? met(ov1Prev, 0) : null;
-  const currActiveUsers = ov1Curr ? met(ov1Curr, 1) : 0;
-  const prevActiveUsers = ov1Prev ? met(ov1Prev, 1) : null;
-  const currNewUsers = ov1Curr ? met(ov1Curr, 2) : 0;
-  const prevNewUsers = ov1Prev ? met(ov1Prev, 2) : null;
-  const currSessions = ov1Curr ? met(ov1Curr, 3) : 0;
-  const prevSessions = ov1Prev ? met(ov1Prev, 3) : null;
-  const currViews = ov1Curr ? met(ov1Curr, 4) : 0;
-  const prevViews = ov1Prev ? met(ov1Prev, 4) : null;
-  const currViewsPerSession = ov1Curr ? Number(met(ov1Curr, 5).toFixed(2)) : 0;
-  const prevViewsPerSession = ov1Prev ? Number(met(ov1Prev, 5).toFixed(2)) : null;
-  const currEngDurationTotal = ov1Curr ? met(ov1Curr, 6) : 0;
-  const prevEngDurationTotal = ov1Prev ? met(ov1Prev, 6) : 0;
+  const currTotalUsers = ovCurr ? met(ovCurr, 0) : 0;
+  const prevTotalUsers = ovPrev ? met(ovPrev, 0) : null;
+  const currActiveUsers = ovCurr ? met(ovCurr, 1) : 0;
+  const prevActiveUsers = ovPrev ? met(ovPrev, 1) : null;
+  const currNewUsers = ovCurr ? met(ovCurr, 2) : 0;
+  const prevNewUsers = ovPrev ? met(ovPrev, 2) : null;
+  const currSessions = ovCurr ? met(ovCurr, 3) : 0;
+  const prevSessions = ovPrev ? met(ovPrev, 3) : null;
+  const currViews = ovCurr ? met(ovCurr, 4) : 0;
+  const prevViews = ovPrev ? met(ovPrev, 4) : null;
+  const currViewsPerSession = currSessions > 0 ? Number((currViews / currSessions).toFixed(2)) : 0;
+  const prevViewsPerSession =
+    filters.compare && prevSessions !== null ? (prevSessions > 0 ? Number(((prevViews || 0) / prevSessions).toFixed(2)) : 0) : null;
+  const currEngDurationTotal = ovCurr ? met(ovCurr, 5) : 0;
+  const prevEngDurationTotal = ovPrev ? met(ovPrev, 5) : 0;
   const currAvgEngSeconds = currActiveUsers > 0 ? Math.round(currEngDurationTotal / currActiveUsers) : 0;
   const prevAvgEngSeconds =
     prevActiveUsers && prevActiveUsers > 0 ? Math.round(prevEngDurationTotal / prevActiveUsers) : filters.compare ? 0 : null;
-  const currEngagementRate = ov1Curr ? Number((met(ov1Curr, 7) * 100).toFixed(1)) : 0;
-  const prevEngagementRate = ov1Prev ? Number((met(ov1Prev, 7) * 100).toFixed(1)) : null;
+  const currEngagementRate = ovCurr ? Number((met(ovCurr, 6) * 100).toFixed(1)) : 0;
+  const prevEngagementRate = ovPrev ? Number((met(ovPrev, 6) * 100).toFixed(1)) : null;
 
-  const currBounceRate = ov2Curr ? Number((met(ov2Curr, 0) * 100).toFixed(1)) : 0;
-  const prevBounceRate = ov2Prev ? Number((met(ov2Prev, 0) * 100).toFixed(1)) : null;
-  const currEventCount = ov2Curr ? met(ov2Curr, 1) : 0;
-  const prevEventCount = ov2Prev ? met(ov2Prev, 1) : null;
-  const currKeyEvents = ov2Curr ? met(ov2Curr, 2) : 0;
-  const prevKeyEvents = ov2Prev ? met(ov2Prev, 2) : null;
+  const currBounceRate = ovCurr ? Number((met(ovCurr, 7) * 100).toFixed(1)) : 0;
+  const prevBounceRate = ovPrev ? Number((met(ovPrev, 7) * 100).toFixed(1)) : null;
+  const currEventCount = ovCurr ? met(ovCurr, 8) : 0;
+  const prevEventCount = ovPrev ? met(ovPrev, 8) : null;
+  const currKeyEvents = ovCurr ? met(ovCurr, 9) : 0;
+  const prevKeyEvents = ovPrev ? met(ovPrev, 9) : null;
 
   const returningVal = currReturning || Math.max(0, currTotalUsers - currNewUsers);
   const prevReturningVal = filters.compare
@@ -466,7 +453,7 @@ export async function queryGa4CoreReports(
   >();
   const prevDays = new Map<string, { activeUsers: number; sessions: number; pageViews: number; conversions: number }>();
 
-  for (const row of r1[3]?.rows || []) {
+  for (const row of r1[2]?.rows || []) {
     const rawDate = formatGaDateYmd(dim(row, 0));
     const rangeTag = filters.compare ? dim(row, 1) : 'date_range_0';
     const act = met(row, 0);
@@ -532,7 +519,7 @@ export async function queryGa4CoreReports(
     engagementRate: number;
   }> = [];
 
-  for (const row of r1[4]?.rows || []) {
+  for (const row of r1[3]?.rows || []) {
     const country = dim(row, 0) || '(not set)';
     const countryCode = dim(row, 1) || '';
     const city = dim(row, 2) || '(not set)';
@@ -628,36 +615,64 @@ export async function queryGa4CoreReports(
 
   const keyEvents = events.filter((e) => e.conversions > 0);
 
-  const languages = (r2[4]?.rows || []).map((row) => ({
+  const languages = (r1[4]?.rows || []).map((row) => ({
     language: dim(row, 0) || 'Unknown',
     activeUsers: met(row, 0),
     totalUsers: met(row, 1),
     sessions: met(row, 2)
   }));
 
-  const deviceCategories = (r3[0]?.rows || []).map((row) => ({
-    device: dim(row, 0) || 'desktop',
-    activeUsers: met(row, 0),
-    sessions: met(row, 1),
-    pageViews: met(row, 2),
-    engagementRate: Number((met(row, 3) * 100).toFixed(1)),
-    bounceRate: Number((met(row, 4) * 100).toFixed(1)),
-    conversions: met(row, 5)
-  }));
+  const devAgg = new Map<string, { device: string; activeUsers: number; sessions: number; pageViews: number; engWeighted: number; bounceWeighted: number; conversions: number }>();
+  const osAgg = new Map<string, { os: string; activeUsers: number; sessions: number }>();
+  const brAgg = new Map<string, { browser: string; activeUsers: number; sessions: number }>();
 
-  const operatingSystems = (r3[1]?.rows || []).map((row) => ({
-    os: dim(row, 0) || 'Unknown',
-    activeUsers: met(row, 0),
-    sessions: met(row, 1)
-  }));
+  for (const row of r2[4]?.rows || []) {
+    const device = dim(row, 0) || 'desktop';
+    const os = dim(row, 1) || 'Unknown';
+    const browser = dim(row, 2) || 'Unknown';
+    const activeUsers = met(row, 0);
+    const sessions = met(row, 1);
+    const pageViews = met(row, 2);
+    const engRate = met(row, 3) * 100;
+    const bounceRate = met(row, 4) * 100;
+    const conversions = met(row, 5);
 
-  const browsers = (r3[2]?.rows || []).map((row) => ({
-    browser: dim(row, 0) || 'Unknown',
-    activeUsers: met(row, 0),
-    sessions: met(row, 1)
-  }));
+    const d = devAgg.get(device) || { device, activeUsers: 0, sessions: 0, pageViews: 0, engWeighted: 0, bounceWeighted: 0, conversions: 0 };
+    d.activeUsers += activeUsers;
+    d.sessions += sessions;
+    d.pageViews += pageViews;
+    d.engWeighted += engRate * Math.max(1, sessions);
+    d.bounceWeighted += bounceRate * Math.max(1, sessions);
+    d.conversions += conversions;
+    devAgg.set(device, d);
 
-  const screenResolutions = (r3[3]?.rows || []).map((row) => ({
+    const o = osAgg.get(os) || { os, activeUsers: 0, sessions: 0 };
+    o.activeUsers += activeUsers;
+    o.sessions += sessions;
+    osAgg.set(os, o);
+
+    const b = brAgg.get(browser) || { browser, activeUsers: 0, sessions: 0 };
+    b.activeUsers += activeUsers;
+    b.sessions += sessions;
+    brAgg.set(browser, b);
+  }
+
+  const deviceCategories = Array.from(devAgg.values())
+    .map((d) => ({
+      device: d.device,
+      activeUsers: d.activeUsers,
+      sessions: d.sessions,
+      pageViews: d.pageViews,
+      engagementRate: d.sessions > 0 ? Number((d.engWeighted / d.sessions).toFixed(1)) : 0,
+      bounceRate: d.sessions > 0 ? Number((d.bounceWeighted / d.sessions).toFixed(1)) : 0,
+      conversions: d.conversions
+    }))
+    .sort((a, b) => b.sessions - a.sessions);
+
+  const operatingSystems = Array.from(osAgg.values()).sort((a, b) => b.sessions - a.sessions).slice(0, 15);
+  const browsers = Array.from(brAgg.values()).sort((a, b) => b.sessions - a.sessions).slice(0, 15);
+
+  const screenResolutions = (r3[0]?.rows || []).map((row) => ({
     resolution: dim(row, 0) || 'Unknown',
     activeUsers: met(row, 0),
     sessions: met(row, 1)

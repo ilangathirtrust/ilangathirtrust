@@ -266,6 +266,8 @@ function downloadCsv(filename: string, headers: string[], rows: Array<Array<stri
   URL.revokeObjectURL(url);
 }
 
+const CLIENT_REPORT_CACHE = new Map<string, { data: CoreReportPayload | ConfigStatusPayload; expiresAt: number }>();
+
 export function AnalyticsPage({
   onNotify,
   userRole
@@ -330,9 +332,23 @@ export function AnalyticsPage({
       if (deviceFilter) q.set('device', deviceFilter);
       if (sourceFilter) q.set('source', sourceFilter);
       if (landingPageFilter) q.set('landingPage', landingPageFilter);
-      if (forceRefresh) q.set('refresh', 'true');
+
+      const cacheKey = q.toString();
+      if (!forceRefresh) {
+        const cached = CLIENT_REPORT_CACHE.get(cacheKey);
+        if (cached && cached.expiresAt > Date.now()) {
+          setReport(cached.data);
+          return;
+        }
+      } else {
+        CLIENT_REPORT_CACHE.clear();
+        q.set('refresh', 'true');
+      }
 
       const res = await callGa4Edge<CoreReportPayload | ConfigStatusPayload>(`/reports?${q.toString()}`);
+      if (res.configured) {
+        CLIENT_REPORT_CACHE.set(cacheKey, { data: res, expiresAt: Date.now() + 600_000 });
+      }
       setReport(res);
     } catch (err) {
       if (err instanceof Ga4EdgeApiError && (err.code === 'GA4_REAUTH_REQUIRED' || err.code === 'GA4_NOT_CONNECTED')) {
@@ -389,6 +405,7 @@ export function AnalyticsPage({
     setDisconnectingOAuth(true);
     try {
       await callGa4Edge('/disconnect', { method: 'POST' });
+      CLIENT_REPORT_CACHE.clear();
       onNotify(tr('Google Analytics disconnected.', 'கூகுள் அனலிடிக்ஸ் துண்டிக்கப்பட்டது.'));
       await loadReports(true);
     } catch (err) {
@@ -427,6 +444,7 @@ export function AnalyticsPage({
   }, []);
 
   useEffect(() => {
+    if (preset === 'custom') return;
     loadReports(false);
   }, [preset, compare, countryFilter, deviceFilter, sourceFilter, landingPageFilter]);
 
