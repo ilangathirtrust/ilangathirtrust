@@ -9,6 +9,7 @@ import { adminApiLimiter } from '../middleware/rateLimit.js';
 import { recordAuditLog, saveContentVersion } from '../services/audit.js';
 import { apiCache } from '../services/cache.js';
 import { parseDeviceMetadata, recordSecurityEvent, signSessionPayload } from '../services/device.js';
+import { analyticsRouter } from './analytics.js';
 
 export const adminRouter = Router();
 
@@ -18,6 +19,8 @@ adminRouter.use(adminApiLimiter, requireAdminAuth, (req, res, next) => {
   }
   next();
 });
+
+adminRouter.use('/analytics', analyticsRouter);
 
 const ALLOWED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml']);
 const ALLOWED_VIDEO_MIME = new Set(['video/mp4', 'video/webm']);

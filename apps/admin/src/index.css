@@ -171,7 +171,8 @@ html.dark .bg-brand-600 {
 
 html.dark .bg-brand-50,
 html.dark .bg-brand-50\/40,
-html.dark .bg-brand-100 {
+html.dark .bg-brand-100,
+html.dark .bg-blue-50 {
   background-color: rgba(59, 130, 246, 0.14);
 }
 

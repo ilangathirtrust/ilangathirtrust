@@ -22,6 +22,10 @@ export interface AppEnv {
   MAX_UPLOAD_IMAGE_MB: number;
   MAX_UPLOAD_VIDEO_MB: number;
   API_CACHE_TTL_SECONDS: number;
+  GA4_PROPERTY_ID: string;
+  GA4_CLIENT_EMAIL: string;
+  GA4_PRIVATE_KEY: string;
+  GA4_SERVICE_ACCOUNT_JSON: string;
 }
 
 const defaultAllowedOrigins =
@@ -50,7 +54,11 @@ export const env: AppEnv = {
   RAZORPAY_WEBHOOK_SECRET: (process.env.RAZORPAY_WEBHOOK_SECRET || '').trim(),
   MAX_UPLOAD_IMAGE_MB: Number(process.env.MAX_UPLOAD_IMAGE_MB || 10),
   MAX_UPLOAD_VIDEO_MB: Number(process.env.MAX_UPLOAD_VIDEO_MB || 50),
-  API_CACHE_TTL_SECONDS: Number(process.env.API_CACHE_TTL_SECONDS || 300)
+  API_CACHE_TTL_SECONDS: Number(process.env.API_CACHE_TTL_SECONDS || 300),
+  GA4_PROPERTY_ID: (process.env.GA4_PROPERTY_ID || '').trim().replace(/^properties\//i, ''),
+  GA4_CLIENT_EMAIL: (process.env.GA4_CLIENT_EMAIL || '').trim(),
+  GA4_PRIVATE_KEY: (process.env.GA4_PRIVATE_KEY || '').replace(/\\n/g, '\n').trim(),
+  GA4_SERVICE_ACCOUNT_JSON: (process.env.GA4_SERVICE_ACCOUNT_JSON || '').trim()
 };
 
 export function isSupabaseConfigured(): boolean {

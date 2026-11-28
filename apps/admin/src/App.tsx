@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Activity,
+  BarChart3,
   BookOpen,
   CalendarDays,
   Compass,
@@ -30,6 +31,7 @@ import { useAdminUi } from './lib/admin-ui';
 import { getSupabaseClient, isSupabaseConfigured, PUBLIC_SITE_URL } from './lib/supabase';
 import { LoginPage } from './pages/LoginPage';
 import { OverviewPage } from './pages/OverviewPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
 import { PagesSeoPage } from './pages/PagesSeoPage';
 import { NavigationMarqueePage } from './pages/NavigationMarqueePage';
 import { MediaLibraryPage } from './pages/MediaLibraryPage';
@@ -64,6 +66,7 @@ const ROLE_LABELS_TA: Record<AdminRole, string> = {
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Dashboard', labelTa: 'டாஷ்போர்டு', shortLabel: 'Home', shortLabelTa: 'முகப்பு', icon: LayoutDashboard, group: 'Workspace', groupTa: 'பணிப்பகுதி', roles: ALL_ROLES },
+  { id: 'analytics', label: 'Website Analytics', labelTa: 'வெப்சைட் அனலிடிக்ஸ்', shortLabel: 'Analytics', shortLabelTa: 'அனலிடிக்ஸ்', icon: BarChart3, group: 'Workspace', groupTa: 'பணிப்பகுதி', roles: ALL_ROLES },
   { id: 'events', label: 'Events Management', labelTa: 'ஈவென்ட்ஸ்', shortLabel: 'Events', shortLabelTa: 'ஈவென்ட்ஸ்', icon: CalendarDays, group: 'Content CMS', groupTa: 'கன்டென்ட் மேலாண்மை', roles: ALL_ROLES },
   { id: 'gallery', label: 'Gallery Folders', labelTa: 'கேலரி ஃபோல்டர்கள்', shortLabel: 'Gallery', shortLabelTa: 'கேலரி', icon: FolderOpen, group: 'Media & Blog', groupTa: 'மீடியா & பிளாக்', roles: ALL_ROLES },
   { id: 'enquiries', label: 'Contact Enquiries', labelTa: 'தொடர்பு மெசேஜ்கள்', shortLabel: 'Enquiries', shortLabelTa: 'மெசேஜ்', icon: Inbox, group: 'Operations', groupTa: 'அன்றாட நிர்வாகம்', roles: ALL_ROLES },
@@ -581,6 +584,7 @@ export default function App() {
           )}
 
           {resolvedActive === 'overview' && <OverviewPage onNavigate={navigateTab} onNotify={notify} userRole={adminUser.role} />}
+          {resolvedActive === 'analytics' && <AnalyticsPage onNotify={notify} />}
           {resolvedActive === 'pages' && <PagesSeoPage onNotify={notify} />}
           {resolvedActive === 'navigation' && <NavigationMarqueePage onNotify={notify} />}
           {resolvedActive === 'media' && <MediaLibraryPage onNotify={notify} />}
