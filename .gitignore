@@ -15,6 +15,7 @@ node_modules/
 *.jks
 *service-account*.json
 *credentials*.json
+client_secret_*.json
 
 # Build outputs & TypeScript caches
 dist/

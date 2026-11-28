@@ -584,7 +584,7 @@ export default function App() {
           )}
 
           {resolvedActive === 'overview' && <OverviewPage onNavigate={navigateTab} onNotify={notify} userRole={adminUser.role} />}
-          {resolvedActive === 'analytics' && <AnalyticsPage onNotify={notify} />}
+          {resolvedActive === 'analytics' && <AnalyticsPage onNotify={notify} userRole={adminUser.role} />}
           {resolvedActive === 'pages' && <PagesSeoPage onNotify={notify} />}
           {resolvedActive === 'navigation' && <NavigationMarqueePage onNotify={notify} />}
           {resolvedActive === 'media' && <MediaLibraryPage onNotify={notify} />}

@@ -5,12 +5,14 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   CheckCircle2,
+  Copy,
   Download,
   ExternalLink,
   FileText,
   Filter,
   Globe2,
   Laptop,
+  Link2,
   Loader2,
   MousePointerClick,
   Radio,
@@ -18,10 +20,11 @@ import {
   SlidersHorizontal,
   Sparkles,
   Target,
+  Unlink,
   Users,
   X
 } from 'lucide-react';
-import { adminApi } from '../lib/api';
+import { callGa4Edge, Ga4EdgeApiError } from '../lib/ga4Edge';
 import { useAdminUi } from '../lib/admin-ui';
 import { AnalyticsSkeleton } from '../components/PageSkeletons';
 import {
@@ -56,12 +59,16 @@ interface ConfigStatusPayload {
   configured: false;
   configStatus: {
     configured: boolean;
+    oauthMode?: boolean;
+    secretsReady?: boolean;
+    migrationRequired?: boolean;
+    hasClientId?: boolean;
+    hasClientSecret?: boolean;
     hasPropertyId: boolean;
-    hasClientEmail: boolean;
-    hasPrivateKey: boolean;
+    connected?: boolean;
+    redirectUri?: string;
     measurementId: string;
     timezone: string;
-    requiredEnvVars: string[];
   };
 }
 
@@ -259,9 +266,18 @@ function downloadCsv(filename: string, headers: string[], rows: Array<Array<stri
   URL.revokeObjectURL(url);
 }
 
-export function AnalyticsPage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
+export function AnalyticsPage({
+  onNotify,
+  userRole
+}: {
+  onNotify: (msg: string, isErr?: boolean) => void;
+  userRole?: string;
+}) {
   const { tr } = useAdminUi();
+  const canManageOAuth = userRole === 'super_admin' || userRole === 'admin';
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('overview');
+  const [connectingOAuth, setConnectingOAuth] = useState(false);
+  const [disconnectingOAuth, setDisconnectingOAuth] = useState(false);
 
   // Filter & Range state
   const [preset, setPreset] = useState<DatePreset>('28d');
@@ -316,11 +332,32 @@ export function AnalyticsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
       if (landingPageFilter) q.set('landingPage', landingPageFilter);
       if (forceRefresh) q.set('refresh', 'true');
 
-      const res = await adminApi<CoreReportPayload | ConfigStatusPayload>(`/analytics/reports?${q.toString()}`, {
-        forceRefresh: true
-      });
+      const res = await callGa4Edge<CoreReportPayload | ConfigStatusPayload>(`/reports?${q.toString()}`);
       setReport(res);
     } catch (err) {
+      if (err instanceof Ga4EdgeApiError && (err.code === 'GA4_REAUTH_REQUIRED' || err.code === 'GA4_NOT_CONNECTED')) {
+        try {
+          const st = await callGa4Edge<{
+            secretsReady: boolean;
+            migrationRequired: boolean;
+            hasClientId: boolean;
+            hasClientSecret: boolean;
+            hasPropertyId: boolean;
+            connected: boolean;
+            redirectUri: string;
+            measurementId: string;
+            timezone: string;
+          }>('/status');
+          setReport({
+            configured: false,
+            configStatus: { ...st, configured: false, oauthMode: true }
+          });
+          setError(err.message);
+          return;
+        } catch {
+          // fall through to standard error handling
+        }
+      }
       const msg = err instanceof Error ? err.message : tr('Unable to load Google Analytics reports.', 'அனலிடிக்ஸ் விவரம் லோடு ஆகலைங்க.');
       setError(msg);
       onNotify(msg, true);
@@ -330,12 +367,43 @@ export function AnalyticsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
     }
   }
 
+  async function handleConnectOAuth() {
+    setConnectingOAuth(true);
+    try {
+      const res = await callGa4Edge<{ authUrl: string }>('/oauth/start', {
+        method: 'POST',
+        body: { returnOrigin: window.location.origin }
+      });
+      window.location.href = res.authUrl;
+    } catch (err) {
+      setConnectingOAuth(false);
+      onNotify(
+        err instanceof Error ? err.message : tr('Unable to start Google OAuth flow.', 'கூகுள் அனுமதி தொடங்க முடியலைங்க.'),
+        true
+      );
+    }
+  }
+
+  async function handleDisconnectOAuth() {
+    if (!confirm(tr('Disconnect Google Analytics 4 OAuth connection?', 'கூகுள் அனலிடிக்ஸ் இணைப்பைத் துண்டிக்கலாமா?'))) return;
+    setDisconnectingOAuth(true);
+    try {
+      await callGa4Edge('/disconnect', { method: 'POST' });
+      onNotify(tr('Google Analytics disconnected.', 'கூகுள் அனலிடிக்ஸ் துண்டிக்கப்பட்டது.'));
+      await loadReports(true);
+    } catch (err) {
+      onNotify(err instanceof Error ? err.message : tr('Failed to disconnect.', 'துண்டிக்க முடியலைங்க.'), true);
+    } finally {
+      setDisconnectingOAuth(false);
+    }
+  }
+
   async function loadRealtime(forceRefresh = false) {
     setRtLoading(true);
     setRtError('');
     try {
       const q = forceRefresh ? '?refresh=true' : '';
-      const res = await adminApi<RealtimePayload>(`/analytics/realtime${q}`, { forceRefresh: true });
+      const res = await callGa4Edge<RealtimePayload>(`/realtime${q}`);
       setRealtime(res);
     } catch (err) {
       setRtError(err instanceof Error ? err.message : tr('Unable to fetch realtime analytics.', 'லைவ் விவரம் வரலைங்க.'));
@@ -343,6 +411,20 @@ export function AnalyticsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
       setRtLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get('ga4_connected') === '1') {
+        onNotify(tr('Google Analytics 4 connected successfully via OAuth 2.0!', 'கூகுள் அனலிடிக்ஸ் (GA4) வெற்றிகரமா இணைக்கப்பட்டது!'));
+        window.history.replaceState(null, '', '/analytics');
+      } else if (sp.get('ga4_error')) {
+        const errCode = sp.get('ga4_error') || 'oauth_failed';
+        onNotify(tr(`Google Analytics connection failed: ${errCode}`, `இணைப்பு தோல்வி: ${errCode}`), true);
+        window.history.replaceState(null, '', '/analytics');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     loadReports(false);
@@ -445,9 +527,12 @@ export function AnalyticsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
     return <AnalyticsSkeleton />;
   }
 
-  // Disconnected / Not Configured State
+  // Disconnected / Not Configured State (Google OAuth 2.0 via Supabase Edge Function)
   if (report && !report.configured) {
     const cs = report.configStatus;
+    const secretsReady = Boolean(cs.secretsReady);
+    const canStartOAuth = canManageOAuth && secretsReady && !cs.migrationRequired;
+
     return (
       <div className="space-y-4">
         <div className="admin-card space-y-5">
@@ -458,26 +543,30 @@ export function AnalyticsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
               </span>
               <div>
                 <h2 className="text-base font-extrabold text-slate-900 sm:text-lg">
-                  {tr('Connect Google Analytics 4 Data API', 'கூகுள் அனலிடிக்ஸ் (GA4) இணைப்பு தேவை')}
+                  {tr('Connect Google Analytics 4 (OAuth 2.0)', 'கூகுள் அனலிடிக்ஸ் (GA4) இணைப்பு')}
                 </h2>
                 <p className="mt-1 text-xs text-slate-500">
                   {tr(
-                    `Public tracking tag ${cs.measurementId} is active on the website. Add your GA4 Data API Service Account credentials on the API server to stream live reports here.`,
-                    `வெப்சைட்ல ${cs.measurementId} டிராக்கிங் ரெடியா இருக்கு. இங்க லைவ் ரிப்போர்ட் பார்க்க சர்வர்ல GA4 சர்வீஸ் அக்கவுண்ட் விவரம் சேர்க்கணும்.`
+                    `Website tracking tag ${cs.measurementId} is active. Authorize your Google Analytics account securely via Supabase Edge Functions to view live reports.`,
+                    `வெப்சைட்ல ${cs.measurementId} டிராக்கிங் ரெடியா இருக்கு. இங்க லைவ் ரிப்போர்ட் பார்க்க உங்க கூகுள் அக்கவுண்ட்டை பாதுகாப்பா இணைங்க.`
                   )}
                 </p>
               </div>
             </div>
             <span className="rounded-full bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-800">
-              {tr('Not Configured', 'இன்னும் இணைக்கலை')}
+              {cs.migrationRequired
+                ? tr('Migration Required', 'டேபிள் அப்டேட் தேவை')
+                : secretsReady
+                ? tr('Ready to Authorize', 'இணைக்கத் தயார்')
+                : tr('Edge Secrets Needed', 'சீக்ரெட்ஸ் தேவை')}
             </span>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              { name: 'GA4_PROPERTY_ID', ok: cs.hasPropertyId, desc: tr('Numeric GA4 Property ID (e.g. 462819304)', 'GA4 ப்ராப்பர்ட்டி ஐடி நம்பர்') },
-              { name: 'GA4_CLIENT_EMAIL', ok: cs.hasClientEmail, desc: tr('Service Account email added as GA4 Viewer', 'சர்வீஸ் அக்கவுண்ட் ஈமெயில் (Viewer)') },
-              { name: 'GA4_PRIVATE_KEY', ok: cs.hasPrivateKey, desc: tr('RSA private key from Google Cloud JSON', 'கூகுள் கிளவுட் பிரைவேட் கீ') }
+              { name: 'GOOGLE_CLIENT_ID', ok: Boolean(cs.hasClientId), desc: tr('Google OAuth Web Application Client ID', 'கூகுள் OAuth கிளையண்ட் ஐடி') },
+              { name: 'GOOGLE_CLIENT_SECRET', ok: Boolean(cs.hasClientSecret), desc: tr('Stored securely in Supabase Edge Secrets', 'சீக்ரெட் சுப்பபேஸ்ல பாதுகாப்பா இருக்கு') },
+              { name: 'GA4_PROPERTY_ID', ok: Boolean(cs.hasPropertyId), desc: tr('Numeric GA4 Property ID (digits only)', 'GA4 ப்ராப்பர்ட்டி நம்பர்') }
             ].map((item) => (
               <div key={item.name} className="admin-subcard flex items-start gap-2.5">
                 {item.ok ? (
@@ -493,22 +582,73 @@ export function AnalyticsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
             ))}
           </div>
 
-          <div className="admin-subcard space-y-2 text-xs text-slate-600">
-            <p className="font-bold text-slate-900">{tr('Quick Setup Steps:', 'செட் பண்ற வழி:')}</p>
-            <ol className="list-decimal space-y-1 pl-4">
-              <li>{tr('Enable "Google Analytics Data API" in Google Cloud Console and create a Service Account JSON key.', 'கூகுள் கிளவுட்ல Google Analytics Data API ஆன் பண்ணி சர்வீஸ் அக்கவுண்ட் கீ உருவாக்குங்க.')}</li>
-              <li>{tr('In Google Analytics Admin → Property Access Management, add the service_account email with "Viewer" role.', 'GA4 அட்மின் பகுதியில அந்த ஈமெயிலுக்கு Viewer அனுமதி கொடுங்க.')}</li>
-              <li>{tr('Add GA4_PROPERTY_ID, GA4_CLIENT_EMAIL, and GA4_PRIVATE_KEY (or GA4_SERVICE_ACCOUNT_JSON) to ilangathir-api environment variables on Vercel.', 'Vercel-ல ilangathir-api சர்வர்ல இந்த விவரங்களை சேர்த்து ரீ-டிப்ளாய் பண்ணுங்க.')}</li>
-            </ol>
+          {cs.migrationRequired && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs font-semibold text-amber-900">
+              {tr(
+                'Run supabase/migrations/v016_ga4_oauth_tokens.sql in Supabase SQL Editor first to create the encrypted OAuth token store.',
+                'முதல்ல சுப்பபேஸ் SQL எடிட்டர்ல v016_ga4_oauth_tokens.sql ரன் பண்ணுங்க.'
+              )}
+            </div>
+          )}
+
+          {cs.redirectUri && (
+            <div className="admin-subcard space-y-2 text-xs">
+              <p className="font-bold text-slate-900">
+                {tr('Authorized Redirect URI in Google Cloud Console:', 'கூகுள் கிளவுட் Redirect URI:')}
+              </p>
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-[11px] text-slate-800 dark:border-[#2C313D] dark:bg-[#161920]">
+                <span className="break-all">{cs.redirectUri}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(cs.redirectUri || '');
+                    onNotify(tr('Redirect URI copied.', 'லிங்க் காப்பி ஆச்சுங்க.'));
+                  }}
+                  className="inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-200"
+                >
+                  <Copy className="h-3 w-3" />
+                  <span>{tr('Copy', 'காப்பி')}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-800">
+              {error}
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <a
               href="https://analytics.google.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1 font-bold text-blue-600 hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline"
             >
               <span>{tr('Open Google Analytics Admin', 'கூகுள் அனலிடிக்ஸ் திற')}</span>
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
+
+            {canManageOAuth ? (
+              <button
+                type="button"
+                disabled={!canStartOAuth || connectingOAuth}
+                onClick={handleConnectOAuth}
+                className="admin-btn-primary px-5 py-2.5"
+              >
+                {connectingOAuth ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+                <span>
+                  {connectingOAuth
+                    ? tr('Redirecting to Google…', 'கூகுளுக்குப் போகுது…')
+                    : tr('Connect Google Analytics (OAuth 2.0)', 'கூகுள் அனலிடிக்ஸ் இணை')}
+                </span>
+              </button>
+            ) : (
+              <span className="text-xs text-slate-500">
+                {tr('Ask an Admin or Super Admin to authorize Google Analytics.', 'அட்மின் இதை இணைச்சதும் இங்க டேட்டா காட்டும்.')}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -627,6 +767,18 @@ export function AnalyticsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
               <RefreshCw className={`h-3.5 w-3.5 ${refreshing || rtLoading ? 'animate-spin' : ''}`} />
               <span>{tr('Refresh', 'புதுப்பி')}</span>
             </button>
+
+            {canManageOAuth && data && (
+              <button
+                type="button"
+                disabled={disconnectingOAuth}
+                onClick={handleDisconnectOAuth}
+                className="rounded-xl border border-red-200 bg-red-50 px-2.5 py-1.5 text-[11px] font-bold text-red-700 transition hover:bg-red-100"
+                title={tr('Disconnect Google Analytics OAuth', 'இணைப்பைத் துண்டி')}
+              >
+                <Unlink className="inline h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
