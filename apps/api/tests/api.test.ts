@@ -96,12 +96,21 @@ test('Shared Zod validation schemas enforce security, honeypot, and consent rule
   assert.equal(
     createDonationOrderSchema.safeParse({
       donor_name: 'Karthik',
-      donor_email: 'karthik@example.com',
       donor_phone: '+91 9876543210',
-      purpose: 'Education Support',
       amount_inr: 50
     }).success,
     false
+  );
+
+  // Donation with name + mobile and blank email -> accepted
+  assert.equal(
+    createDonationOrderSchema.safeParse({
+      donor_name: 'Karthik',
+      donor_phone: '+91 9876543210',
+      donor_email: '',
+      amount_inr: 500
+    }).success,
+    true
   );
 });
 
@@ -337,14 +346,21 @@ test('Social links parser, validation, receipt lookup, and trust metadata work c
   assert.equal(
     receiptLookupSchema.safeParse({
       receipt_number: 'ILG-20261128-AB12CD',
-      donor_email: 'donor@example.com'
+      contact: '9876543210'
+    }).success,
+    true
+  );
+  assert.equal(
+    receiptLookupSchema.safeParse({
+      receipt_number: 'ILG-20261128-AB12CD',
+      contact: 'donor@example.com'
     }).success,
     true
   );
   assert.equal(
     receiptLookupSchema.safeParse({
       receipt_number: '12',
-      donor_email: 'bad-email'
+      contact: '12'
     }).success,
     false
   );

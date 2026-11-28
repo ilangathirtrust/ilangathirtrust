@@ -314,9 +314,23 @@ export const PERMANENT_PAGES = {
     seo_title_en: 'Contact & Volunteer | Ilangathir Trust, V. Kallupatti, Dindigul',
     seo_title_ta: 'தொடர்பு & தன்னார்வ சேவை | இளங்கதிர் அறக்கட்டளை',
     seo_description_en: 'Contact Ilangathir Trust at V. Kallupatti, Dindigul, Tamil Nadu (+91 93630 15050) or apply to volunteer.',
-    seo_description_ta: 'திண்டுக்கல் V. கல்லுப்பட்டி இளங்கதிர் அறக்கட்டளையைத் தொடர்பு கொள்ளவும் அல்லது தன்னார்வலராக இணையவும்.',
-    keywords_en: 'Contact Ilangathir Trust, Volunteer Dindigul NGO, V. Kallupatti Trust Phone Address',
-    keywords_ta: 'இளங்கதிர் அறக்கட்டளை தொடர்பு, தன்னார்வலர் பதிவு, திண்டுக்கல்'
+    seo_description_ta: 'திண்டுக்கல் V. கல்லுப்பட்டி இளங்கதிர் அறக்கட்டளையைத் தொடர்பு கொள்ளவும்.',
+    keywords_en: 'Contact Ilangathir Trust, V. Kallupatti Trust Phone Address',
+    keywords_ta: 'இளங்கதிர் அறக்கட்டளை தொடர்பு, திண்டுக்கல்'
+  },
+  volunteer: {
+    eyebrow_en: 'JOIN THE MOVEMENT',
+    eyebrow_ta: 'தன்னார்வ சேவை',
+    title_en: 'Become a volunteer with Ilangathir Trust.',
+    title_ta: 'இளங்கதிர் அறக்கட்டளையில் தன்னார்வலராக இணையுங்கள்.',
+    subtitle_en: 'Contribute your time and skills to student education, rural health camps, and environmental drives.',
+    subtitle_ta: 'கல்வி உதவி, மருத்துவ முகாம் மற்றும் சமூக நலப் பணிகளில் உங்களின் நேரத்தையும் திறமையையும் பகிருங்கள்.',
+    seo_title_en: 'Volunteer With Ilangathir Trust | Dindigul, Tamil Nadu',
+    seo_title_ta: 'தன்னார்வலர் பதிவு | இளங்கதிர் அறக்கட்டளை — திண்டுக்கல்',
+    seo_description_en: 'Apply to volunteer with Ilangathir Trust across V. Kallupatti, Dindigul and neighbouring Tamil Nadu districts.',
+    seo_description_ta: 'திண்டுக்கல் இளங்கதிர் அறக்கட்டளையில் தன்னார்வலராகப் பதிவு செய்யுங்கள்.',
+    keywords_en: 'Volunteer Dindigul NGO, Volunteer Ilangathir Trust, Tamil Nadu Charity Volunteer',
+    keywords_ta: 'தன்னார்வலர் பதிவு, இளங்கதிர் அறக்கட்டளை, திண்டுக்கல் சமூக சேவை'
   },
   privacy: {
     eyebrow_en: 'LEGAL & PRIVACY',

@@ -31,7 +31,7 @@ declare global {
 
 interface DonationCheckoutProps {
   suggestedAmounts: number[];
-  purposes: string[];
+  purposes?: string[];
 }
 
 interface DonationReceiptData {
@@ -45,22 +45,17 @@ interface DonationReceiptData {
   donor_name?: string;
   donor_email?: string;
   donor_phone?: string;
-  donor_pan?: string;
-  donor_address?: string;
 }
 
-export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckoutProps) {
+export function DonationCheckout({ suggestedAmounts, purposes = ['General Welfare'] }: DonationCheckoutProps) {
   const { lang } = useLanguage();
   const ui = getUi(lang);
 
+  const defaultPurpose = purposes[0] || 'General Welfare';
   const [amountInr, setAmountInr] = useState<number>(suggestedAmounts[1] || 1000);
-  const [purpose, setPurpose] = useState<string>(purposes[0] || 'General Welfare');
   const [donorName, setDonorName] = useState('');
-  const [donorEmail, setDonorEmail] = useState('');
   const [donorPhone, setDonorPhone] = useState('');
-  const [donorPan, setDonorPan] = useState('');
-  const [donorAddress, setDonorAddress] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [donorEmail, setDonorEmail] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -69,7 +64,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
 
   const [lookupOpen, setLookupOpen] = useState(false);
   const [lookupReceiptNo, setLookupReceiptNo] = useState('');
-  const [lookupEmail, setLookupEmail] = useState('');
+  const [lookupContact, setLookupContact] = useState('');
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState('');
 
@@ -87,19 +82,16 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
     const idempotencyKey = `ilg_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
     try {
-      trackEvent('begin_donation', { amount_inr: amountInr, purpose });
+      trackEvent('begin_donation', { amount_inr: amountInr, purpose: defaultPurpose });
 
       const orderRes = await fetch(`${API_URL}/api/donations/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           donor_name: donorName,
-          donor_email: donorEmail,
           donor_phone: donorPhone,
-          donor_pan: donorPan,
-          donor_address: donorAddress,
-          purpose,
-          is_anonymous: isAnonymous,
+          donor_email: donorEmail.trim(),
+          purpose: defaultPurpose,
           amount_inr: Number(amountInr),
           idempotency_key: idempotencyKey
         })
@@ -131,13 +123,13 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
         amount: orderData.amount_paise,
         currency: orderData.currency,
         name: 'Ilangathir Trust',
-        description: `Donation — ${purpose}`,
+        description: `Donation — ${defaultPurpose}`,
         image: '/logos/icon.webp',
         order_id: orderData.order_id,
         prefill: {
           name: donorName,
-          email: donorEmail,
-          contact: donorPhone
+          contact: donorPhone,
+          ...(donorEmail.trim() ? { email: donorEmail.trim() } : {})
         },
         theme: { color: '#1727d8' },
         modal: {
@@ -183,9 +175,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               ...verifyJson,
               donor_name: verifyJson.donor_name || donorName,
               donor_email: verifyJson.donor_email || donorEmail,
-              donor_phone: verifyJson.donor_phone || donorPhone,
-              donor_pan: verifyJson.donor_pan || donorPan,
-              donor_address: verifyJson.donor_address || donorAddress
+              donor_phone: verifyJson.donor_phone || donorPhone
             });
             trackEvent('donation_completed', {
               amount_inr: verifyJson.amount_inr,
@@ -243,7 +233,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           receipt_number: lookupReceiptNo.trim(),
-          donor_email: lookupEmail.trim()
+          contact: lookupContact.trim()
         })
       });
       const found = await readApiResponse<DonationReceiptData & { verified: boolean }>(
@@ -259,8 +249,8 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
         formatClientError(
           err,
           lang,
-          'Could not locate that receipt. Verify the receipt number and donor email.',
-          'ரசீதைக் கண்டறிய முடியவில்லை. ரசீது எண்ணையும் மின்னஞ்சலையும் சரிபார்க்கவும்.'
+          'Could not locate that receipt. Verify the receipt number and mobile/email.',
+          'ரசீதைக் கண்டறிய முடியவில்லை. ரசீது எண்ணையும் கைபேசி/மின்னஞ்சலையும் சரிபார்க்கவும்.'
         )
       );
     } finally {
@@ -355,18 +345,6 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               <div className="flex justify-between gap-3">
                 <span className="text-slate-500">{lang === 'ta' ? 'கைபேசி' : 'Phone'}</span>
                 <span className="text-right font-medium text-slate-800">{receipt.donor_phone}</span>
-              </div>
-            )}
-            {receipt.donor_pan && (
-              <div className="flex justify-between gap-3">
-                <span className="text-slate-500">PAN</span>
-                <span className="font-mono font-bold uppercase text-slate-900">{receipt.donor_pan}</span>
-              </div>
-            )}
-            {receipt.donor_address && (
-              <div className="flex justify-between gap-3">
-                <span className="text-slate-500">{lang === 'ta' ? 'முகவரி' : 'Address'}</span>
-                <span className="text-right text-slate-800">{receipt.donor_address}</span>
               </div>
             )}
           </div>
@@ -489,57 +467,31 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
             ))}
           </div>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <label className="block space-y-1.5 text-xs font-bold text-slate-700">
-              <span>{ui.customAmount}</span>
-              <input
-                type="number"
-                min={100}
-                max={10000000}
-                required
-                value={amountInr}
-                onChange={(e) => setAmountInr(Number(e.target.value))}
-                className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-base font-bold text-brand-900 outline-none focus:border-brand-700 focus:bg-white"
-              />
-            </label>
-
-            <label className="block space-y-1.5 text-xs font-bold text-slate-700">
-              <span>{ui.purposeLabel}</span>
-              <select
-                value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
-                className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
-              >
-                {purposes.map((p) => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <label className="mt-4 block space-y-1.5 text-xs font-bold text-slate-700">
+            <span>{ui.customAmount}</span>
+            <input
+              type="number"
+              min={100}
+              max={10000000}
+              required
+              value={amountInr}
+              onChange={(e) => setAmountInr(Number(e.target.value))}
+              className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-base font-bold text-brand-900 outline-none focus:border-brand-700 focus:bg-white"
+            />
+          </label>
         </div>
 
-        {/* Donor Info */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <label className="block space-y-1.5 text-xs font-bold text-slate-700">
+        {/* Simple Donor Details (Max 3 Fields: Name, Mobile, Optional Email) */}
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <label className="block space-y-1.5 text-xs font-bold text-slate-700 sm:col-span-2">
             <span>{ui.donorName}</span>
             <input
               required
               minLength={2}
               maxLength={160}
+              placeholder={lang === 'ta' ? 'உங்கள் முழுப் பெயர்' : 'Your full name'}
               value={donorName}
               onChange={(e) => setDonorName(e.target.value)}
-              className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
-            />
-          </label>
-
-          <label className="block space-y-1.5 text-xs font-bold text-slate-700">
-            <span>{ui.donorEmail}</span>
-            <input
-              type="email"
-              required
-              maxLength={190}
-              value={donorEmail}
-              onChange={(e) => setDonorEmail(e.target.value)}
               className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
             />
           </label>
@@ -551,6 +503,7 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               required
               minLength={7}
               maxLength={30}
+              placeholder="+91 98765 43210"
               value={donorPhone}
               onChange={(e) => setDonorPhone(e.target.value)}
               className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
@@ -558,33 +511,15 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
           </label>
 
           <label className="block space-y-1.5 text-xs font-bold text-slate-700">
-            <span>{ui.donorPan}</span>
+            <span>{ui.donorEmail}</span>
             <input
-              maxLength={20}
-              value={donorPan}
-              onChange={(e) => setDonorPan(e.target.value.toUpperCase())}
-              className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal uppercase text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
-            />
-          </label>
-
-          <label className="block space-y-1.5 text-xs font-bold text-slate-700 sm:col-span-2">
-            <span>{ui.donorAddress}</span>
-            <input
-              maxLength={400}
-              value={donorAddress}
-              onChange={(e) => setDonorAddress(e.target.value)}
+              type="email"
+              maxLength={190}
+              placeholder={lang === 'ta' ? 'விருப்பம் (ரசீதுக்கு)' : 'Optional (for receipt copy)'}
+              value={donorEmail}
+              onChange={(e) => setDonorEmail(e.target.value)}
               className="w-full rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm font-normal text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
             />
-          </label>
-
-          <label className="flex items-center gap-2.5 text-xs font-medium text-slate-700 sm:col-span-2">
-            <input
-              type="checkbox"
-              checked={isAnonymous}
-              onChange={(e) => setIsAnonymous(e.target.checked)}
-              className="h-4 w-4 rounded accent-saffron-600"
-            />
-            <span>{ui.anonymousLabel}</span>
           </label>
         </div>
 
@@ -638,11 +573,10 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               className="rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
             />
             <input
-              type="email"
               required
-              placeholder={lang === 'ta' ? 'நன்கொடையாளர் மின்னஞ்சல்' : 'Donor Email Address'}
-              value={lookupEmail}
-              onChange={(e) => setLookupEmail(e.target.value)}
+              placeholder={lang === 'ta' ? 'கைபேசி எண் அல்லது மின்னஞ்சல்' : 'Mobile Number or Email'}
+              value={lookupContact}
+              onChange={(e) => setLookupContact(e.target.value)}
               className="rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
             />
             <button

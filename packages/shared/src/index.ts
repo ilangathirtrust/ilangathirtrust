@@ -246,12 +246,15 @@ export const volunteerApplicationSchema = z.object({
 
 export const createDonationOrderSchema = z.object({
   donor_name: z.string().trim().min(2).max(160),
-  donor_email: z.string().trim().email().max(190),
   donor_phone: z.string().trim().min(7).max(30),
-  donor_pan: z.string().trim().max(20).optional().default(''),
-  donor_address: z.string().trim().max(400).optional().default(''),
-  purpose: z.string().trim().min(2).max(120).default('General Welfare'),
-  is_anonymous: z.boolean().optional().default(false),
+  donor_email: z
+    .string()
+    .trim()
+    .max(190)
+    .optional()
+    .default('')
+    .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), 'Enter a valid email address.'),
+  purpose: z.string().trim().min(2).max(120).optional().default('General Welfare'),
   amount_inr: z.number().min(100).max(10000000),
   idempotency_key: z.string().trim().min(8).max(120).optional()
 });
@@ -470,7 +473,7 @@ export const socialLinksUpdateSchema = z.object({
 
 export const receiptLookupSchema = z.object({
   receipt_number: z.string().trim().min(4).max(60),
-  donor_email: z.string().trim().email().max(190)
+  contact: z.string().trim().min(5).max(190)
 });
 
 export function parseSocialLinks(

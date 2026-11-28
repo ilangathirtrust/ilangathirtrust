@@ -40,60 +40,64 @@ const LUCIDE_PRESETS: Array<{ label: string; icon: string }> = [
 
 const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }> = {
   instagram: {
-    bg: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white border-transparent',
+    bg: 'bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285AEB_90%)] text-white border-transparent',
     glyph: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
-        <circle cx="12" cy="12" r="4.2" />
-        <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none" />
+      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="5.5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none" />
       </svg>
     )
   },
   whatsapp: {
     bg: 'bg-[#25D366] text-white border-transparent',
     glyph: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-        <path d="M12.03 2a9.97 9.97 0 0 0-8.65 14.95L2 22l5.2-1.36A9.98 9.98 0 1 0 12.03 2Zm0 18.14a8.18 8.18 0 0 1-4.17-1.14l-.3-.18-3.09.81.82-3.01-.2-.31a8.18 8.18 0 1 1 7.04 3.83Zm4.49-6.13c-.25-.12-1.46-.72-1.69-.8-.22-.08-.39-.12-.55.12-.17.25-.64.8-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.48-1.39-1.73-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47c-.17 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.54c.13.17 1.74 2.66 4.22 3.73.59.25 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.07-.11-.23-.17-.48-.29Z" />
+      <svg viewBox="0 0 32 32" className="h-5 w-5" fill="currentColor">
+        <path d="M16.04 4C9.42 4 4.04 9.38 4.04 16c0 2.12.56 4.19 1.62 6.01L4 28l6.16-1.61A11.95 11.95 0 0 0 16.04 28C22.66 28 28.04 22.62 28.04 16S22.66 4 16.04 4Zm0 21.81c-1.84 0-3.65-.5-5.22-1.44l-.37-.22-3.66.96.98-3.57-.24-.39a9.77 9.77 0 0 1-1.5-5.15c0-5.41 4.4-9.81 9.81-9.81s9.81 4.4 9.81 9.81-4.4 9.81-9.61 9.81Zm5.38-7.35c-.3-.15-1.74-.86-2.01-.96-.27-.1-.46-.15-.66.15-.2.3-.76.96-.94 1.15-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.44-.52.15-.17.2-.3.3-.49.1-.2.05-.37-.02-.52-.08-.15-.66-1.59-.9-2.18-.24-.58-.48-.5-.66-.51h-.56c-.2 0-.52.07-.79.37-.27.3-1.03 1.01-1.03 2.46s1.06 2.85 1.21 3.05c.15.2 2.08 3.18 5.04 4.46.7.3 1.25.49 1.68.62.71.22 1.35.19 1.86.12.57-.09 1.74-.71 1.98-1.4.25-.69.25-1.28.17-1.4-.07-.12-.27-.2-.57-.35Z" />
       </svg>
     )
   },
   youtube: {
     bg: 'bg-[#FF0000] text-white border-transparent',
     glyph: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-        <path d="M23.1 7.1a2.95 2.95 0 0 0-2.08-2.09C19.18 4.5 12 4.5 12 4.5s-7.18 0-9.02.51A2.95 2.95 0 0 0 .9 7.1C.4 8.95.4 12 .4 12s0 3.05.5 4.9a2.95 2.95 0 0 0 2.08 2.09c1.84.51 9.02.51 9.02.51s7.18 0 9.02-.51a2.95 2.95 0 0 0 2.08-2.09c.5-1.85.5-4.9.5-4.9s0-3.05-.5-4.9ZM9.7 15.1V8.9l5.9 3.1-5.9 3.1Z" />
+      <svg viewBox="0 0 24 24" className="h-[19px] w-[19px]">
+        <path fill="#FFFFFF" d="M21.58 7.19a2.51 2.51 0 0 0-1.77-1.77C18.25 5 12 5 12 5s-6.25 0-7.81.42a2.51 2.51 0 0 0-1.77 1.77C2 8.75 2 12 2 12s0 3.25.42 4.81a2.51 2.51 0 0 0 1.77 1.77C5.75 19 12 19 12 19s6.25 0 7.81-.42a2.51 2.51 0 0 0 1.77-1.77C22 15.25 22 12 22 12s0-3.25-.42-4.81Z" />
+        <path fill="#FF0000" d="M10 15.02 15.22 12 10 8.98v6.04Z" />
       </svg>
     )
   },
   facebook: {
     bg: 'bg-[#1877F2] text-white border-transparent',
     glyph: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-        <path d="M13.6 22v-8.8h2.95l.44-3.43H13.6V7.58c0-.99.28-1.67 1.7-1.67h1.81V2.84c-.31-.04-1.39-.14-2.64-.14-2.62 0-4.41 1.6-4.41 4.53v2.54H7.1v3.43h2.96V22h3.54Z" />
+      <svg viewBox="0 0 24 24" className="h-[19px] w-[19px]" fill="currentColor">
+        <path d="M14.2 21.5v-8.4h2.8l.42-3.28H14.2V7.73c0-.95.26-1.6 1.62-1.6h1.73V3.2c-.3-.04-1.33-.13-2.52-.13-2.5 0-4.21 1.52-4.21 4.33v2.42H8v3.28h2.82v8.4h3.38Z" />
       </svg>
     )
   },
   x: {
-    bg: 'bg-[#0F1419] text-white border-transparent',
+    bg: 'bg-[#000000] text-white border-transparent',
     glyph: (
-      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.451-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z" />
+      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+        <path d="M18.9 2.25h3.07l-6.7 7.66 7.88 10.42h-6.17l-4.83-6.32-5.53 6.32H3.55l7.17-8.19-7.56-9.89h6.33l4.37 5.77 5.04-5.77Zm-1.08 16.25h1.7L6.7 4.02H4.88l12.94 14.48Z" />
       </svg>
     )
   },
   threads: {
-    bg: 'bg-[#101010] text-white border-transparent',
+    bg: 'bg-[#000000] text-white border-transparent',
     glyph: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-        <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.781 3.631 2.695 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.96-.065-1.182.408-2.256 1.332-3.023.812-.674 1.928-1.077 3.23-1.166.93-.064 1.82-.01 2.656.144-.08-.776-.315-1.39-.705-1.832-.517-.584-1.304-.883-2.342-.89h-.027c-.81 0-1.918.234-2.611 1.258l-1.766-1.196C7.688 6.46 9.188 5.71 10.97 5.71h.041c3.21.02 5.063 1.95 5.206 5.43.13.053.26.108.387.166 1.26.584 2.256 1.497 2.81 2.677.772 1.646.89 4.38-1.298 6.522-1.842 1.805-4.084 2.572-7.33 2.495Z" />
+      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="2.05" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19.25 8.5A7.9 7.9 0 0 0 12.1 4.2c-4.5 0-7.85 3.35-7.85 7.8s3.35 7.8 7.85 7.8c3.65 0 6.5-1.95 7.45-4.95" />
+        <path d="M15.4 11.75c0-2.3-1.45-3.75-3.6-3.75-1.75 0-2.95.95-3.45 2.2" />
+        <path d="M15.4 11.75v1.65c0 1.45.95 2.4 2.15 2.4 1.35 0 2.2-1.1 2.2-3.1" />
+        <circle cx="11.75" cy="13.2" r="2.6" />
       </svg>
     )
   },
   linkedin: {
     bg: 'bg-[#0A66C2] text-white border-transparent',
     glyph: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77Z" />
+      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor">
+        <path d="M6.94 8.5a1.56 1.56 0 1 1 0-3.12 1.56 1.56 0 0 1 0 3.12ZM5.6 18.4V9.8h2.68v8.6H5.6Zm4.65 0V9.8h2.57v1.18h.04c.36-.68 1.24-1.4 2.55-1.4 2.73 0 3.23 1.8 3.23 4.13v4.69h-2.68v-4.16c0-.99-.02-2.27-1.38-2.27-1.39 0-1.6 1.08-1.6 2.2v4.23h-2.73Z" />
       </svg>
     )
   },
@@ -101,7 +105,7 @@ const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }>
     bg: 'bg-[#26A5E4] text-white border-transparent',
     glyph: (
       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056Zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635Z" />
+        <path d="M21.2 4.4a1.1 1.1 0 0 0-1.15-.16L3.25 11.1a1.05 1.05 0 0 0 .08 1.97l4.2 1.34 1.65 5.15a.9.9 0 0 0 1.53.36l2.37-2.45 4.4 3.24a1.1 1.1 0 0 0 1.73-.67l2.58-14.5a1.1 1.1 0 0 0-.59-1.14ZM9.7 14.3l8.15-6.65-6.2 7.8-.42 2.8-1.53-3.95Z" />
       </svg>
     )
   }
@@ -120,7 +124,7 @@ function IconPreview({ url, alt, platform }: { url: string; alt: string; platfor
 
   if (brand && isDefaultUrl) {
     return (
-      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border shadow-xs ${brand.bg}`}>
+      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border shadow-xs ${brand.bg}`}>
         {brand.glyph}
       </div>
     );
@@ -128,14 +132,14 @@ function IconPreview({ url, alt, platform }: { url: string; alt: string; platfor
 
   if (!url || failed) {
     return (
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 dark:border-[#262A34] dark:bg-[#1C2029]">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 dark:border-[#262A34] dark:bg-[#1C2029]">
         <Globe className="h-4 w-4 text-slate-500" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white dark:border-[#262A34] dark:bg-white">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white dark:border-[#262A34] dark:bg-white">
       <img
         src={url}
         alt={alt}

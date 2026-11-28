@@ -28,7 +28,8 @@ Ilangathir Trust (Ilangathir Arakattalai / இளங்கதிர் அறக
 - Photo & Video Gallery: /gallery
 - Stories & Field Updates: /blog
 - Online Donations & Receipt Lookup: /donate
-- Contact & Volunteer Registration: /contact
+- Contact & Office Map: /contact
+- Volunteer Registration: /volunteer
 - Privacy Policy: /privacy-policy
 - Terms & Conditions: /terms
 - Refund & Cancellation Policy: /refund-policy

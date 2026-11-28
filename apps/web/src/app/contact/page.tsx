@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { Clock, ExternalLink, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, Clock, ExternalLink, HeartHandshake, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { getEnabledSocialLinks, TRUST_INFO } from '@ilangathir/shared';
 import { getBootstrap } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
@@ -7,7 +8,7 @@ import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from '@/lib/seo';
 import { PERMANENT_PAGES, SITE_SETTINGS, pickText } from '@/lib/site-content';
 import { PageHeader } from '@/components/PageHeader';
-import { ContactEnquiryForm, VolunteerForm } from '@/components/ContactForms';
+import { ContactEnquiryForm } from '@/components/ContactForms';
 import { SocialLinksRow } from '@/components/SocialLinksRow';
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
@@ -175,7 +176,31 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
             </div>
           </div>
 
-          <VolunteerForm />
+          {/* Separate Volunteer Page Invitation Card */}
+          <div className="flex flex-col items-start justify-between gap-5 rounded-3xl border border-brand-200 bg-gradient-to-r from-brand-900 to-brand-950 p-6 text-white shadow-md sm:flex-row sm:items-center sm:p-8">
+            <div className="flex items-start gap-4">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-saffron-500/20 text-saffron-400">
+                <HeartHandshake className="h-6 w-6" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="font-heading text-lg font-bold text-white sm:text-xl">
+                  {lang === 'ta' ? 'தன்னார்வலராக இணைய விரும்புகிறீர்களா?' : 'Want to Join Us as a Volunteer?'}
+                </h2>
+                <p className="mt-1 text-xs leading-relaxed text-sand-200/90 sm:text-sm">
+                  {lang === 'ta'
+                    ? 'திண்டுக்கல் மற்றும் சுற்றியுள்ள பகுதிகளில் கல்வி, மருத்துவ முகாம் மற்றும் மரம் நடுதல் பணிகளில் இணையுங்கள்.'
+                    : 'Register on our dedicated Volunteer page to support education drives, medical camps, and relief across Dindigul.'}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/volunteer"
+              className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-saffron-500 px-5 py-3 text-sm font-bold text-brand-950 transition hover:bg-saffron-400 sm:w-auto"
+            >
+              <span>{ui.volunteer}</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
     </>

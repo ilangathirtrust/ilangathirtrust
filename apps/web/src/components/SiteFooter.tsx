@@ -29,17 +29,17 @@ export function SiteFooter(props: SiteFooterProps) {
     <footer className="print:hidden border-t border-brand-800 bg-brand-950 pb-24 pt-10 text-sand-200 sm:pt-14 lg:pb-10">
       <div className="container-max">
         <div className="grid gap-8 sm:gap-10 lg:grid-cols-12">
-          {/* Brand Logo Card (uses /logos/logo.webp on both Mobile and Desktop) */}
+          {/* Brand Logo (uses /logos/logo-white.webp on all devices) */}
           <div className="space-y-4 lg:col-span-4">
             <Link
               href="/"
-              className="inline-flex items-center rounded-2xl bg-white px-3.5 py-2 shadow-sm transition hover:opacity-95"
+              className="inline-flex items-center transition hover:opacity-90"
               aria-label={`${props.trustNameEn} | ${props.trustNameTa}`}
             >
               <img
-                src={STATIC_ASSETS.logo}
+                src={STATIC_ASSETS.logoWhite}
                 alt={`${props.trustNameEn} | ${props.trustNameTa}`}
-                className="h-11 w-auto max-w-[220px] object-contain object-left sm:h-12 sm:max-w-none"
+                className="h-12 w-auto max-w-[230px] object-contain object-left sm:h-14 lg:h-16 sm:max-w-none"
               />
             </Link>
 
@@ -85,7 +85,7 @@ export function SiteFooter(props: SiteFooterProps) {
                     </Link>
                   </li>
                 )}
-                <li><Link href="/contact#volunteer" className="text-sand-200/90 transition hover:text-white">{ui.volunteer}</Link></li>
+                <li><Link href="/volunteer" className="text-sand-200/90 transition hover:text-white">{ui.volunteer}</Link></li>
                 <li><Link href="/contact" className="text-sand-200/90 transition hover:text-white">{ui.contact}</Link></li>
                 <li className="pt-2 text-[10px] font-bold uppercase tracking-widest text-saffron-400/90 sm:text-[11px]">
                   {ui.footerLegal}

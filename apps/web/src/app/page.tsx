@@ -170,7 +170,7 @@ export default async function HomePage({
                     <ArrowRight className="h-4 w-4 shrink-0" />
                   </Link>
                   <Link
-                    href="/contact#volunteer"
+                    href="/volunteer"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-bold text-white backdrop-blur-md transition hover:border-white/50 hover:bg-white/20 sm:w-auto"
                   >
                     <Users className="h-4 w-4 shrink-0 text-saffron-300" />
@@ -361,7 +361,7 @@ export default async function HomePage({
                 </Link>
               )}
               <Link
-                href="/contact#volunteer"
+                href="/volunteer"
                 className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold transition ${
                   donationsEnabled
                     ? 'border border-white/25 bg-white/10 text-white hover:bg-white/20'

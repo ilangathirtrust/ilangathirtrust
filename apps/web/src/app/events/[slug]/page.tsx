@@ -144,7 +144,7 @@ export default async function EventDetailPage({
 
                 {event.registration_enabled && (
                   <Link
-                    href="/contact#volunteer"
+                    href="/volunteer"
                     className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-saffron-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-saffron-700"
                   >
                     <span>{ui.participate}</span>

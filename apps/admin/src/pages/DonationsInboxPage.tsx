@@ -13,7 +13,6 @@ interface DonationRow {
   donor_name: string;
   donor_email: string;
   donor_phone: string;
-  donor_pan: string;
   purpose: string;
   amount_paise: number;
   razorpay_order_id: string;
@@ -241,7 +240,7 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-slate-900">{r.donor_name}</p>
-                  <p className="truncate text-xs text-slate-500">{r.donor_email}</p>
+                  <p className="truncate text-xs text-slate-500">{r.donor_phone || r.donor_email || '—'}</p>
                 </div>
                 <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
                   r.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : r.status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'
@@ -283,7 +282,7 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
                   <td className="p-3.5 font-mono font-bold text-slate-800">{r.receipt_number || '—'}</td>
                   <td className="p-3.5">
                     <p className="font-bold text-slate-900">{r.donor_name}</p>
-                    <p className="text-slate-500">{r.donor_email}</p>
+                    <p className="text-slate-500">{r.donor_phone}{r.donor_email ? ` • ${r.donor_email}` : ''}</p>
                   </td>
                   <td className="p-3.5">{r.purpose}</td>
                   <td className="p-3.5 font-bold text-slate-900">₹{(r.amount_paise / 100).toLocaleString('en-IN')}</td>
@@ -335,9 +334,8 @@ export function DonationsPage({ onNotify }: { onNotify: (msg: string, isErr?: bo
             <dl className="mt-4 space-y-2.5 text-xs">
               <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Receipt', 'ரசீது')}</dt><dd className="font-bold">{selected.receipt_number || '—'}</dd></div>
               <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Donor', 'நன்கொடையாளர்')}</dt><dd className="font-bold">{selected.donor_name}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Email', 'ஈமெயில்')}</dt><dd className="break-all">{selected.donor_email}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Phone', 'போன்')}</dt><dd>{selected.donor_phone}</dd></div>
-              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('PAN', 'பான் எண்')}</dt><dd>{selected.donor_pan || '—'}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Phone', 'போன்')}</dt><dd>{selected.donor_phone || '—'}</dd></div>
+              {selected.donor_email && <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Email', 'ஈமெயில்')}</dt><dd className="break-all">{selected.donor_email}</dd></div>}
               <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Amount', 'தொகை')}</dt><dd className="font-bold">₹{(selected.amount_paise / 100).toLocaleString('en-IN')}</dd></div>
               <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Razorpay Order ID', 'ரேசர்பே ஆர்டர் ஐடி')}</dt><dd className="break-all font-mono">{selected.razorpay_order_id}</dd></div>
               <div className="flex justify-between gap-2"><dt className="text-slate-500">{tr('Razorpay Payment ID', 'பேமெண்ட் ஐடி')}</dt><dd className="break-all font-mono">{selected.razorpay_payment_id || '—'}</dd></div>

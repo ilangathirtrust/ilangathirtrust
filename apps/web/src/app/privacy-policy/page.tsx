@@ -42,7 +42,7 @@ export default async function PrivacyPolicyPage({ searchParams }: { searchParams
           {
             title: '1. நாம் சேகரிக்கும் தகவல்கள்',
             body: [
-              'நீங்கள் தொடர்பு படிவம், தன்னார்வலர் பதிவுப் படிவம் அல்லது நன்கொடைப் படிவத்தை நிரப்பும்போது உங்கள் பெயர், மின்னஞ்சல் முகவரி, கைபேசி எண், முகவரி, மற்றும் நன்கொடைத் தொடர்பான PAN எண் (விருப்பம்) ஆகியவற்றைச் சேகரிக்கிறோம்.',
+              'நீங்கள் தொடர்பு படிவம், தன்னார்வலர் பதிவுப் படிவம் அல்லது நன்கொடைப் படிவத்தை நிரப்பும்போது உங்கள் பெயர், கைபேசி எண் மற்றும் மின்னஞ்சல் முகவரி (விருப்பம்) போன்ற அத்தியாவசிய விவரங்களை மட்டுமே சேகரிக்கிறோம்.',
               'இணையதளப் பயன்பாட்டை மேம்படுத்த Google Analytics 4 (GA4) மூலம் பார்வைப் புள்ளிவிவரங்கள் அநாமதேயமாகச் சேகரிக்கப்படுகின்றன.'
             ]
           },
@@ -72,7 +72,7 @@ export default async function PrivacyPolicyPage({ searchParams }: { searchParams
           {
             title: '1. Information We Collect',
             body: [
-              'When you submit a contact enquiry, volunteer application, or online donation on www.ilangathirtrust.org, we collect only the details you provide such as your full name, email address, phone number, town/address, and optional PAN number for donation records.',
+              'When you submit a contact enquiry, volunteer application, or online donation on www.ilangathirtrust.org, we collect only minimal details such as your full name, mobile number, and optional email address.',
               'We also use Google Analytics 4 (GA4) to understand aggregate website traffic and improve public outreach, without selling personal visitor profiles.'
             ]
           },

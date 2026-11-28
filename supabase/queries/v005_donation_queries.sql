@@ -13,8 +13,8 @@ FROM public.donations;
 
 -- Paginated donation history with date & status filtering
 SELECT
-  id, receipt_number, donor_name, donor_email, donor_phone, donor_pan,
-  purpose, is_anonymous, amount_paise, currency,
+  id, receipt_number, donor_name, donor_email, donor_phone,
+  purpose, amount_paise, currency,
   razorpay_order_id, razorpay_payment_id, status, payment_method,
   failure_reason, paid_at, created_at
 FROM public.donations

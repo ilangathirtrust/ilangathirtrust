@@ -1202,7 +1202,7 @@ adminRouter.get('/donations', requireRole(['super_admin', 'admin']), async (req,
     if (dateTo) query = query.lte('created_at', `${dateTo}T23:59:59.999Z`);
     if (search) {
       const clean = search.replace(/[%_]/g, '');
-      query = query.or(`donor_name.ilike.%${clean}%,donor_email.ilike.%${clean}%,receipt_number.ilike.%${clean}%,razorpay_order_id.ilike.%${clean}%`);
+      query = query.or(`donor_name.ilike.%${clean}%,donor_phone.ilike.%${clean}%,donor_email.ilike.%${clean}%,receipt_number.ilike.%${clean}%,razorpay_order_id.ilike.%${clean}%`);
     }
 
     const [listRes, summaryRes, cfgRes] = await Promise.all([

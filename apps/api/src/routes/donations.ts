@@ -75,15 +75,20 @@ donationsRouter.post('/create-order', donationOrderLimiter, async (req, res, nex
       }
     }
 
+    const cleanEmail = (d.donor_email || '').trim().toLowerCase();
+    const cleanPhone = sanitizePlainText(d.donor_phone);
+    const cleanPurpose = sanitizePlainText(d.purpose || 'General Welfare') || 'General Welfare';
+
     const razorpay = getRazorpayClient();
     const order = await razorpay.orders.create({
       amount: amountPaise,
       currency: 'INR',
       receipt: `ilg_${Date.now()}`,
       notes: {
-        purpose: sanitizePlainText(d.purpose),
+        purpose: cleanPurpose,
         donor_name: sanitizePlainText(d.donor_name),
-        donor_email: d.donor_email.toLowerCase()
+        donor_phone: cleanPhone,
+        ...(cleanEmail ? { donor_email: cleanEmail } : {})
       }
     });
 
@@ -91,12 +96,9 @@ donationsRouter.post('/create-order', donationOrderLimiter, async (req, res, nex
       .from('donations')
       .insert({
         donor_name: sanitizePlainText(d.donor_name),
-        donor_email: d.donor_email.toLowerCase(),
-        donor_phone: sanitizePlainText(d.donor_phone),
-        donor_pan: sanitizePlainText(d.donor_pan).toUpperCase(),
-        donor_address: sanitizePlainText(d.donor_address),
-        purpose: sanitizePlainText(d.purpose),
-        is_anonymous: d.is_anonymous,
+        donor_email: cleanEmail,
+        donor_phone: cleanPhone,
+        purpose: cleanPurpose,
         amount_paise: amountPaise,
         currency: 'INR',
         razorpay_order_id: order.id,
@@ -174,10 +176,8 @@ donationsRouter.post('/verify', donationOrderLimiter, async (req, res, next) => 
         razorpay_order_id: existing.razorpay_order_id,
         payment_method: existing.payment_method || '',
         donor_name: existing.donor_name,
-        donor_email: existing.donor_email,
-        donor_phone: existing.donor_phone,
-        donor_pan: existing.donor_pan || '',
-        donor_address: existing.donor_address || ''
+        donor_email: existing.donor_email || '',
+        donor_phone: existing.donor_phone || ''
       });
       return;
     }
@@ -201,7 +201,7 @@ donationsRouter.post('/verify', donationOrderLimiter, async (req, res, next) => 
         paid_at: new Date().toISOString()
       })
       .eq('id', existing.id)
-      .select('receipt_number, amount_paise, purpose, paid_at, razorpay_payment_id, razorpay_order_id, payment_method, donor_name, donor_email, donor_phone, donor_pan, donor_address')
+      .select('receipt_number, amount_paise, purpose, paid_at, razorpay_payment_id, razorpay_order_id, payment_method, donor_name, donor_email, donor_phone')
       .single();
 
     if (updateError) throw updateError;
@@ -216,10 +216,8 @@ donationsRouter.post('/verify', donationOrderLimiter, async (req, res, next) => 
       razorpay_order_id: updated.razorpay_order_id,
       payment_method: updated.payment_method || '',
       donor_name: updated.donor_name,
-      donor_email: updated.donor_email,
-      donor_phone: updated.donor_phone,
-      donor_pan: updated.donor_pan || '',
-      donor_address: updated.donor_address || ''
+      donor_email: updated.donor_email || '',
+      donor_phone: updated.donor_phone || ''
     });
   } catch (err) {
     next(err);
@@ -284,29 +282,44 @@ donationsRouter.get('/status/:orderId', donationOrderLimiter, async (req, res, n
 
 donationsRouter.post('/receipt-lookup', donationOrderLimiter, async (req, res, next) => {
   try {
-    const parsed = receiptLookupSchema.safeParse(req.body);
+    const body = {
+      receipt_number: req.body?.receipt_number,
+      contact: req.body?.contact || req.body?.donor_email || req.body?.donor_phone || ''
+    };
+    const parsed = receiptLookupSchema.safeParse(body);
     if (!parsed.success) {
-      res.status(400).json({ error: 'Enter a valid receipt number and donor email address.' });
+      res.status(400).json({ error: 'Enter a valid receipt number and your mobile number or email.' });
       return;
     }
 
     const receiptNumber = parsed.data.receipt_number.trim().toUpperCase();
-    const donorEmail = parsed.data.donor_email.trim().toLowerCase();
-
+    const contactInput = parsed.data.contact.trim();
     const supabase = getSupabaseAdmin();
+
     const { data, error } = await supabase
       .from('donations')
       .select(
-        'receipt_number, amount_paise, purpose, paid_at, razorpay_payment_id, razorpay_order_id, payment_method, donor_name, donor_email, donor_phone, donor_pan, donor_address'
+        'receipt_number, amount_paise, purpose, paid_at, razorpay_payment_id, razorpay_order_id, payment_method, donor_name, donor_email, donor_phone'
       )
       .eq('status', 'paid')
       .ilike('receipt_number', receiptNumber)
-      .ilike('donor_email', donorEmail)
       .maybeSingle();
 
     if (error) throw error;
-    if (!data) {
-      res.status(404).json({ error: 'No paid donation receipt matched that receipt number and email.' });
+
+    const matchesContact = (() => {
+      if (!data) return false;
+      if (contactInput.includes('@')) {
+        return (data.donor_email || '').trim().toLowerCase() === contactInput.toLowerCase();
+      }
+      const inputDigits = contactInput.replace(/\D/g, '');
+      const storedDigits = (data.donor_phone || '').replace(/\D/g, '');
+      if (inputDigits.length < 7 || storedDigits.length < 7) return false;
+      return storedDigits === inputDigits || storedDigits.slice(-10) === inputDigits.slice(-10);
+    })();
+
+    if (!data || !matchesContact) {
+      res.status(404).json({ error: 'No paid donation receipt matched that receipt number and mobile/email.' });
       return;
     }
 
@@ -320,10 +333,8 @@ donationsRouter.post('/receipt-lookup', donationOrderLimiter, async (req, res, n
       razorpay_order_id: data.razorpay_order_id,
       payment_method: data.payment_method || '',
       donor_name: data.donor_name,
-      donor_email: data.donor_email,
-      donor_phone: data.donor_phone,
-      donor_pan: data.donor_pan || '',
-      donor_address: data.donor_address || ''
+      donor_email: data.donor_email || '',
+      donor_phone: data.donor_phone || ''
     });
   } catch (err) {
     next(err);
