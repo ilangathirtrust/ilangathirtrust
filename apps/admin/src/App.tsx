@@ -304,17 +304,18 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen bg-[#F6F7F9] dark:bg-[#0F1117]">
-      {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-[1px] lg:hidden"
-        />
-      )}
+      <div
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden={!sidebarOpen}
+        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-[1px] transition-opacity duration-300 lg:hidden ${
+          sidebarOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      />
 
       {/* Desktop Fixed Independent Left Rail & Mobile Drawer */}
       <aside
         aria-label={tr('Admin navigation menu', 'அட்மின் மெனு')}
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/10 bg-[#111318] text-slate-200 shadow-2xl transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-[min(86vw,288px)] flex-col border-r border-white/10 bg-[#111318] text-slate-200 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:w-64 lg:translate-x-0 lg:shadow-none ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

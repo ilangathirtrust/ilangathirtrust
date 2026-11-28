@@ -3,13 +3,40 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Heart, Mail, Menu, MessageCircle, Phone, X } from 'lucide-react';
+import {
+  BookOpen,
+  CalendarDays,
+  ChevronRight,
+  Heart,
+  HeartHandshake,
+  Home,
+  Images,
+  Mail,
+  Menu,
+  MessageCircle,
+  Phone,
+  Sparkles,
+  Users,
+  X
+} from 'lucide-react';
 import type { NavigationItem, SocialLinkItem } from '@ilangathir/shared';
 import { useLanguage } from './LanguageProvider';
 import { SocialLinksRow } from './SocialLinksRow';
 import { getUi } from '@/lib/i18n';
 import { trackEvent } from '@/lib/analytics';
 import { STATIC_ASSETS } from '@/lib/site-content';
+
+const DRAWER_ICON_MAP: Record<string, typeof Home> = {
+  '/': Home,
+  '/about': HeartHandshake,
+  '/activities': Sparkles,
+  '/events': CalendarDays,
+  '/gallery': Images,
+  '/blog': BookOpen,
+  '/volunteer': Users,
+  '/contact': Mail,
+  '/donate': Heart
+};
 
 interface SiteHeaderProps {
   logoUrl?: string;
@@ -246,84 +273,179 @@ export function SiteHeader({
             </div>
           </div>
         </div>
-
-        {/* Mobile Drawer + Dimmed Backdrop */}
-        {drawerOpen && (
-          <>
-            <div
-              onClick={() => setDrawerOpen(false)}
-              aria-hidden="true"
-              className="fixed inset-0 top-[66px] z-30 bg-brand-950/45 backdrop-blur-xs min-[360px]:top-[70px] lg:hidden"
-            />
-            <nav
-              aria-label="Mobile navigation"
-              className="relative z-40 max-h-[calc(100svh-70px)] overflow-y-auto border-t border-sand-200 bg-white px-4 pb-6 pt-3 shadow-xl lg:hidden"
-            >
-              <div className="flex flex-col gap-1">
-                {headerLinks.map((item) => {
-                  const isActive =
-                    item.href === '/'
-                      ? pathname === '/'
-                      : pathname === item.href || pathname.startsWith(`${item.href}/`);
-                  const label = lang === 'ta' ? item.label_ta : item.label_en;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      onClick={() => setDrawerOpen(false)}
-                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                        isActive
-                          ? 'bg-sand-100 text-brand-900 font-bold'
-                          : 'text-slate-700 hover:bg-sand-50'
-                      }`}
-                    >
-                      {label}
-                    </Link>
-                  );
-                })}
-                {donationsEnabled && (
-                  <Link
-                    href="/donate"
-                    onClick={() => {
-                      setDrawerOpen(false);
-                      trackEvent('nav_donate_click', { location: 'mobile_drawer' });
-                    }}
-                    className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-saffron-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-saffron-700 active:scale-[0.99]"
-                  >
-                    <Heart className="h-4 w-4" />
-                    <span>{ui.donateNow}</span>
-                  </Link>
-                )}
-
-                <div className="mt-4 space-y-3 border-t border-sand-200 pt-4">
-                  <div className="grid grid-cols-2 gap-2">
-                    <a
-                      href={`tel:${phone.replace(/[^\d+]/g, '')}`}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sand-200 bg-sand-50 px-3 py-2.5 text-xs font-bold text-brand-900"
-                    >
-                      <Phone className="h-3.5 w-3.5 text-saffron-600" />
-                      <span>{lang === 'ta' ? 'அழைக்க' : 'Call'}</span>
-                    </a>
-                    <a
-                      href="https://wa.me/919363015050"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-bold text-emerald-800"
-                    >
-                      <MessageCircle className="h-3.5 w-3.5" />
-                      <span>WhatsApp</span>
-                    </a>
-                  </div>
-
-                  {socialLinks.length > 0 && (
-                    <SocialLinksRow links={socialLinks} variant="light" />
-                  )}
-                </div>
-              </div>
-            </nav>
-          </>
-        )}
       </header>
+
+      {/* Full-Height Mobile Left Slide-In Drawer (outside transformed <header> for true 100dvh) */}
+      <div
+        aria-hidden={!drawerOpen}
+        className={`print:hidden fixed inset-0 z-50 lg:hidden ${
+          drawerOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible delay-300'
+        }`}
+      >
+        {/* Smooth Fade Backdrop */}
+        <div
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden="true"
+          className={`fixed inset-0 bg-brand-950/55 backdrop-blur-xs transition-opacity duration-300 ease-out ${
+            drawerOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+
+        {/* Smooth Left-Slide Panel */}
+        <aside
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation"
+          className={`fixed inset-y-0 left-0 flex h-[100dvh] w-[min(86vw,340px)] flex-col border-r border-sand-200 bg-white shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            drawerOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          {/* Drawer Brand Top Bar */}
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-sand-200 bg-sand-50/70 px-4 py-3.5">
+            <Link
+              href="/"
+              onClick={() => setDrawerOpen(false)}
+              className="flex min-w-0 items-center"
+              aria-label={lang === 'ta' ? trustNameTa : trustNameEn}
+            >
+              <img
+                src={mobileLogoSrc}
+                alt={lang === 'ta' ? trustNameTa : trustNameEn}
+                className="h-10 w-auto max-w-[190px] object-contain object-left"
+              />
+            </Link>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(false)}
+              aria-label={ui.close}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sand-200 bg-white text-brand-900 shadow-xs transition hover:bg-sand-100 active:scale-95"
+            >
+              <X className="h-5 w-5" strokeWidth={2.2} />
+            </button>
+          </div>
+
+          {/* Scrollable Links + Actions */}
+          <nav className="flex-1 overflow-y-auto overscroll-contain px-3.5 py-4">
+            <div className="flex flex-col gap-1">
+              {headerLinks.map((item) => {
+                const isActive =
+                  item.href === '/'
+                    ? pathname === '/'
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const label = lang === 'ta' ? item.label_ta : item.label_en;
+                const Icon = DRAWER_ICON_MAP[item.href] || ChevronRight;
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    onClick={() => setDrawerOpen(false)}
+                    className={`group flex items-center justify-between gap-3 rounded-2xl px-3.5 py-3 text-sm font-semibold transition active:scale-[0.99] ${
+                      isActive
+                        ? 'bg-brand-900 font-bold text-white shadow-sm'
+                        : 'text-slate-700 hover:bg-sand-100 hover:text-brand-900'
+                    }`}
+                  >
+                    <span className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition ${
+                          isActive ? 'bg-white/15 text-saffron-300' : 'bg-sand-100 text-brand-800 group-hover:bg-white'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="truncate">{label}</span>
+                    </span>
+                    <ChevronRight className={`h-4 w-4 shrink-0 ${isActive ? 'text-white/80' : 'text-slate-400'}`} />
+                  </Link>
+                );
+              })}
+
+              {/* Dedicated Volunteer Link */}
+              <Link
+                href="/volunteer"
+                onClick={() => setDrawerOpen(false)}
+                className={`group flex items-center justify-between gap-3 rounded-2xl px-3.5 py-3 text-sm font-semibold transition active:scale-[0.99] ${
+                  pathname === '/volunteer'
+                    ? 'bg-brand-900 font-bold text-white shadow-sm'
+                    : 'text-slate-700 hover:bg-sand-100 hover:text-brand-900'
+                }`}
+              >
+                <span className="flex min-w-0 items-center gap-3">
+                  <span
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition ${
+                      pathname === '/volunteer' ? 'bg-white/15 text-saffron-300' : 'bg-sand-100 text-brand-800 group-hover:bg-white'
+                    }`}
+                  >
+                    <Users className="h-4 w-4" />
+                  </span>
+                  <span className="truncate">{ui.volunteer}</span>
+                </span>
+                <ChevronRight className={`h-4 w-4 shrink-0 ${pathname === '/volunteer' ? 'text-white/80' : 'text-slate-400'}`} />
+              </Link>
+            </div>
+
+            {donationsEnabled && (
+              <Link
+                href="/donate"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  trackEvent('nav_donate_click', { location: 'mobile_drawer' });
+                }}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-saffron-600 px-4 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-saffron-700 active:scale-[0.99]"
+              >
+                <Heart className="h-4 w-4 shrink-0" />
+                <span>{ui.donateNow}</span>
+              </Link>
+            )}
+
+            {/* Quick Contact + Social Media Icons */}
+            <div className="mt-5 space-y-3.5 border-t border-sand-200 pt-4">
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={`tel:${phone.replace(/[^\d+]/g, '')}`}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sand-200 bg-sand-50 px-3 py-2.5 text-xs font-bold text-brand-900 transition hover:bg-sand-100"
+                >
+                  <Phone className="h-3.5 w-3.5 text-saffron-600" />
+                  <span>{lang === 'ta' ? 'அழைக்க' : 'Call'}</span>
+                </a>
+                <a
+                  href="https://wa.me/919363015050"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+
+              {socialLinks.length > 0 && (
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    {ui.followUs}
+                  </p>
+                  <SocialLinksRow links={socialLinks} variant="light" />
+                </div>
+              )}
+            </div>
+          </nav>
+
+          {/* Drawer Sticky Footer Bar */}
+          <div className="shrink-0 border-t border-sand-200 bg-sand-50/90 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold text-slate-600">
+              <span className="truncate">{ui.trustNotice}</span>
+              <div className="flex items-center gap-2.5 font-bold text-brand-800">
+                <Link href="/privacy-policy" onClick={() => setDrawerOpen(false)} className="hover:underline">
+                  {lang === 'ta' ? 'தனியுரிமை' : 'Privacy'}
+                </Link>
+                <Link href="/terms" onClick={() => setDrawerOpen(false)} className="hover:underline">
+                  {lang === 'ta' ? 'விதிகள்' : 'Terms'}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
     </>
   );
 }
