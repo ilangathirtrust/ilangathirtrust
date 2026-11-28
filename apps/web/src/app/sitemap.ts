@@ -15,7 +15,7 @@ function bilingualAlternates(path: string) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [bootstrap, data] = await Promise.all([getBootstrap(), getSitemapData()]);
+  const [bootstrap, data] = await Promise.all([getBootstrap(300), getSitemapData()]);
   const donationsEnabled = isDonationsEnabled(bootstrap.settings);
 
   const staticRoutes = [

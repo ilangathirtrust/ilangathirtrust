@@ -89,7 +89,7 @@ export function buildOrganizationGraphJsonLd(socialLinks?: SocialLinkItem[]) {
   const phone = SITE_SETTINGS.phone.value_en;
   const address = SITE_SETTINGS.address.value_en;
   const logo = STATIC_ASSETS.logo;
-  const linksToUse = socialLinks?.length ? socialLinks : DEFAULT_SOCIAL_LINKS;
+  const linksToUse = socialLinks !== undefined ? socialLinks : DEFAULT_SOCIAL_LINKS;
   const sameAs = linksToUse
     .filter((item) => item.enabled && /^https?:\/\//i.test(item.url) && !item.url.includes('wa.me'))
     .map((item) => item.url);

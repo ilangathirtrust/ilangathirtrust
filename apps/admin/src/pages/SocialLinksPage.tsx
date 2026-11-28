@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
-  ArrowDown,
-  ArrowUp,
   ChevronDown,
   ChevronUp,
   ExternalLink,
@@ -29,7 +28,7 @@ const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }>
   instagram: {
     bg: 'bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285AEB_90%)] text-white border-transparent',
     glyph: (
-      <svg viewBox="1.5 1.5 21 21" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+      <svg viewBox="1.5 1.5 21 21" className="h-[18px] w-[18px] sm:h-5 sm:w-5" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="5.5" />
         <circle cx="12" cy="12" r="4" />
         <circle cx="17.2" cy="6.8" r="1.2" fill="currentColor" stroke="none" />
@@ -39,7 +38,7 @@ const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }>
   whatsapp: {
     bg: 'bg-[#25D366] text-white border-transparent',
     glyph: (
-      <svg viewBox="2.5 2.5 27 27" className="h-[22px] w-[22px]" fill="currentColor">
+      <svg viewBox="2.5 2.5 27 27" className="h-5 w-5 sm:h-[22px] sm:w-[22px]" fill="currentColor">
         <path d="M16.04 4C9.42 4 4.04 9.38 4.04 16c0 2.12.56 4.19 1.62 6.01L4 28l6.16-1.61A11.95 11.95 0 0 0 16.04 28C22.66 28 28.04 22.62 28.04 16S22.66 4 16.04 4Zm0 21.81c-1.84 0-3.65-.5-5.22-1.44l-.37-.22-3.66.96.98-3.57-.24-.39a9.77 9.77 0 0 1-1.5-5.15c0-5.41 4.4-9.81 9.81-9.81s9.81 4.4 9.81 9.81-4.4 9.81-9.61 9.81Zm5.38-7.35c-.3-.15-1.74-.86-2.01-.96-.27-.1-.46-.15-.66.15-.2.3-.76.96-.94 1.15-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.44-.52.15-.17.2-.3.3-.49.1-.2.05-.37-.02-.52-.08-.15-.66-1.59-.9-2.18-.24-.58-.48-.5-.66-.51h-.56c-.2 0-.52.07-.79.37-.27.3-1.03 1.01-1.03 2.46s1.06 2.85 1.21 3.05c.15.2 2.08 3.18 5.04 4.46.7.3 1.25.49 1.68.62.71.22 1.35.19 1.86.12.57-.09 1.74-.71 1.98-1.4.25-.69.25-1.28.17-1.4-.07-.12-.27-.2-.57-.35Z" />
       </svg>
     )
@@ -47,7 +46,7 @@ const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }>
   youtube: {
     bg: 'bg-[#FF0000] text-white border-transparent',
     glyph: (
-      <svg viewBox="1 3.5 22 17" className="h-[22px] w-[22px]">
+      <svg viewBox="1 3.5 22 17" className="h-5 w-5 sm:h-[22px] sm:w-[22px]">
         <path fill="#FFFFFF" d="M21.58 7.19a2.51 2.51 0 0 0-1.77-1.77C18.25 5 12 5 12 5s-6.25 0-7.81.42a2.51 2.51 0 0 0-1.77 1.77C2 8.75 2 12 2 12s0 3.25.42 4.81a2.51 2.51 0 0 0 1.77 1.77C5.75 19 12 19 12 19s6.25 0 7.81-.42a2.51 2.51 0 0 0 1.77-1.77C22 15.25 22 12 22 12s0-3.25-.42-4.81Z" />
         <path fill="#FF0000" d="M10 15.02 15.22 12 10 8.98v6.04Z" />
       </svg>
@@ -56,7 +55,7 @@ const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }>
   facebook: {
     bg: 'bg-[#1877F2] text-white border-transparent',
     glyph: (
-      <svg viewBox="6 1.5 13 21" className="h-[21px] w-[21px] translate-y-[0.5px]" fill="currentColor">
+      <svg viewBox="6 1.5 13 21" className="h-[19px] w-[19px] translate-y-[0.5px] sm:h-[21px] sm:w-[21px]" fill="currentColor">
         <path d="M14.2 21.5v-8.4h2.8l.42-3.28H14.2V7.73c0-.95.26-1.6 1.62-1.6h1.73V3.2c-.3-.04-1.33-.13-2.52-.13-2.5 0-4.21 1.52-4.21 4.33v2.42H8v3.28h2.82v8.4h3.38Z" />
       </svg>
     )
@@ -64,7 +63,7 @@ const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }>
   x: {
     bg: 'bg-[#000000] text-white border-transparent',
     glyph: (
-      <svg viewBox="2 1 20 22" className="h-[19px] w-[19px]" fill="currentColor">
+      <svg viewBox="2 1 20 22" className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" fill="currentColor">
         <path d="M18.9 2.25h3.07l-6.7 7.66 7.88 10.42h-6.17l-4.83-6.32-5.53 6.32H3.55l7.17-8.19-7.56-9.89h6.33l4.37 5.77 5.04-5.77Zm-1.08 16.25h1.7L6.7 4.02H4.88l12.94 14.48Z" />
       </svg>
     )
@@ -72,7 +71,7 @@ const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }>
   threads: {
     bg: 'bg-[#000000] text-white border-transparent',
     glyph: (
-      <svg viewBox="2 2 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.05" strokeLinecap="round" strokeLinejoin="round">
+      <svg viewBox="2 2 20 20" className="h-[18px] w-[18px] sm:h-5 sm:w-5" fill="none" stroke="currentColor" strokeWidth="2.05" strokeLinecap="round" strokeLinejoin="round">
         <path d="M19.5 10.5C18.8 6.5 15.8 4 12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8c3.3 0 6-1.9 7.2-4.8" />
         <path d="M15.2 12.2v1.6c0 1.4.8 2.3 2 2.3 1.3 0 2.3-1.1 2.3-3.1 0-1-.2-1.8-.5-2.5" />
         <path d="M15.2 12.2c0-2-1.3-3.3-3.3-3.3-1.5 0-2.7.8-3.2 2" />
@@ -83,7 +82,7 @@ const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }>
   linkedin: {
     bg: 'bg-[#0A66C2] text-white border-transparent',
     glyph: (
-      <svg viewBox="4 4 16 16" className="h-5 w-5" fill="currentColor">
+      <svg viewBox="4 4 16 16" className="h-[18px] w-[18px] sm:h-5 sm:w-5" fill="currentColor">
         <path d="M6.94 8.5a1.56 1.56 0 1 1 0-3.12 1.56 1.56 0 0 1 0 3.12ZM5.6 18.4V9.8h2.68v8.6H5.6Zm4.65 0V9.8h2.57v1.18h.04c.36-.68 1.24-1.4 2.55-1.4 2.73 0 3.23 1.8 3.23 4.13v4.69h-2.68v-4.16c0-.99-.02-2.27-1.38-2.27-1.39 0-1.6 1.08-1.6 2.2v4.23h-2.73Z" />
       </svg>
     )
@@ -91,7 +90,7 @@ const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }>
   telegram: {
     bg: 'bg-[#26A5E4] text-white border-transparent',
     glyph: (
-      <svg viewBox="1.5 2.5 20.5 18.5" className="h-5 w-5 -translate-x-[0.5px]" fill="currentColor">
+      <svg viewBox="1.5 2.5 20.5 18.5" className="h-[18px] w-[18px] -translate-x-[0.5px] sm:h-5 sm:w-5" fill="currentColor">
         <path d="M21.2 4.4a1.1 1.1 0 0 0-1.15-.16L3.25 11.1a1.05 1.05 0 0 0 .08 1.97l4.2 1.34 1.65 5.15a.9.9 0 0 0 1.53.36l2.37-2.45 4.4 3.24a1.1 1.1 0 0 0 1.73-.67l2.58-14.5a1.1 1.1 0 0 0-.59-1.14ZM9.7 14.3l8.15-6.65-6.2 7.8-.42 2.8-1.53-3.95Z" />
       </svg>
     )
@@ -111,7 +110,7 @@ function IconPreview({ url, alt, platform }: { url: string; alt: string; platfor
 
   if (brand && isDefaultUrl) {
     return (
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border shadow-xs ${brand.bg}`}>
+      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border shadow-xs sm:h-10 sm:w-10 ${brand.bg}`}>
         {brand.glyph}
       </div>
     );
@@ -119,22 +118,30 @@ function IconPreview({ url, alt, platform }: { url: string; alt: string; platfor
 
   if (!url || failed) {
     return (
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 dark:border-[#262A34] dark:bg-[#1C2029]">
-        <Globe className="h-5 w-5 text-slate-500" />
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 sm:h-10 sm:w-10 dark:border-[#262A34] dark:bg-[#1C2029]">
+        <Globe className="h-[18px] w-[18px] text-slate-500 sm:h-5 sm:w-5" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white dark:border-[#262A34] dark:bg-white">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white sm:h-10 sm:w-10 dark:border-[#262A34] dark:bg-white">
       <img
         src={url}
         alt={alt}
         onError={() => setFailed(true)}
-        className="h-6 w-6 object-contain"
+        className="h-5 w-5 object-contain sm:h-6 sm:w-6"
       />
     </div>
   );
+}
+
+interface FloatingDragMeta {
+  item: SocialLinkItem;
+  width: number;
+  height: number;
+  initialX: number;
+  initialY: number;
 }
 
 export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: boolean) => void }) {
@@ -143,10 +150,13 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
   const [loading, setLoading] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
 
-  // Pointer drag state (works smoothly on desktop mouse, trackpad & mobile touch)
-  const [dragFromIdx, setDragFromIdx] = useState<number | null>(null);
-  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  // Smooth live cursor-following pointer drag state
+  const [dragOrder, setDragOrder] = useState<SocialLinkItem[] | null>(null);
+  const [floatingMeta, setFloatingMeta] = useState<FloatingDragMeta | null>(null);
+  const floatingRef = useRef<HTMLDivElement | null>(null);
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const dragOrderRef = useRef<SocialLinkItem[] | null>(null);
+  const cleanupDragRef = useRef<(() => void) | null>(null);
 
   // Ref-based atomic FIFO queue so rapid multi-toggles & reorders never overwrite each other
   const itemsRef = useRef<SocialLinkItem[]>([]);
@@ -183,6 +193,9 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
 
   useEffect(() => {
     void load(false);
+    return () => {
+      cleanupDragRef.current?.();
+    };
   }, []);
 
   /**
@@ -201,33 +214,30 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
     const seq = ++mutationSeqRef.current;
     setPendingCount((c) => c + 1);
 
-    queueChainRef.current = queueChainRef.current
-      .then(async () => {
-        try {
-          const res = await adminApi<{ items: SocialLinkItem[] }>('/social-links', {
-            method: 'PUT',
-            body: JSON.stringify({ items: nextOrdered })
-          });
-          // Only sync UI from server response once the entire queue catches up to the latest mutation
-          if (seq === mutationSeqRef.current) {
-            const sorted = res.items.slice().sort((a, b) => a.sort_order - b.sort_order);
-            itemsRef.current = sorted;
-            setItems(sorted);
-          }
-          if (successMsg) onNotify(successMsg);
-        } catch (err) {
-          onNotify(
-            err instanceof Error ? err.message : tr('Could not save social links.', 'சேவ் பண்ண முடியலைங்க.'),
-            true
-          );
-          // Re-sync cleanly with server if the latest queued mutation failed
-          if (seq === mutationSeqRef.current) {
-            void load(true);
-          }
-        } finally {
-          setPendingCount((c) => Math.max(0, c - 1));
+    queueChainRef.current = queueChainRef.current.then(async () => {
+      try {
+        const res = await adminApi<{ items: SocialLinkItem[] }>('/social-links', {
+          method: 'PUT',
+          body: JSON.stringify({ items: nextOrdered })
+        });
+        if (seq === mutationSeqRef.current) {
+          const sorted = res.items.slice().sort((a, b) => a.sort_order - b.sort_order);
+          itemsRef.current = sorted;
+          setItems(sorted);
         }
-      });
+        if (successMsg) onNotify(successMsg);
+      } catch (err) {
+        onNotify(
+          err instanceof Error ? err.message : tr('Could not save social links.', 'சேவ் பண்ண முடியலைங்க.'),
+          true
+        );
+        if (seq === mutationSeqRef.current) {
+          void load(true);
+        }
+      } finally {
+        setPendingCount((c) => Math.max(0, c - 1));
+      }
+    });
   }
 
   function handleToggle(id: string) {
@@ -243,64 +253,151 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
     );
   }
 
-  function reorderList(fromIdx: number, toIdx: number) {
-    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0) return;
-    enqueueMutation(
-      (curr) => {
-        if (fromIdx >= curr.length || toIdx >= curr.length) return curr;
-        const copy = [...curr];
-        const [moved] = copy.splice(fromIdx, 1);
-        if (!moved) return curr;
-        copy.splice(toIdx, 0, moved);
-        return copy;
-      },
-      tr('Order updated.', 'வரிசை சேவ் ஆச்சுங்க.')
-    );
-  }
-
-  function startPointerDrag(e: React.PointerEvent, fromIdx: number) {
+  function startPointerDrag(e: React.PointerEvent<HTMLButtonElement>, startIdx: number) {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     e.preventDefault();
 
-    setDragFromIdx(fromIdx);
-    setDragOverIdx(fromIdx);
-    let latestOver = fromIdx;
+    const startList = itemsRef.current.slice();
+    const draggedItem = startList[startIdx];
+    const rowEl = draggedItem ? rowRefs.current.get(draggedItem.id) : null;
+    if (!draggedItem || !rowEl) return;
 
-    const findHoverIndex = (clientY: number): number => {
-      const currentList = itemsRef.current;
-      for (let i = 0; i < currentList.length; i++) {
-        const el = rowRefs.current.get(currentList[i].id);
+    const handleEl = e.currentTarget;
+    try {
+      handleEl.setPointerCapture?.(e.pointerId);
+    } catch {
+      // Ignore synthetic events without active pointer
+    }
+
+    const rowRect = rowEl.getBoundingClientRect();
+    const grabOffsetX = e.clientX - rowRect.left;
+    const grabOffsetY = e.clientY - rowRect.top;
+
+    dragOrderRef.current = startList;
+    setDragOrder(startList);
+    setFloatingMeta({
+      item: draggedItem,
+      width: rowRect.width,
+      height: rowRect.height,
+      initialX: rowRect.left,
+      initialY: rowRect.top
+    });
+
+    const prevUserSelect = document.body.style.userSelect;
+    const prevCursor = document.body.style.cursor;
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'grabbing';
+
+    let latestClientX = e.clientX;
+    let latestClientY = e.clientY;
+    let rafId = 0;
+
+    const updateDragFrame = () => {
+      rafId = 0;
+      if (floatingRef.current) {
+        const nextX = latestClientX - grabOffsetX;
+        const nextY = latestClientY - grabOffsetY;
+        floatingRef.current.style.transform = `translate3d(${nextX}px, ${nextY}px, 0) scale(1.015)`;
+      }
+
+      // Gentle edge auto-scroll when dragging near viewport edges
+      if (latestClientY < 72) {
+        window.scrollBy({ top: -10 });
+      } else if (latestClientY > window.innerHeight - 72) {
+        window.scrollBy({ top: 10 });
+      }
+
+      const currentOrder = dragOrderRef.current;
+      if (!currentOrder) return;
+      const currentIdx = currentOrder.findIndex((i) => i.id === draggedItem.id);
+      if (currentIdx === -1) return;
+
+      let targetIdx = currentIdx;
+      for (let i = 0; i < currentOrder.length; i++) {
+        if (i === currentIdx) continue;
+        const el = rowRefs.current.get(currentOrder[i].id);
         if (!el) continue;
         const rect = el.getBoundingClientRect();
-        if (clientY >= rect.top && clientY <= rect.bottom) {
-          return i;
+        if (i < currentIdx && latestClientY < rect.top + rect.height * 0.52) {
+          targetIdx = i;
+          break;
+        }
+        if (i > currentIdx && latestClientY > rect.top + rect.height * 0.48) {
+          targetIdx = i;
         }
       }
-      // Above first or below last row
-      const firstEl = currentList[0] ? rowRefs.current.get(currentList[0].id) : null;
-      if (firstEl && clientY < firstEl.getBoundingClientRect().top) return 0;
-      return currentList.length - 1;
+
+      if (targetIdx !== currentIdx) {
+        const reordered = currentOrder.slice();
+        const [moved] = reordered.splice(currentIdx, 1);
+        if (moved) {
+          reordered.splice(targetIdx, 0, moved);
+          dragOrderRef.current = reordered;
+          setDragOrder(reordered);
+        }
+      }
     };
 
     const onPointerMove = (ev: PointerEvent) => {
-      const nextOver = findHoverIndex(ev.clientY);
-      if (nextOver !== latestOver) {
-        latestOver = nextOver;
-        setDragOverIdx(nextOver);
+      latestClientX = ev.clientX;
+      latestClientY = ev.clientY;
+      if (!rafId) {
+        rafId = window.requestAnimationFrame(updateDragFrame);
       }
     };
 
-    const finishDrag = () => {
+    const cleanup = () => {
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', finishDrag);
       window.removeEventListener('pointercancel', finishDrag);
-      setDragFromIdx(null);
-      setDragOverIdx(null);
-      if (latestOver !== fromIdx) {
-        reorderList(fromIdx, latestOver);
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
+      try {
+        if (handleEl.hasPointerCapture?.(e.pointerId)) {
+          handleEl.releasePointerCapture(e.pointerId);
+        }
+      } catch {
+        // Ignore if capture already released
+      }
+      document.body.style.userSelect = prevUserSelect;
+      document.body.style.cursor = prevCursor;
+      cleanupDragRef.current = null;
+    };
+
+    const finishDrag = () => {
+      const finalOrder = dragOrderRef.current;
+      cleanup();
+      dragOrderRef.current = null;
+      setDragOrder(null);
+      setFloatingMeta(null);
+
+      if (!finalOrder) return;
+      const finalIds = finalOrder.map((i) => i.id);
+      const originalIds = itemsRef.current.map((i) => i.id);
+      const changed = finalIds.some((id, index) => id !== originalIds[index]);
+      if (changed) {
+        enqueueMutation(
+          (curr) => {
+            const byId = new Map(curr.map((item) => [item.id, item]));
+            const ordered: SocialLinkItem[] = [];
+            for (const id of finalIds) {
+              const found = byId.get(id);
+              if (found) {
+                ordered.push(found);
+                byId.delete(id);
+              }
+            }
+            for (const extra of byId.values()) ordered.push(extra);
+            return ordered;
+          },
+          tr('Order updated.', 'வரிசை சேவ் ஆச்சுங்க.')
+        );
       }
     };
 
+    cleanupDragRef.current = cleanup;
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('pointerup', finishDrag);
     window.addEventListener('pointercancel', finishDrag);
@@ -395,18 +492,21 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="admin-card flex items-center justify-between gap-3 p-3.5">
             <div className="flex items-center gap-3">
-              <div className="admin-skeleton h-10 w-10 rounded-full" />
+              <div className="admin-skeleton h-9 w-9 rounded-full sm:h-10 sm:w-10" />
               <div className="space-y-1.5">
                 <div className="admin-skeleton h-4 w-28 rounded" />
-                <div className="admin-skeleton h-3 w-40 rounded" />
+                <div className="admin-skeleton hidden h-3 w-40 rounded sm:block" />
               </div>
             </div>
-            <div className="admin-skeleton h-8 w-24 rounded-xl" />
+            <div className="admin-skeleton h-8 w-20 rounded-xl" />
           </div>
         ))}
       </div>
     );
   }
+
+  const displayedItems = dragOrder ?? items;
+  const activeDragId = floatingMeta?.item.id ?? null;
 
   return (
     <div className="space-y-4">
@@ -430,8 +530,8 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
           </div>
           <p className="mt-1 text-xs text-slate-500">
             {tr(
-              'Hold and drag the 6-dot handle to reorder links, toggle switches rapidly, or edit/upload icons.',
-              '6-புள்ளி ஐகானை அழுத்தி இழுத்து வரிசையை மாத்துங்க. எத்தனை லிங்க் வேணாலும் தொடர்ந்து ஆன்/ஆஃப் பண்ணலாம்.'
+              'Hold and drag the 6-dot handle to reorder smoothly, toggle switches rapidly, or edit/upload icons.',
+              '6-புள்ளி ஐகானை அழுத்தி பிடித்து இழுத்து வரிசையை மாத்துங்க. எத்தனை லிங்க் வேணாலும் ஆன்/ஆஃப் பண்ணலாம்.'
             )}
           </p>
         </div>
@@ -450,11 +550,8 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
 
       {/* Ordered Social List */}
       <div className="space-y-2.5">
-        {items.map((item, idx) => {
-          const isDragging = dragFromIdx === idx;
-          const isDropTarget = dragFromIdx !== null && dragOverIdx === idx && dragFromIdx !== idx;
-          const dropAfter = isDropTarget && dragFromIdx! < idx;
-          const dropBefore = isDropTarget && dragFromIdx! > idx;
+        {displayedItems.map((item, idx) => {
+          const isPlaceholder = activeDragId === item.id;
           const displayName = lang === 'ta' && item.name_ta ? item.name_ta : item.name_en;
 
           return (
@@ -464,62 +561,45 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                 if (el) rowRefs.current.set(item.id, el);
                 else rowRefs.current.delete(item.id);
               }}
-              className={`admin-card flex flex-wrap items-center justify-between gap-2.5 p-3 transition-all duration-150 min-[360px]:p-3.5 sm:flex-nowrap ${
-                isDragging ? 'z-10 scale-[1.01] border-blue-500 bg-blue-50/30 shadow-lg ring-2 ring-blue-500/25' : ''
-              } ${dropBefore ? 'border-t-[3px] border-t-blue-600' : ''} ${
-                dropAfter ? 'border-b-[3px] border-b-blue-600' : ''
-              } ${!item.enabled && !isDragging ? 'bg-slate-50/80 opacity-80' : ''}`}
+              className={`admin-card relative flex flex-nowrap items-center justify-between gap-2 px-2.5 py-2.5 transition-all duration-150 sm:gap-3 sm:p-3.5 ${
+                isPlaceholder
+                  ? 'border-2 border-dashed border-blue-400 bg-blue-50/40 shadow-none dark:border-blue-500/50 dark:bg-blue-500/10'
+                  : !item.enabled
+                    ? 'bg-slate-50/80 opacity-80'
+                    : ''
+              }`}
             >
-              <div className="flex min-w-0 flex-1 items-center gap-2.5 min-[360px]:gap-3">
-                {/* Pointer Drag Handle + Up/Down Nudge Buttons */}
-                <div className="flex shrink-0 items-center gap-1">
-                  <button
-                    type="button"
-                    onPointerDown={(e) => startPointerDrag(e, idx)}
-                    title={tr('Drag to reorder', 'இழுத்து வரிசை மாற்று')}
-                    aria-label={tr(`Reorder ${item.name_en}`, `${item.name_en} வரிசை மாற்று`)}
-                    className="inline-flex h-9 w-7 touch-none cursor-grab select-none items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 active:cursor-grabbing dark:hover:bg-[#1C2029]"
-                  >
-                    <GripVertical className="h-4 w-4" />
-                  </button>
-                  <div className="flex flex-col">
-                    <button
-                      type="button"
-                      disabled={idx === 0}
-                      onClick={() => reorderList(idx, idx - 1)}
-                      aria-label={tr('Move up', 'மேலே நகர்த்து')}
-                      className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-25 dark:hover:bg-[#1C2029]"
-                    >
-                      <ArrowUp className="h-3 w-3" />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={idx === items.length - 1}
-                      onClick={() => reorderList(idx, idx + 1)}
-                      aria-label={tr('Move down', 'கீழே நகர்த்து')}
-                      className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-25 dark:hover:bg-[#1C2029]"
-                    >
-                      <ArrowDown className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
+              {/* Left Cluster: Drag Handle + Social Icon + Name (+ Handle/URL on Desktop) */}
+              <div
+                className={`flex min-w-0 flex-1 items-center gap-2 sm:gap-3 ${
+                  isPlaceholder ? 'opacity-0' : ''
+                }`}
+              >
+                <button
+                  type="button"
+                  onPointerDown={(e) => startPointerDrag(e, idx)}
+                  title={tr('Hold & drag to reorder', 'அழுத்தி இழுத்து வரிசை மாற்று')}
+                  aria-label={tr(`Reorder ${item.name_en}`, `${item.name_en} வரிசை மாற்று`)}
+                  className="inline-flex h-9 w-7 shrink-0 touch-none cursor-grab select-none items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 active:cursor-grabbing dark:hover:bg-[#1C2029]"
+                >
+                  <GripVertical className="h-4 w-4" />
+                </button>
 
-                {/* Icon */}
                 <IconPreview url={item.icon_url} alt={displayName} platform={item.platform} />
 
-                {/* Platform Name & URL */}
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
+                  <div className="flex items-center gap-1.5">
                     <span className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
                       {displayName}
                     </span>
                     {item.is_custom && (
-                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                      <span className="hidden rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 sm:inline-flex dark:bg-blue-500/15 dark:text-blue-300">
                         {tr('Custom', 'கஸ்டம்')}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                  {/* Handle & URL shown cleanly on sm+ screens; omitted on mobile for uniform single-row alignment */}
+                  <div className="hidden items-center gap-2 text-xs text-slate-500 sm:flex">
                     {item.handle && <span className="truncate font-semibold text-slate-600">{item.handle}</span>}
                     <a
                       href={item.url}
@@ -535,15 +615,20 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                 </div>
               </div>
 
-              {/* Edit Button + Enable/Disable Switch */}
-              <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
+              {/* Right Cluster: Pencil Icon Button + Clean Toggle Switch (no text on mobile) */}
+              <div
+                className={`flex shrink-0 items-center gap-2 ${
+                  isPlaceholder ? 'opacity-0 pointer-events-none' : ''
+                }`}
+              >
                 <button
                   type="button"
                   onClick={() => openEditModal(item)}
-                  className="admin-btn-secondary px-2.5 py-1.5 text-xs"
+                  aria-label={tr(`Edit ${item.name_en}`, `${item.name_en} மாற்று`)}
+                  className="admin-btn-secondary h-8 w-8 justify-center p-0 text-xs sm:h-auto sm:w-auto sm:px-2.5 sm:py-1.5"
                 >
-                  <Pencil className="h-3.5 w-3.5" />
-                  <span>{tr('Edit', 'மாற்று')}</span>
+                  <Pencil className="h-3.5 w-3.5 shrink-0" />
+                  <span className="hidden sm:inline">{tr('Edit', 'மாற்று')}</span>
                 </button>
 
                 <button
@@ -556,30 +641,104 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                       : tr(`Enable ${item.name_en}`, `${item.name_en} இயக்கு`)
                   }
                   onClick={() => handleToggle(item.id)}
-                  className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-bold transition ${
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-full transition sm:border sm:px-2.5 sm:py-1 sm:text-xs sm:font-bold ${
                     item.enabled
-                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                      : 'border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'sm:border-emerald-200 sm:bg-emerald-50 sm:text-emerald-700 sm:hover:bg-emerald-100'
+                      : 'sm:border-slate-200 sm:bg-slate-100 sm:text-slate-600 sm:hover:bg-slate-200'
                   }`}
                 >
                   <span
-                    className={`relative inline-flex h-4 w-7 items-center rounded-full transition ${
-                      item.enabled ? 'bg-emerald-600' : 'bg-slate-400'
+                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 sm:h-4 sm:w-7 ${
+                      item.enabled ? 'bg-emerald-600' : 'bg-slate-400 dark:bg-slate-600'
                     }`}
                   >
                     <span
-                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition ${
-                        item.enabled ? 'translate-x-3.5' : 'translate-x-0.5'
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-xs transition-transform duration-200 sm:h-3 sm:w-3 ${
+                        item.enabled ? 'translate-x-4 sm:translate-x-3.5' : 'translate-x-0.5'
                       }`}
                     />
                   </span>
-                  <span>{item.enabled ? tr('On', 'ஆன்') : tr('Off', 'ஆஃப்')}</span>
+                  <span className="hidden sm:inline">{item.enabled ? tr('On', 'ஆன்') : tr('Off', 'ஆஃப்')}</span>
                 </button>
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Live Floating Cursor-Tracked Clone While Dragging */}
+      {floatingMeta &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            ref={floatingRef}
+            style={{
+              position: 'fixed',
+              left: 0,
+              top: 0,
+              width: floatingMeta.width,
+              height: floatingMeta.height,
+              transform: `translate3d(${floatingMeta.initialX}px, ${floatingMeta.initialY}px, 0) scale(1.015)`,
+              transformOrigin: 'center center',
+              zIndex: 9999,
+              pointerEvents: 'none',
+              willChange: 'transform'
+            }}
+            className="admin-card flex flex-nowrap items-center justify-between gap-2 border-blue-500 bg-white px-2.5 py-2.5 shadow-2xl ring-2 ring-blue-500/30 sm:gap-3 sm:p-3.5 dark:bg-[#161920]"
+          >
+            <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+              <span className="inline-flex h-9 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">
+                <GripVertical className="h-4 w-4" />
+              </span>
+              <IconPreview
+                url={floatingMeta.item.icon_url}
+                alt={lang === 'ta' && floatingMeta.item.name_ta ? floatingMeta.item.name_ta : floatingMeta.item.name_en}
+                platform={floatingMeta.item.platform}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {lang === 'ta' && floatingMeta.item.name_ta ? floatingMeta.item.name_ta : floatingMeta.item.name_en}
+                  </span>
+                </div>
+                <div className="hidden items-center gap-2 text-xs text-slate-500 sm:flex">
+                  {floatingMeta.item.handle && (
+                    <span className="truncate font-semibold text-slate-600">{floatingMeta.item.handle}</span>
+                  )}
+                  <span className="truncate text-blue-600">{floatingMeta.item.url}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="admin-btn-secondary inline-flex h-8 w-8 items-center justify-center p-0 text-xs sm:h-auto sm:w-auto sm:px-2.5 sm:py-1.5">
+                <Pencil className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden sm:inline">{tr('Edit', 'மாற்று')}</span>
+              </span>
+              <span
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full sm:border sm:px-2.5 sm:py-1 sm:text-xs sm:font-bold ${
+                  floatingMeta.item.enabled
+                    ? 'sm:border-emerald-200 sm:bg-emerald-50 sm:text-emerald-700'
+                    : 'sm:border-slate-200 sm:bg-slate-100 sm:text-slate-600'
+                }`}
+              >
+                <span
+                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full sm:h-4 sm:w-7 ${
+                    floatingMeta.item.enabled ? 'bg-emerald-600' : 'bg-slate-400'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 rounded-full bg-white shadow-xs sm:h-3 sm:w-3 ${
+                      floatingMeta.item.enabled ? 'translate-x-4 sm:translate-x-3.5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </span>
+                <span className="hidden sm:inline">{floatingMeta.item.enabled ? tr('On', 'ஆன்') : tr('Off', 'ஆஃப்')}</span>
+              </span>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* Minimal, Clean Add / Edit Modal Widget */}
       {editing && (

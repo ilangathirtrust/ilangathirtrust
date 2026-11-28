@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import {
   DEFAULT_SOCIAL_LINKS,
   type ActivityItem,
@@ -98,8 +99,22 @@ export const DEFAULT_BOOTSTRAP: BootstrapPayload = {
   homePage: null
 };
 
-export async function getBootstrap(): Promise<BootstrapPayload> {
-  const data = await fetchApi<BootstrapPayload>('/api/public/bootstrap', 30);
+const getFreshBootstrap = cache(async (): Promise<BootstrapPayload> => {
+  const data = await fetchApi<BootstrapPayload>('/api/public/bootstrap', 0);
+  if (!data) return DEFAULT_BOOTSTRAP;
+  return {
+    settings: { ...DEFAULT_BOOTSTRAP.settings, ...(data.settings || {}) },
+    navigation: data.navigation?.length ? data.navigation : DEFAULT_BOOTSTRAP.navigation,
+    marquee: data.marquee || [],
+    homePage: data.homePage || null
+  };
+});
+
+export async function getBootstrap(revalidateSeconds = 0): Promise<BootstrapPayload> {
+  if (revalidateSeconds === 0) {
+    return getFreshBootstrap();
+  }
+  const data = await fetchApi<BootstrapPayload>('/api/public/bootstrap', revalidateSeconds);
   if (!data) return DEFAULT_BOOTSTRAP;
   return {
     settings: { ...DEFAULT_BOOTSTRAP.settings, ...(data.settings || {}) },

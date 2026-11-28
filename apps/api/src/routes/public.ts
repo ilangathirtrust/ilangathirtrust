@@ -24,76 +24,74 @@ function parsePagination(query: Record<string, unknown>, defaultSize = 12, maxSi
 
 publicRouter.get('/bootstrap', async (_req, res, next) => {
   try {
-    const payload = await withCache('public:bootstrap', async () => {
-      const supabase = getSupabaseAdmin();
-      const [settingsRes, navRes, marqueeRes, homeRes] = await Promise.all([
-        supabase
-          .from('site_settings')
-          .select('key, value_en, value_ta, json_value')
-          .in('key', ['donation_config', 'social_links'])
-          .eq('is_public', true),
-        supabase
-          .from('navigation_items')
-          .select('id, menu_location, label_en, label_ta, href, icon_name, sort_order, open_in_new_tab')
-          .eq('is_visible', true)
-          .order('menu_location', { ascending: true })
-          .order('sort_order', { ascending: true }),
-        supabase
-          .from('marquee_items')
-          .select('id, title_en, title_ta, alt_text_en, alt_text_ta, image_url, link_url, sort_order')
-          .eq('is_active', true)
-          .order('sort_order', { ascending: true })
-          .limit(24),
-        supabase
-          .from('page_contents')
-          .select('*')
-          .eq('slug', 'home')
-          .eq('status', 'published')
-          .maybeSingle()
-      ]);
+    // Query directly without multi-instance memory/CDN caching so admin toggles (social links, donations, nav) propagate immediately
+    const supabase = getSupabaseAdmin();
+    const [settingsRes, navRes, marqueeRes, homeRes] = await Promise.all([
+      supabase
+        .from('site_settings')
+        .select('key, value_en, value_ta, json_value')
+        .in('key', ['donation_config', 'social_links'])
+        .eq('is_public', true),
+      supabase
+        .from('navigation_items')
+        .select('id, menu_location, label_en, label_ta, href, icon_name, sort_order, open_in_new_tab')
+        .eq('is_visible', true)
+        .order('menu_location', { ascending: true })
+        .order('sort_order', { ascending: true }),
+      supabase
+        .from('marquee_items')
+        .select('id, title_en, title_ta, alt_text_en, alt_text_ta, image_url, link_url, sort_order')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .limit(24),
+      supabase
+        .from('page_contents')
+        .select('*')
+        .eq('slug', 'home')
+        .eq('status', 'published')
+        .maybeSingle()
+    ]);
 
-      if (settingsRes.error) throw settingsRes.error;
-      if (navRes.error) throw navRes.error;
-      if (marqueeRes.error) throw marqueeRes.error;
-      if (homeRes.error) throw homeRes.error;
+    if (settingsRes.error) throw settingsRes.error;
+    if (navRes.error) throw navRes.error;
+    if (marqueeRes.error) throw marqueeRes.error;
+    if (homeRes.error) throw homeRes.error;
 
-      const settings = Object.fromEntries(
-        (settingsRes.data || []).map((row) => [
-          row.key,
-          {
-            value_en: row.value_en,
-            value_ta: row.value_ta,
-            json_value: row.json_value
-          }
-        ])
-      );
-
-      if (!settings.social_links) {
-        settings.social_links = {
-          value_en: '',
-          value_ta: '',
-          json_value: { items: DEFAULT_SOCIAL_LINKS }
-        };
-      }
-
-      const donationsEnabled = isDonationsEnabled(settings);
-      const navigation = (navRes.data || []).filter((item) => {
-        if (!donationsEnabled && typeof item.href === 'string' && item.href.startsWith('/donate')) {
-          return false;
+    const settings = Object.fromEntries(
+      (settingsRes.data || []).map((row) => [
+        row.key,
+        {
+          value_en: row.value_en,
+          value_ta: row.value_ta,
+          json_value: row.json_value
         }
-        return true;
-      });
+      ])
+    );
 
-      return {
-        settings,
-        navigation,
-        marquee: marqueeRes.data || [],
-        homePage: homeRes.data || null
+    if (!settings.social_links) {
+      settings.social_links = {
+        value_en: '',
+        value_ta: '',
+        json_value: { items: DEFAULT_SOCIAL_LINKS }
       };
+    }
+
+    const donationsEnabled = isDonationsEnabled(settings);
+    const navigation = (navRes.data || []).filter((item) => {
+      if (!donationsEnabled && typeof item.href === 'string' && item.href.startsWith('/donate')) {
+        return false;
+      }
+      return true;
     });
 
-    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
-    res.json(payload);
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    res.setHeader('CDN-Cache-Control', 'no-store');
+    res.json({
+      settings,
+      navigation,
+      marquee: marqueeRes.data || [],
+      homePage: homeRes.data || null
+    });
   } catch (err) {
     next(err);
   }
