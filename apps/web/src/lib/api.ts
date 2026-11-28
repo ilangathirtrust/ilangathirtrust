@@ -1,13 +1,14 @@
-import type {
-  ActivityItem,
-  BlogPost,
-  BootstrapPayload,
-  EventItem,
-  GalleryFolder,
-  GalleryItem,
-  PageContent,
-  PaginatedResponse,
-  TeamMember
+import {
+  DEFAULT_SOCIAL_LINKS,
+  type ActivityItem,
+  type BlogPost,
+  type BootstrapPayload,
+  type EventItem,
+  type GalleryFolder,
+  type GalleryItem,
+  type PageContent,
+  type PaginatedResponse,
+  type TeamMember
 } from '@ilangathir/shared';
 
 export const API_URL = (
@@ -69,6 +70,13 @@ export const DEFAULT_BOOTSTRAP: BootstrapPayload = {
         currency: 'INR',
         suggested_amounts: [500, 1000, 2500, 5000, 10000],
         purposes: ['General Welfare', 'Education Support', 'Medical Relief', 'Environmental Care']
+      }
+    },
+    social_links: {
+      value_en: '',
+      value_ta: '',
+      json_value: {
+        items: DEFAULT_SOCIAL_LINKS
       }
     }
   },

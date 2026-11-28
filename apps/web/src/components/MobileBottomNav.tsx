@@ -59,7 +59,7 @@ export function MobileBottomNav({
   return (
     <nav
       aria-label="Mobile bottom navigation"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-sand-200 bg-white/95 shadow-[0_-4px_20px_rgba(11,24,46,0.08)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="print:hidden fixed inset-x-0 bottom-0 z-40 border-t border-sand-200 bg-white/95 shadow-[0_-4px_20px_rgba(11,24,46,0.08)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       <ul
         className="grid items-stretch"

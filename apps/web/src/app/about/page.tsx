@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { Eye, HeartHandshake, Target, Users } from 'lucide-react';
-import { isDonationsEnabled } from '@ilangathir/shared';
+import Link from 'next/link';
+import { Eye, HeartHandshake, ShieldCheck, Target, Users } from 'lucide-react';
+import { isDonationsEnabled, TRUST_INFO } from '@ilangathir/shared';
 import { getBootstrap } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
@@ -109,6 +110,25 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
                 </span>
                 <h3 className="mt-3 font-heading text-base font-bold text-brand-900">{ui.missionTitle}</h3>
                 <p className="mt-1.5 flex-1 text-sm text-slate-600">{mission}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sand-200 bg-white p-4 text-xs font-semibold text-slate-700 shadow-xs">
+              <div className="flex flex-wrap items-center gap-2">
+                <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+                <span>
+                  {lang === 'ta' ? 'அறக்கட்டளை பதிவு எண்:' : 'Reg. No:'}{' '}
+                  <strong className="text-brand-900">{TRUST_INFO.registrationNumber}</strong>
+                </span>
+                <span className="text-slate-300">•</span>
+                <span>
+                  PAN: <strong className="text-brand-900">{TRUST_INFO.panNumber}</strong>
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-3 font-bold text-brand-800">
+                <Link href="/privacy-policy" className="hover:text-saffron-600 hover:underline">{ui.privacyPolicy}</Link>
+                <Link href="/terms" className="hover:text-saffron-600 hover:underline">{ui.termsConditions}</Link>
+                <Link href="/refund-policy" className="hover:text-saffron-600 hover:underline">{ui.refundPolicy}</Link>
               </div>
             </div>
           </div>

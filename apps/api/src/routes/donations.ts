@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createDonationOrderSchema,
+  receiptLookupSchema,
   sanitizePlainText,
   verifyDonationSchema
 } from '@ilangathir/shared';
@@ -169,7 +170,14 @@ donationsRouter.post('/verify', donationOrderLimiter, async (req, res, next) => 
         amount_inr: existing.amount_paise / 100,
         purpose: existing.purpose,
         paid_at: existing.paid_at,
-        razorpay_payment_id: existing.razorpay_payment_id
+        razorpay_payment_id: existing.razorpay_payment_id,
+        razorpay_order_id: existing.razorpay_order_id,
+        payment_method: existing.payment_method || '',
+        donor_name: existing.donor_name,
+        donor_email: existing.donor_email,
+        donor_phone: existing.donor_phone,
+        donor_pan: existing.donor_pan || '',
+        donor_address: existing.donor_address || ''
       });
       return;
     }
@@ -193,7 +201,7 @@ donationsRouter.post('/verify', donationOrderLimiter, async (req, res, next) => 
         paid_at: new Date().toISOString()
       })
       .eq('id', existing.id)
-      .select('receipt_number, amount_paise, purpose, paid_at, razorpay_payment_id')
+      .select('receipt_number, amount_paise, purpose, paid_at, razorpay_payment_id, razorpay_order_id, payment_method, donor_name, donor_email, donor_phone, donor_pan, donor_address')
       .single();
 
     if (updateError) throw updateError;
@@ -204,7 +212,14 @@ donationsRouter.post('/verify', donationOrderLimiter, async (req, res, next) => 
       amount_inr: updated.amount_paise / 100,
       purpose: updated.purpose,
       paid_at: updated.paid_at,
-      razorpay_payment_id: updated.razorpay_payment_id
+      razorpay_payment_id: updated.razorpay_payment_id,
+      razorpay_order_id: updated.razorpay_order_id,
+      payment_method: updated.payment_method || '',
+      donor_name: updated.donor_name,
+      donor_email: updated.donor_email,
+      donor_phone: updated.donor_phone,
+      donor_pan: updated.donor_pan || '',
+      donor_address: updated.donor_address || ''
     });
   } catch (err) {
     next(err);
@@ -261,6 +276,54 @@ donationsRouter.get('/status/:orderId', donationOrderLimiter, async (req, res, n
       purpose: data.purpose,
       paid_at: data.paid_at,
       razorpay_payment_id: data.razorpay_payment_id
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+donationsRouter.post('/receipt-lookup', donationOrderLimiter, async (req, res, next) => {
+  try {
+    const parsed = receiptLookupSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Enter a valid receipt number and donor email address.' });
+      return;
+    }
+
+    const receiptNumber = parsed.data.receipt_number.trim().toUpperCase();
+    const donorEmail = parsed.data.donor_email.trim().toLowerCase();
+
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from('donations')
+      .select(
+        'receipt_number, amount_paise, purpose, paid_at, razorpay_payment_id, razorpay_order_id, payment_method, donor_name, donor_email, donor_phone, donor_pan, donor_address'
+      )
+      .eq('status', 'paid')
+      .ilike('receipt_number', receiptNumber)
+      .ilike('donor_email', donorEmail)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) {
+      res.status(404).json({ error: 'No paid donation receipt matched that receipt number and email.' });
+      return;
+    }
+
+    res.json({
+      verified: true,
+      receipt_number: data.receipt_number,
+      amount_inr: data.amount_paise / 100,
+      purpose: data.purpose,
+      paid_at: data.paid_at,
+      razorpay_payment_id: data.razorpay_payment_id,
+      razorpay_order_id: data.razorpay_order_id,
+      payment_method: data.payment_method || '',
+      donor_name: data.donor_name,
+      donor_email: data.donor_email,
+      donor_phone: data.donor_phone,
+      donor_pan: data.donor_pan || '',
+      donor_address: data.donor_address || ''
     });
   } catch (err) {
     next(err);

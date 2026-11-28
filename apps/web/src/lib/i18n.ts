@@ -108,12 +108,26 @@ export const uiDict = {
     receiptNumber: 'Receipt Number',
     paymentId: 'Transaction ID',
     donateAnother: 'Make Another Contribution',
+    printReceipt: 'Print / Save PDF Receipt',
+    copyReceiptNo: 'Copy Receipt No',
+    copied: 'Copied!',
+    lookupReceipt: 'Download Past Receipt',
+    shareWhatsapp: 'Share on WhatsApp',
+    copyLink: 'Copy Link',
+    addToCalendar: 'Add to Calendar',
+    openInMaps: 'Open in Google Maps',
+    chatWhatsapp: 'Chat on WhatsApp',
     // Footer
     footerExplore: 'Pages',
     footerSupport: 'Support',
     footerContact: 'Contact',
+    footerLegal: 'Legal & Policies',
+    privacyPolicy: 'Privacy Policy',
+    termsConditions: 'Terms & Conditions',
+    refundPolicy: 'Refund Policy',
+    followUs: 'Connect With Us',
     allRightsReserved: 'All rights reserved.',
-    trustNotice: 'Registered Charitable Trust • Dindigul, Tamil Nadu'
+    trustNotice: 'Reg. No: Book - 4/47/2024 • PAN: AACT13541A • Dindigul, Tamil Nadu'
   },
   ta: {
     brandName: 'இளங்கதிர் அறக்கட்டளை',
@@ -222,12 +236,26 @@ export const uiDict = {
     receiptNumber: 'ரசீது எண்',
     paymentId: 'பரிவர்த்தனை எண்',
     donateAnother: 'மீண்டும் நன்கொடை அளிக்க',
+    printReceipt: 'ரசீதை அச்சிடு / PDF சேமி',
+    copyReceiptNo: 'ரசீது எண்ணை நகலெடு',
+    copied: 'நகலெடுக்கப்பட்டது!',
+    lookupReceipt: 'பழைய ரசீதைப் பெற',
+    shareWhatsapp: 'வாட்ஸ்அப்பில் பகிர்',
+    copyLink: 'லிங்க் நகலெடு',
+    addToCalendar: 'காலெண்டரில் சேர்',
+    openInMaps: 'Google Maps-ல் பார்க்க',
+    chatWhatsapp: 'வாட்ஸ்அப்பில் பேச',
     // Footer
     footerExplore: 'பக்கங்கள்',
     footerSupport: 'உதவ & இணைய',
     footerContact: 'தொடர்புக்கு',
+    footerLegal: 'சட்ட விதிமுறைகள்',
+    privacyPolicy: 'தனியுரிமைக் கொள்கை',
+    termsConditions: 'விதிமுறைகள் & நிபந்தனைகள்',
+    refundPolicy: 'நன்கொடை ரத்து கொள்கை',
+    followUs: 'இணைந்திருக்க',
     allRightsReserved: 'அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.',
-    trustNotice: 'பதிவு பெற்ற அறக்கட்டளை • திண்டுக்கல், தமிழ்நாடு'
+    trustNotice: 'பதிவு எண்: Book - 4/47/2024 • PAN: AACT13541A • திண்டுக்கல், தமிழ்நாடு'
   }
 } as const;
 

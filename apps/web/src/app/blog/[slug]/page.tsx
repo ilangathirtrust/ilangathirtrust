@@ -8,7 +8,9 @@ import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
 import { buildBlogPostingJsonLd, buildBreadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { FormattedContent } from '@/components/FormattedContent';
 import { LazyImage } from '@/components/LazyPrimitives';
+import { ShareActionsBar } from '@/components/ShareActionsBar';
 
 export async function generateMetadata({
   params,
@@ -119,8 +121,12 @@ export default async function BlogDetailPage({
               />
             )}
 
-            <div className="mt-8 space-y-5 whitespace-pre-line text-sm leading-relaxed text-slate-700 sm:text-base">
-              {content}
+            <div className="mt-8">
+              <FormattedContent text={content} />
+            </div>
+
+            <div className="mt-8 border-t border-sand-200 pt-5">
+              <ShareActionsBar title={title} path={`/blog/${slug}`} />
             </div>
 
             {post.media_gallery && post.media_gallery.length > 0 && (

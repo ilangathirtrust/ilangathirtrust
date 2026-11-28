@@ -9,7 +9,9 @@ import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildEventJsonLd, buildPageMetadata } from '@/lib/seo';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { FolderItemsViewer } from '@/components/FolderItemsViewer';
+import { FormattedContent } from '@/components/FormattedContent';
 import { LazyImage } from '@/components/LazyPrimitives';
+import { ShareActionsBar } from '@/components/ShareActionsBar';
 
 export async function generateMetadata({
   params,
@@ -93,8 +95,23 @@ export default async function EventDetailPage({
                 />
               )}
 
-              <div className="mt-7 whitespace-pre-line text-sm leading-relaxed text-slate-700 sm:text-base">
-                {description}
+              <div className="mt-7">
+                <FormattedContent text={description} />
+              </div>
+
+              <div className="mt-7 border-t border-sand-200 pt-5">
+                <ShareActionsBar
+                  title={title}
+                  path={`/events/${slug}`}
+                  calendar={{
+                    title,
+                    description: pickLocalized(event as unknown as Record<string, unknown>, 'summary', lang) || description,
+                    location,
+                    eventDate: event.event_date,
+                    startTime: event.start_time,
+                    endTime: event.end_time
+                  }}
+                />
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Download, X } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 
@@ -10,6 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PwaInstallBanner() {
+  const pathname = usePathname();
   const { lang } = useLanguage();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(true);
@@ -42,7 +44,7 @@ export function PwaInstallBanner() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  if (dismissed || !deferredPrompt) return null;
+  if (dismissed || !deferredPrompt || pathname?.startsWith('/donate')) return null;
 
   async function handleInstall() {
     if (!deferredPrompt) return;
@@ -62,7 +64,7 @@ export function PwaInstallBanner() {
   }
 
   return (
-    <div className="fixed bottom-[70px] left-3 right-3 z-30 mx-auto flex max-w-md items-center justify-between gap-2.5 rounded-2xl border border-sand-300 bg-white/95 px-3.5 py-2.5 shadow-lg backdrop-blur-md lg:bottom-5 lg:left-auto lg:right-5">
+    <div className="print:hidden fixed bottom-[70px] left-3 right-3 z-30 mx-auto flex max-w-md items-center justify-between gap-2.5 rounded-2xl border border-sand-300 bg-white/95 px-3.5 py-2.5 shadow-lg backdrop-blur-md lg:bottom-5 lg:left-auto lg:right-5">
       <div className="flex min-w-0 items-center gap-2.5">
         <img
           src="/logos/icon.webp"

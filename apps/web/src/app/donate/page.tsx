@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Check, Heart, Lock, ShieldCheck } from 'lucide-react';
-import { isDonationsEnabled, parseDonationConfig } from '@ilangathir/shared';
+import { isDonationsEnabled, parseDonationConfig, TRUST_INFO } from '@ilangathir/shared';
 import { getBootstrap } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
@@ -75,16 +76,29 @@ export default async function DonatePage({ searchParams }: { searchParams: Promi
         icon={Heart}
       />
 
-      <section className="bg-sand-50 py-12 sm:py-14 lg:py-16">
+      <section className="bg-sand-50 py-10 sm:py-14 lg:py-16 print:bg-white print:py-2">
         <div className="container-max grid gap-8 lg:grid-cols-12">
-          <div className="min-w-0 lg:col-span-8">
+          {/* Mobile-First Trust Credential Strip above checkout */}
+          <div className="min-w-0 lg:hidden print:hidden">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-xs font-semibold text-emerald-900">
+              <span className="inline-flex items-center gap-1.5 font-bold">
+                <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-700" />
+                {lang === 'ta' ? 'பதிவு பெற்ற அறக்கட்டளை' : 'Verified Charitable Trust'}
+              </span>
+              <span className="font-mono text-[11px] font-bold text-brand-900">
+                Reg: {TRUST_INFO.registrationNumber} • PAN: {TRUST_INFO.panNumber}
+              </span>
+            </div>
+          </div>
+
+          <div className="min-w-0 lg:col-span-8 print:col-span-12">
             <DonationCheckout
               suggestedAmounts={donationCfg.suggested_amounts}
               purposes={donationCfg.purposes}
             />
           </div>
 
-          <aside className="min-w-0 space-y-5 lg:col-span-4">
+          <aside className="min-w-0 space-y-5 lg:col-span-4 print:hidden">
             <div className="trust-card p-5 sm:p-6">
               <ShieldCheck className="h-7 w-7 text-forest-600" />
               <h2 className="mt-3 font-heading text-lg font-bold text-brand-900">
@@ -92,9 +106,19 @@ export default async function DonatePage({ searchParams }: { searchParams: Promi
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
                 {lang === 'ta'
-                  ? 'UPI, டெபிட்/கிரெடிட் கார்டு மற்றும் நெட் பேங்கிங் மூலம் எளிதாகவும் பாதுகாப்பாகவும் நன்கொடை வழங்கலாம். உடனே ரசீது எண் கிடைக்கும்.'
-                  : 'Payments work smoothly via UPI, debit/credit cards, and netbanking, with instant verified receipt numbers generated automatically.'}
+                  ? 'UPI, டெபிட்/கிரெடிட் கார்டு மற்றும் நெட் பேங்கிங் மூலம் எளிதாகவும் பாதுகாப்பாகவும் நன்கொடை வழங்கலாம். உடனே அச்சிடக்கூடிய ரசீது கிடைக்கும்.'
+                  : 'Payments work smoothly via UPI, debit/credit cards, and netbanking, with an instant printable official receipt generated automatically.'}
               </p>
+              <div className="mt-4 space-y-1 rounded-xl border border-sand-200 bg-sand-50 p-3 text-xs text-slate-700">
+                <p><strong>{lang === 'ta' ? 'பதிவு எண்:' : 'Reg. No:'}</strong> {TRUST_INFO.registrationNumber}</p>
+                <p><strong>PAN:</strong> {TRUST_INFO.panNumber}</p>
+                <p><strong>{lang === 'ta' ? 'நிறுவனர்:' : 'Managing Trustee:'}</strong> {lang === 'ta' ? TRUST_INFO.founderNameTa : TRUST_INFO.founderNameEn}</p>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-bold text-brand-800">
+                <Link href="/privacy-policy" className="hover:underline">{ui.privacyPolicy}</Link>
+                <Link href="/terms" className="hover:underline">{ui.termsConditions}</Link>
+                <Link href="/refund-policy" className="hover:underline">{ui.refundPolicy}</Link>
+              </div>
             </div>
 
             <div className="trust-card p-5 sm:p-6">

@@ -2,7 +2,18 @@
 
 import { useState } from 'react';
 import Script from 'next/script';
-import { AlertCircle, CheckCircle2, Heart, Loader2, ShieldCheck } from 'lucide-react';
+import {
+  AlertCircle,
+  Check,
+  CheckCircle2,
+  Copy,
+  FileSearch,
+  Heart,
+  Loader2,
+  Printer,
+  ShieldCheck
+} from 'lucide-react';
+import { TRUST_INFO } from '@ilangathir/shared';
 import { API_URL } from '@/lib/api';
 import { formatClientError, readApiResponse } from '@/lib/client-error';
 import { trackEvent } from '@/lib/analytics';
@@ -23,6 +34,21 @@ interface DonationCheckoutProps {
   purposes: string[];
 }
 
+interface DonationReceiptData {
+  receipt_number: string;
+  amount_inr: number;
+  purpose: string;
+  paid_at?: string;
+  razorpay_payment_id: string;
+  razorpay_order_id?: string;
+  payment_method?: string;
+  donor_name?: string;
+  donor_email?: string;
+  donor_phone?: string;
+  donor_pan?: string;
+  donor_address?: string;
+}
+
 export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckoutProps) {
   const { lang } = useLanguage();
   const ui = getUi(lang);
@@ -38,12 +64,14 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [receipt, setReceipt] = useState<{
-    receipt_number: string;
-    amount_inr: number;
-    purpose: string;
-    razorpay_payment_id: string;
-  } | null>(null);
+  const [receipt, setReceipt] = useState<DonationReceiptData | null>(null);
+  const [copiedReceipt, setCopiedReceipt] = useState(false);
+
+  const [lookupOpen, setLookupOpen] = useState(false);
+  const [lookupReceiptNo, setLookupReceiptNo] = useState('');
+  const [lookupEmail, setLookupEmail] = useState('');
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupError, setLookupError] = useState('');
 
   async function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
@@ -136,13 +164,9 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(response)
             });
-            const verifyJson = await readApiResponse<{
-              verified: boolean;
-              receipt_number: string;
-              amount_inr: number;
-              purpose: string;
-              razorpay_payment_id: string;
-            }>(
+            const verifyJson = await readApiResponse<
+              DonationReceiptData & { verified: boolean }
+            >(
               verifyRes,
               lang,
               'Payment verification failed.',
@@ -155,7 +179,14 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
                   : 'Payment verification did not complete. Please contact support with your payment ID.'
               );
             }
-            setReceipt(verifyJson);
+            setReceipt({
+              ...verifyJson,
+              donor_name: verifyJson.donor_name || donorName,
+              donor_email: verifyJson.donor_email || donorEmail,
+              donor_phone: verifyJson.donor_phone || donorPhone,
+              donor_pan: verifyJson.donor_pan || donorPan,
+              donor_address: verifyJson.donor_address || donorAddress
+            });
             trackEvent('donation_completed', {
               amount_inr: verifyJson.amount_inr,
               purpose: verifyJson.purpose,
@@ -201,53 +232,221 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
     }
   }
 
+  async function handleReceiptLookup(e: React.FormEvent) {
+    e.preventDefault();
+    if (lookupLoading) return;
+    setLookupError('');
+    setLookupLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/donations/receipt-lookup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          receipt_number: lookupReceiptNo.trim(),
+          donor_email: lookupEmail.trim()
+        })
+      });
+      const found = await readApiResponse<DonationReceiptData & { verified: boolean }>(
+        res,
+        lang,
+        'No matching paid receipt found.',
+        'பொருந்தும் கட்டண ரசீது கிடைக்கவில்லை.'
+      );
+      setReceipt(found);
+      setLookupOpen(false);
+    } catch (err) {
+      setLookupError(
+        formatClientError(
+          err,
+          lang,
+          'Could not locate that receipt. Verify the receipt number and donor email.',
+          'ரசீதைக் கண்டறிய முடியவில்லை. ரசீது எண்ணையும் மின்னஞ்சலையும் சரிபார்க்கவும்.'
+        )
+      );
+    } finally {
+      setLookupLoading(false);
+    }
+  }
+
+  function handleCopyReceiptNo() {
+    if (!receipt?.receipt_number || typeof navigator === 'undefined' || !navigator.clipboard) return;
+    navigator.clipboard
+      .writeText(receipt.receipt_number)
+      .then(() => {
+        setCopiedReceipt(true);
+        setTimeout(() => setCopiedReceipt(false), 2500);
+      })
+      .catch(() => {});
+  }
+
   if (receipt) {
+    const formattedDate = receipt.paid_at
+      ? new Date(receipt.paid_at).toLocaleString(lang === 'ta' ? 'ta-IN' : 'en-IN', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        })
+      : new Date().toLocaleDateString('en-IN', { dateStyle: 'medium' });
+
     return (
-      <div className="rounded-3xl border border-emerald-200 bg-white p-8 text-center shadow-xl">
-        <div className="mb-5 flex justify-center">
-          <img
-            src="/logos/logo-navy-monochrome.webp"
-            alt="Ilangathir Trust"
-            className="h-12 w-12 object-contain print:hidden"
-          />
-          <img
-            src="/logos/logo-black-monochrome.webp"
-            alt="Ilangathir Trust"
-            className="hidden h-12 w-12 object-contain print:block"
-          />
-        </div>
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-          <CheckCircle2 className="h-9 w-9" />
-        </div>
-        <h2 className="mt-5 font-heading text-2xl font-bold text-slate-900">
-          {ui.paymentSuccessTitle}
-        </h2>
-        <p className="mt-2 text-sm text-slate-600">
-          ₹{receipt.amount_inr.toLocaleString('en-IN')} — {receipt.purpose}
-        </p>
-
-        <div className="mx-auto mt-6 max-w-md space-y-2 rounded-2xl bg-slate-50 p-5 text-left text-sm">
-          <div className="flex justify-between gap-4">
-            <span className="text-slate-500">{ui.receiptNumber}</span>
-            <span className="font-bold text-slate-900">{receipt.receipt_number}</span>
+      <div className="receipt-printable rounded-3xl border border-emerald-200 bg-white p-5 shadow-xl sm:p-8 print:rounded-none print:border print:border-slate-300 print:p-6 print:shadow-none">
+        {/* Trust Receipt Letterhead */}
+        <div className="flex flex-col items-center justify-between gap-4 border-b border-sand-200 pb-5 text-center sm:flex-row sm:text-left">
+          <div className="flex flex-col items-center gap-3 sm:flex-row">
+            <img
+              src="/logos/logo-navy-monochrome.webp"
+              alt="Ilangathir Trust"
+              className="h-12 w-12 object-contain print:hidden"
+            />
+            <img
+              src="/logos/logo-black-monochrome.webp"
+              alt="Ilangathir Trust"
+              className="hidden h-12 w-12 object-contain print:block"
+            />
+            <div>
+              <h2 className="font-heading text-lg font-extrabold text-brand-900 sm:text-xl">
+                {TRUST_INFO.legalNameEn} ({TRUST_INFO.displayNameEn})
+              </h2>
+              <p className="text-xs font-semibold text-slate-600">
+                Reg. No: <span className="text-brand-900">{TRUST_INFO.registrationNumber}</span> • PAN:{' '}
+                <span className="text-brand-900">{TRUST_INFO.panNumber}</span>
+              </p>
+              <p className="text-[11px] text-slate-500">{TRUST_INFO.addressEn}</p>
+            </div>
           </div>
-          <div className="flex justify-between gap-4">
-            <span className="text-slate-500">{ui.paymentId}</span>
-            <span className="font-mono text-xs font-semibold text-slate-800">{receipt.razorpay_payment_id}</span>
+
+          <div className="shrink-0 rounded-2xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-center print:border-slate-300 print:bg-slate-50">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 print:text-slate-800">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>{lang === 'ta' ? 'அதிகாரப்பூர்வ ரசீது' : 'Official Receipt'}</span>
+            </div>
+            <p className="mt-0.5 font-mono text-sm font-extrabold text-brand-900">{receipt.receipt_number}</p>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setReceipt(null);
-            setError('');
-          }}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-700"
-        >
-          <Heart className="h-4 w-4" />
-          <span>{ui.donateAnother}</span>
-        </button>
+        {/* Highlight Banner */}
+        <div className="mt-5 text-center sm:text-left">
+          <h3 className="font-heading text-xl font-bold text-slate-900 sm:text-2xl">
+            {ui.paymentSuccessTitle}
+          </h3>
+          <p className="mt-1 text-sm text-slate-600">
+            ₹{receipt.amount_inr.toLocaleString('en-IN')} — {receipt.purpose}
+          </p>
+        </div>
+
+        {/* Receipt Breakdown Grid */}
+        <div className="mt-5 grid gap-4 rounded-2xl border border-sand-200 bg-sand-50/70 p-4 text-sm sm:grid-cols-2 sm:p-5 print:bg-white">
+          <div className="space-y-2.5">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              {lang === 'ta' ? 'நன்கொடையாளர் விவரம்' : 'Donor Details'}
+            </p>
+            {receipt.donor_name && (
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-500">{lang === 'ta' ? 'பெயர்' : 'Donor Name'}</span>
+                <span className="text-right font-bold text-slate-900">{receipt.donor_name}</span>
+              </div>
+            )}
+            {receipt.donor_email && (
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-500">{lang === 'ta' ? 'மின்னஞ்சல்' : 'Email'}</span>
+                <span className="break-all text-right font-medium text-slate-800">{receipt.donor_email}</span>
+              </div>
+            )}
+            {receipt.donor_phone && (
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-500">{lang === 'ta' ? 'கைபேசி' : 'Phone'}</span>
+                <span className="text-right font-medium text-slate-800">{receipt.donor_phone}</span>
+              </div>
+            )}
+            {receipt.donor_pan && (
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-500">PAN</span>
+                <span className="font-mono font-bold uppercase text-slate-900">{receipt.donor_pan}</span>
+              </div>
+            )}
+            {receipt.donor_address && (
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-500">{lang === 'ta' ? 'முகவரி' : 'Address'}</span>
+                <span className="text-right text-slate-800">{receipt.donor_address}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2.5 border-t border-sand-200 pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              {lang === 'ta' ? 'பரிவர்த்தனை விவரம்' : 'Transaction Summary'}
+            </p>
+            <div className="flex justify-between gap-3">
+              <span className="text-slate-500">{ui.receiptNumber}</span>
+              <span className="font-mono font-bold text-slate-900">{receipt.receipt_number}</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-slate-500">{ui.paymentId}</span>
+              <span className="break-all font-mono text-xs font-semibold text-slate-800">{receipt.razorpay_payment_id}</span>
+            </div>
+            {receipt.razorpay_order_id && (
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-500">{lang === 'ta' ? 'ஆர்டர் எண்' : 'Order ID'}</span>
+                <span className="break-all font-mono text-xs text-slate-700">{receipt.razorpay_order_id}</span>
+              </div>
+            )}
+            <div className="flex justify-between gap-3">
+              <span className="text-slate-500">{lang === 'ta' ? 'தேதி & நேரம்' : 'Date & Time'}</span>
+              <span className="text-right font-medium text-slate-800">{formattedDate}</span>
+            </div>
+            <div className="flex justify-between gap-3 border-t border-sand-200 pt-2 text-base">
+              <span className="font-bold text-brand-900">{lang === 'ta' ? 'மொத்தத் தொகை' : 'Contribution'}</span>
+              <span className="font-extrabold text-emerald-700 print:text-slate-900">
+                ₹{receipt.amount_inr.toLocaleString('en-IN')} INR
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Authorised Footer Note */}
+        <div className="mt-5 flex flex-col justify-between gap-3 border-t border-dashed border-sand-300 pt-4 text-xs text-slate-500 sm:flex-row sm:items-end">
+          <p>
+            {lang === 'ta'
+              ? `இது ${TRUST_INFO.legalNameTa} மூலம் கணினி வழியே வழங்கப்பட்ட அதிகாரப்பூர்வ ரசீது. உதவிக்கு: ${TRUST_INFO.email} | ${TRUST_INFO.phone}`
+              : `Computer-generated official donation receipt issued by ${TRUST_INFO.legalNameEn}. For queries: ${TRUST_INFO.email} | ${TRUST_INFO.phone}`}
+          </p>
+          <div className="shrink-0 text-left sm:text-right">
+            <p className="font-bold text-brand-900">{TRUST_INFO.founderNameEn}</p>
+            <p>{lang === 'ta' ? 'நிர்வாக அறங்காவலர்' : 'Managing Trustee'}</p>
+          </div>
+        </div>
+
+        {/* Actions (Hidden when printing) */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5 print:hidden sm:justify-start">
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-brand-800 active:scale-[0.98]"
+          >
+            <Printer className="h-4 w-4" />
+            <span>{ui.printReceipt}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCopyReceiptNo}
+            className="inline-flex items-center gap-2 rounded-xl border border-sand-300 bg-sand-50 px-4 py-3 text-sm font-bold text-brand-900 transition hover:bg-sand-100 active:scale-[0.98]"
+          >
+            {copiedReceipt ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+            <span>{copiedReceipt ? ui.copied : ui.copyReceiptNo}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setReceipt(null);
+              setError('');
+            }}
+            className="inline-flex items-center gap-2 rounded-xl border border-saffron-300 bg-saffron-50 px-5 py-3 text-sm font-bold text-saffron-800 transition hover:bg-saffron-100 active:scale-[0.98]"
+          >
+            <Heart className="h-4 w-4" />
+            <span>{ui.donateAnother}</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -399,12 +598,67 @@ export function DonationCheckout({ suggestedAmounts, purposes }: DonationCheckou
         <button
           type="submit"
           disabled={loading}
-          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-saffron-600 px-6 py-4 text-sm font-bold text-white shadow-md transition hover:bg-saffron-700 disabled:opacity-60"
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-saffron-600 px-6 py-4 text-sm font-bold text-white shadow-md transition hover:bg-saffron-700 active:scale-[0.99] disabled:opacity-60"
         >
           {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Heart className="h-5 w-5" />}
           <span>{loading ? ui.submitting : `${ui.proceedToPay} (₹${Number(amountInr || 0).toLocaleString('en-IN')})`}</span>
         </button>
       </form>
+
+      {/* Re-download / Print Past Donation Receipt */}
+      <div className="mt-5 rounded-2xl border border-sand-200 bg-white p-4 shadow-xs sm:p-5 print:hidden">
+        <button
+          type="button"
+          onClick={() => {
+            setLookupOpen((v) => !v);
+            setLookupError('');
+          }}
+          className="flex w-full items-center justify-between gap-3 text-left"
+        >
+          <span className="inline-flex items-center gap-2 text-xs font-bold text-brand-900 sm:text-sm">
+            <FileSearch className="h-4 w-4 shrink-0 text-saffron-600" />
+            <span>
+              {lang === 'ta'
+                ? 'ஏற்கனவே நன்கொடை அளித்தீர்களா? ரசீதை மீண்டும் அச்சிட'
+                : 'Already donated? Retrieve & print a past receipt'}
+            </span>
+          </span>
+          <span className="shrink-0 text-xs font-bold text-saffron-700">
+            {lookupOpen ? ui.close : ui.lookupReceipt}
+          </span>
+        </button>
+
+        {lookupOpen && (
+          <form onSubmit={handleReceiptLookup} className="mt-4 grid gap-3 border-t border-sand-200 pt-4 sm:grid-cols-3">
+            <input
+              required
+              placeholder={lang === 'ta' ? 'ரசீது எண் (எ.கா., ILG-...)' : 'Receipt No (e.g., ILG-...)'}
+              value={lookupReceiptNo}
+              onChange={(e) => setLookupReceiptNo(e.target.value)}
+              className="rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
+            />
+            <input
+              type="email"
+              required
+              placeholder={lang === 'ta' ? 'நன்கொடையாளர் மின்னஞ்சல்' : 'Donor Email Address'}
+              value={lookupEmail}
+              onChange={(e) => setLookupEmail(e.target.value)}
+              className="rounded-xl border border-sand-200 bg-sand-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-700 focus:bg-white"
+            />
+            <button
+              type="submit"
+              disabled={lookupLoading}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-brand-800 disabled:opacity-60"
+            >
+              {lookupLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
+              <span>{ui.lookupReceipt}</span>
+            </button>
+            {lookupError && (
+              <p className="text-xs font-semibold text-red-700 sm:col-span-3">{lookupError}</p>
+            )}
+          </form>
+        )}
+      </div>
     </>
   );
 }

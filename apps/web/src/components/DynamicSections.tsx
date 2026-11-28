@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowUpRight, BookOpen, Calendar, MapPin } from 'lucide-react';
+import { ArrowUpRight, BookOpen, Calendar, MapPin, Sparkles, Users } from 'lucide-react';
 import { pickLocalized, type Language } from '@ilangathir/shared';
 import {
   getActivities,
@@ -57,13 +57,17 @@ export async function HomeActivitiesSection({ lang }: { lang: Language }) {
               return (
                 <LazyReveal key={act.id} delayMs={idx * 70}>
                   <article className="trust-card flex h-full flex-col overflow-hidden">
-                    {act.image_url && (
+                    {act.image_url ? (
                       <LazyImage
                         src={act.image_url}
                         alt={title}
                         wrapperClassName="h-48 w-full"
                         className="h-full w-full object-cover"
                       />
+                    ) : (
+                      <div className="flex h-48 w-full items-center justify-center bg-gradient-to-br from-brand-50 via-sand-100 to-saffron-50 text-brand-700">
+                        <Sparkles className="h-10 w-10 text-saffron-600" />
+                      </div>
                     )}
                     <div className="flex flex-1 flex-col p-4 min-[360px]:p-5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -288,13 +292,17 @@ export async function AboutTeamSection({ lang }: { lang: Language }) {
         return (
           <LazyReveal key={member.id} delayMs={idx * 60}>
             <article className="trust-card flex h-full flex-col overflow-hidden">
-              {member.image_url && (
+              {member.image_url ? (
                 <LazyImage
                   src={member.image_url}
                   alt={name}
                   wrapperClassName="h-64 w-full"
                   className="h-full w-full object-cover object-top"
                 />
+              ) : (
+                <div className="flex h-64 w-full items-center justify-center bg-gradient-to-br from-brand-50 to-sand-100 text-brand-700">
+                  <Users className="h-12 w-12 opacity-60" />
+                </div>
               )}
               <div className="flex flex-1 flex-col p-5">
                 <h3 className="font-heading text-lg font-bold text-brand-900">{name}</h3>
@@ -331,13 +339,17 @@ export async function ActivitiesListSection({ lang, page }: { lang: Language; pa
           return (
             <LazyReveal key={act.id} delayMs={idx * 45}>
               <article className="trust-card flex h-full flex-col overflow-hidden">
-                {act.image_url && (
+                {act.image_url ? (
                   <LazyImage
                     src={act.image_url}
                     alt={title}
                     wrapperClassName="h-52 w-full"
                     className="h-full w-full object-cover"
                   />
+                ) : (
+                  <div className="flex h-52 w-full items-center justify-center bg-gradient-to-br from-brand-50 via-sand-100 to-saffron-50 text-brand-700">
+                    <Sparkles className="h-10 w-10 text-saffron-600" />
+                  </div>
                 )}
                 <div className="flex flex-1 flex-col p-5 sm:p-6">
                   <div className="flex flex-wrap items-center justify-between gap-2">

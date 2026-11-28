@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Noto_Sans_Tamil, Plus_Jakarta_Sans } from 'next/font/google';
 import { Suspense } from 'react';
-import { isDonationsEnabled } from '@ilangathir/shared';
+import { getEnabledSocialLinks, isDonationsEnabled } from '@ilangathir/shared';
 import { getBootstrap, SITE_URL } from '@/lib/api';
 import { getServerLang } from '@/lib/lang-server';
 import { buildOrganizationGraphJsonLd } from '@/lib/seo';
@@ -13,6 +13,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { SiteFooter } from '@/components/SiteFooter';
 import { AnalyticsTracker } from '@/components/AnalyticsTracker';
+import { WhatsAppFloat } from '@/components/WhatsAppFloat';
 import './globals.css';
 
 const inter = Inter({
@@ -87,6 +88,7 @@ export default async function RootLayout({
 }) {
   const [lang, bootstrap] = await Promise.all([getServerLang(), getBootstrap()]);
   const donationsEnabled = isDonationsEnabled(bootstrap.settings);
+  const socialLinks = getEnabledSocialLinks(bootstrap.settings);
 
   const trustNameEn = SITE_SETTINGS.trust_name.value_en;
   const trustNameTa = SITE_SETTINGS.trust_name.value_ta;
@@ -98,7 +100,7 @@ export default async function RootLayout({
   const footerDescEn = SITE_SETTINGS.footer_description.value_en;
   const footerDescTa = SITE_SETTINGS.footer_description.value_ta;
 
-  const orgJsonLd = buildOrganizationGraphJsonLd();
+  const orgJsonLd = buildOrganizationGraphJsonLd(socialLinks);
 
   return (
     <html
@@ -126,6 +128,7 @@ export default async function RootLayout({
             email={email}
             navItems={bootstrap.navigation}
             donationsEnabled={donationsEnabled}
+            socialLinks={socialLinks}
           />
 
           <main id="main-content" className="flex-1">
@@ -142,6 +145,7 @@ export default async function RootLayout({
             addressEn={addressEn}
             addressTa={addressTa}
             donationsEnabled={donationsEnabled}
+            socialLinks={socialLinks}
           />
 
           <MobileBottomNav
@@ -149,6 +153,7 @@ export default async function RootLayout({
             donationsEnabled={donationsEnabled}
           />
 
+          <WhatsAppFloat socialLinks={socialLinks} />
           <PwaInstallBanner />
         </LanguageProvider>
       </body>

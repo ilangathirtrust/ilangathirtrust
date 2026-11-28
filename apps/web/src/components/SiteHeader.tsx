@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Heart, Mail, Menu, Phone, X } from 'lucide-react';
-import type { NavigationItem } from '@ilangathir/shared';
+import { Heart, Mail, Menu, MessageCircle, Phone, X } from 'lucide-react';
+import type { NavigationItem, SocialLinkItem } from '@ilangathir/shared';
 import { useLanguage } from './LanguageProvider';
+import { SocialLinksRow } from './SocialLinksRow';
 import { getUi } from '@/lib/i18n';
 import { trackEvent } from '@/lib/analytics';
 import { STATIC_ASSETS } from '@/lib/site-content';
@@ -18,6 +19,7 @@ interface SiteHeaderProps {
   email: string;
   navItems: NavigationItem[];
   donationsEnabled: boolean;
+  socialLinks?: SocialLinkItem[];
 }
 
 export function SiteHeader({
@@ -26,12 +28,32 @@ export function SiteHeader({
   phone,
   email,
   navItems,
-  donationsEnabled
+  donationsEnabled,
+  socialLinks = []
 }: SiteHeaderProps) {
   const { lang, setLang } = useLanguage();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const ui = getUi(lang);
+
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDrawerOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [drawerOpen]);
 
   const headerLinks = navItems.filter((item) => {
     if (item.menu_location !== 'header') return false;
@@ -52,12 +74,12 @@ export function SiteHeader({
       </a>
 
       {/* Top utility strip (Desktop) */}
-      <div className="hidden border-b border-sand-200 bg-brand-950 text-xs text-sand-100 md:block">
+      <div className="print:hidden hidden border-b border-sand-200 bg-brand-950 text-xs text-sand-100 md:block">
         <div className="container-max flex h-9 items-center justify-between gap-4">
           <p className="truncate font-medium text-sand-200">
             {lang === 'ta'
-              ? 'பதிவு பெற்ற மக்கள் நல அறக்கட்டளை • V. கல்லுப்பட்டி, திண்டுக்கல்'
-              : 'Registered Charitable Trust • V. Kallupatti, Dindigul, Tamil Nadu'}
+              ? 'பதிவு பெற்ற அறக்கட்டளை (Book - 4/47/2024) • V. கல்லுப்பட்டி, திண்டுக்கல்'
+              : 'Registered Charitable Trust (Book - 4/47/2024) • V. Kallupatti, Dindigul, Tamil Nadu'}
           </p>
           <div className="flex shrink-0 items-center gap-4">
             <a
@@ -80,7 +102,7 @@ export function SiteHeader({
       </div>
 
       {/* Main Sticky Header (opaque + GPU-composited to prevent scroll jitter) */}
-      <header className="sticky top-0 z-40 transform-gpu border-b border-sand-200 bg-white shadow-[0_2px_12px_rgba(11,24,46,0.04)]">
+      <header className="print:hidden sticky top-0 z-40 transform-gpu border-b border-sand-200 bg-white shadow-[0_2px_12px_rgba(11,24,46,0.04)]">
         <div className="container-max">
           {/* Mobile Header (< lg): Left bare menu icon | Balanced centered language-switched logo | Right full "En" "த" toggle | NO donate icon */}
           <div className="grid h-[66px] grid-cols-[auto_1fr_auto] items-center gap-2 min-[360px]:h-[70px] lg:hidden">
@@ -225,49 +247,81 @@ export function SiteHeader({
           </div>
         </div>
 
-        {/* Mobile Drawer */}
+        {/* Mobile Drawer + Dimmed Backdrop */}
         {drawerOpen && (
-          <nav
-            aria-label="Mobile navigation"
-            className="border-t border-sand-200 bg-white px-4 pb-6 pt-3 shadow-xl lg:hidden"
-          >
-            <div className="flex flex-col gap-1">
-              {headerLinks.map((item) => {
-                const isActive =
-                  item.href === '/'
-                    ? pathname === '/'
-                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
-                const label = lang === 'ta' ? item.label_ta : item.label_en;
-                return (
+          <>
+            <div
+              onClick={() => setDrawerOpen(false)}
+              aria-hidden="true"
+              className="fixed inset-0 top-[66px] z-30 bg-brand-950/45 backdrop-blur-xs min-[360px]:top-[70px] lg:hidden"
+            />
+            <nav
+              aria-label="Mobile navigation"
+              className="relative z-40 max-h-[calc(100svh-70px)] overflow-y-auto border-t border-sand-200 bg-white px-4 pb-6 pt-3 shadow-xl lg:hidden"
+            >
+              <div className="flex flex-col gap-1">
+                {headerLinks.map((item) => {
+                  const isActive =
+                    item.href === '/'
+                      ? pathname === '/'
+                      : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const label = lang === 'ta' ? item.label_ta : item.label_en;
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={() => setDrawerOpen(false)}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                        isActive
+                          ? 'bg-sand-100 text-brand-900 font-bold'
+                          : 'text-slate-700 hover:bg-sand-50'
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
+                {donationsEnabled && (
                   <Link
-                    key={item.id}
-                    href={item.href}
-                    onClick={() => setDrawerOpen(false)}
-                    className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                      isActive
-                        ? 'bg-sand-100 text-brand-900 font-bold'
-                        : 'text-slate-700 hover:bg-sand-50'
-                    }`}
+                    href="/donate"
+                    onClick={() => {
+                      setDrawerOpen(false);
+                      trackEvent('nav_donate_click', { location: 'mobile_drawer' });
+                    }}
+                    className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-saffron-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-saffron-700 active:scale-[0.99]"
                   >
-                    {label}
+                    <Heart className="h-4 w-4" />
+                    <span>{ui.donateNow}</span>
                   </Link>
-                );
-              })}
-              {donationsEnabled && (
-                <Link
-                  href="/donate"
-                  onClick={() => {
-                    setDrawerOpen(false);
-                    trackEvent('nav_donate_click', { location: 'mobile_drawer' });
-                  }}
-                  className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-saffron-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-saffron-700"
-                >
-                  <Heart className="h-4 w-4" />
-                  <span>{ui.donateNow}</span>
-                </Link>
-              )}
-            </div>
-          </nav>
+                )}
+
+                <div className="mt-4 space-y-3 border-t border-sand-200 pt-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <a
+                      href={`tel:${phone.replace(/[^\d+]/g, '')}`}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sand-200 bg-sand-50 px-3 py-2.5 text-xs font-bold text-brand-900"
+                    >
+                      <Phone className="h-3.5 w-3.5 text-saffron-600" />
+                      <span>{lang === 'ta' ? 'அழைக்க' : 'Call'}</span>
+                    </a>
+                    <a
+                      href="https://wa.me/919363015050"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-bold text-emerald-800"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
+
+                  {socialLinks.length > 0 && (
+                    <SocialLinksRow links={socialLinks} variant="light" />
+                  )}
+                </div>
+              </div>
+            </nav>
+          </>
         )}
       </header>
     </>

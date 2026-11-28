@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'node:path';
-import { DEFAULT_DONATION_CONFIG } from '@ilangathir/shared';
+import {
+  DEFAULT_DONATION_CONFIG,
+  parseSocialLinks,
+  socialLinksUpdateSchema
+} from '@ilangathir/shared';
 import { env } from '../config/env.js';
 import { getPublicStorageUrl, getSupabaseAdmin } from '../config/supabase.js';
 import { PROTECTED_OWNER_EMAIL, requireAdminAuth, requireRole, requireWriteAccess } from '../middleware/auth.js';
@@ -1277,6 +1281,73 @@ adminRouter.patch('/donations/toggle', requireRole(['super_admin', 'admin']), as
 
     invalidatePublic();
     res.json({ enabled, config: nextJson });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ======================== SOCIAL MEDIA LINKS MANAGER ========================
+adminRouter.get('/social-links', async (_req, res, next) => {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('json_value')
+      .eq('key', 'social_links')
+      .maybeSingle();
+
+    if (error) throw error;
+    const items = parseSocialLinks(data ? { social_links: { json_value: data.json_value } } : null);
+    res.json({ items });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.put('/social-links', requireRole(['super_admin', 'admin', 'editor']), async (req, res, next) => {
+  try {
+    const parsed = socialLinksUpdateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        error: parsed.error.issues[0]?.message || 'Invalid social links payload.',
+        issues: parsed.error.flatten().fieldErrors
+      });
+      return;
+    }
+
+    const normalized = parsed.data.items.map((item, idx) => ({
+      ...item,
+      name_ta: item.name_ta || item.name_en,
+      sort_order: idx + 1
+    }));
+
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.from('site_settings').upsert(
+      {
+        key: 'social_links',
+        category: 'social',
+        value_en: '',
+        value_ta: '',
+        json_value: { items: normalized },
+        is_public: true,
+        updated_by: req.admin?.id ?? null
+      },
+      { onConflict: 'key' }
+    );
+    if (error) throw error;
+
+    await recordAuditLog({
+      actorId: req.admin?.id,
+      actorEmail: req.admin?.email,
+      action: 'update_social_links',
+      entityType: 'site_settings',
+      entityId: 'social_links',
+      details: { count: normalized.length, enabledCount: normalized.filter((i) => i.enabled).length },
+      req
+    });
+
+    invalidatePublic();
+    res.json({ items: normalized });
   } catch (err) {
     next(err);
   }

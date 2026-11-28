@@ -19,6 +19,7 @@ import {
   Menu,
   Moon,
   Navigation,
+  Share2,
   Shield,
   ShieldCheck,
   Sun,
@@ -34,6 +35,7 @@ import { OverviewPage } from './pages/OverviewPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { PagesSeoPage } from './pages/PagesSeoPage';
 import { NavigationMarqueePage } from './pages/NavigationMarqueePage';
+import { SocialLinksPage } from './pages/SocialLinksPage';
 import { MediaLibraryPage } from './pages/MediaLibraryPage';
 import { GalleryManagerPage } from './pages/GalleryManagerPage';
 import { EventsActivitiesPage } from './pages/EventsActivitiesPage';
@@ -73,6 +75,7 @@ const NAV_ITEMS = [
   { id: 'donations', label: 'Donations & Payments', labelTa: 'நன்கொடை & பேமெண்ட்', shortLabel: 'Donate', shortLabelTa: 'நன்கொடை', icon: IndianRupee, group: 'Operations', groupTa: 'அன்றாட நிர்வாகம்', roles: OPS_ROLES },
   { id: 'pages', label: 'Pages & Hero', labelTa: 'பேஜஸ் & பேனர்', shortLabel: 'Pages', shortLabelTa: 'பேஜஸ்', icon: FileCode2, group: 'Content CMS', groupTa: 'கன்டென்ட் மேலாண்மை', roles: ALL_ROLES },
   { id: 'navigation', label: 'Menus & Marquee', labelTa: 'மெனு & மார்க்யூ', shortLabel: 'Menus', shortLabelTa: 'மெனு', icon: Navigation, group: 'Content CMS', groupTa: 'கன்டென்ட் மேலாண்மை', roles: ALL_ROLES },
+  { id: 'social', label: 'Social Media Links', labelTa: 'சமூக வலைதளங்கள்', shortLabel: 'Social', shortLabelTa: 'சோஷியல்', icon: Share2, group: 'Content CMS', groupTa: 'கன்டென்ட் மேலாண்மை', roles: ALL_ROLES },
   { id: 'activities', label: 'Activities & Services', labelTa: 'நலப்பணிகள்', shortLabel: 'Activities', shortLabelTa: 'பணிகள்', icon: Layers, group: 'Content CMS', groupTa: 'கன்டென்ட் மேலாண்மை', roles: ALL_ROLES },
   { id: 'media', label: 'Media Library', labelTa: 'மீடியா ஃபைல்கள்', shortLabel: 'Media', shortLabelTa: 'மீடியா', icon: ImageIcon, group: 'Media & Blog', groupTa: 'மீடியா & பிளாக்', roles: ALL_ROLES },
   { id: 'blogs', label: 'Blog & Articles', labelTa: 'பிளாக் & கட்டுரைகள்', shortLabel: 'Blog', shortLabelTa: 'பிளாக்', icon: BookOpen, group: 'Media & Blog', groupTa: 'மீடியா & பிளாக்', roles: ALL_ROLES },
@@ -599,6 +602,7 @@ export default function App() {
           {resolvedActive === 'analytics' && <AnalyticsPage onNotify={notify} userRole={adminUser.role} />}
           {resolvedActive === 'pages' && <PagesSeoPage onNotify={notify} />}
           {resolvedActive === 'navigation' && <NavigationMarqueePage onNotify={notify} />}
+          {resolvedActive === 'social' && <SocialLinksPage onNotify={notify} />}
           {resolvedActive === 'media' && <MediaLibraryPage onNotify={notify} />}
           {resolvedActive === 'gallery' && <GalleryManagerPage onNotify={notify} />}
           {resolvedActive === 'events' && <EventsActivitiesPage mode="events" onNotify={notify} />}

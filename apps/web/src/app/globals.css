@@ -112,3 +112,10 @@ html[lang='ta'] .section-kicker {
     animation: none !important;
   }
 }
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+}

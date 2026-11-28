@@ -1,4 +1,10 @@
-import type { BilingualFaq, Language, NavigationItem } from '@ilangathir/shared';
+import {
+  DEFAULT_SOCIAL_LINKS,
+  TRUST_INFO,
+  type BilingualFaq,
+  type Language,
+  type NavigationItem
+} from '@ilangathir/shared';
 
 export const STATIC_ASSETS = {
   logo: '/logos/logo.webp',
@@ -72,9 +78,19 @@ export const SITE_SETTINGS = {
     value_ta: 'திங்கள் - சனி: காலை 9:30 - மாலை 6:00',
     json_value: null
   },
+  trust_registration: {
+    value_en: TRUST_INFO.registrationNumber,
+    value_ta: TRUST_INFO.registrationNumber,
+    json_value: null
+  },
+  trust_pan: {
+    value_en: TRUST_INFO.panNumber,
+    value_ta: TRUST_INFO.panNumber,
+    json_value: null
+  },
   founder_name: {
-    value_en: 'Founder — Ilangathir Trust',
-    value_ta: 'நிறுவனர் — இளங்கதிர் அறக்கட்டளை',
+    value_en: TRUST_INFO.founderNameEn,
+    value_ta: TRUST_INFO.founderNameTa,
     json_value: null
   },
   founder_role: {
@@ -83,8 +99,10 @@ export const SITE_SETTINGS = {
     json_value: null
   },
   founder_bio: {
-    value_en: 'Guiding Ilangathir Trust from V. Kallupatti, Dindigul with a clear focus on rural student education, free medical outreach, and community welfare.',
-    value_ta: 'திண்டுக்கல் மாவட்டம் V. கல்லுப்பட்டியை மையமாகக் கொண்டு மாணவர் கல்வி, இலவச மருத்துவ முகாம் மற்றும் சமூக நலப் பணிகளை அக்கறையுடன் வழிநடத்தி வருகிறார்.',
+    value_en:
+      'Founded by Prejeval Prince in V. Kallupatti, Dindigul (Reg. No: Book - 4/47/2024), guiding Ilangathir Trust with a practical focus on rural student education, free medical outreach, and community welfare.',
+    value_ta:
+      'நிறுவனர் பிரெஜெவல் பிரின்ஸ் வழிகாட்டுதலில், திண்டுக்கல் மாவட்டம் V. கல்லுப்பட்டியை மையமாகக் கொண்டு (பதிவு எண்: Book - 4/47/2024) மாணவர் கல்வி, இலவச மருத்துவ முகாம் மற்றும் சமூக நலப் பணிகளைத் தொடர்ந்து நடத்தி வருகிறோம்.',
     json_value: null
   },
   mission_statement: {
@@ -106,10 +124,7 @@ export const SITE_SETTINGS = {
     value_en: '',
     value_ta: '',
     json_value: {
-      facebook: '',
-      instagram: '',
-      youtube: '',
-      whatsapp: 'https://wa.me/919363015050'
+      items: DEFAULT_SOCIAL_LINKS
     }
   },
   donation_config: {
@@ -302,6 +317,48 @@ export const PERMANENT_PAGES = {
     seo_description_ta: 'திண்டுக்கல் V. கல்லுப்பட்டி இளங்கதிர் அறக்கட்டளையைத் தொடர்பு கொள்ளவும் அல்லது தன்னார்வலராக இணையவும்.',
     keywords_en: 'Contact Ilangathir Trust, Volunteer Dindigul NGO, V. Kallupatti Trust Phone Address',
     keywords_ta: 'இளங்கதிர் அறக்கட்டளை தொடர்பு, தன்னார்வலர் பதிவு, திண்டுக்கல்'
+  },
+  privacy: {
+    eyebrow_en: 'LEGAL & PRIVACY',
+    eyebrow_ta: 'தனியுரிமைக் கொள்கை',
+    title_en: 'Privacy Policy',
+    title_ta: 'தனியுரிமைக் கொள்கை (Privacy Policy)',
+    subtitle_en: 'How Ilangathir Trust (Reg. No: Book - 4/47/2024) collects, safeguards, and uses visitor, volunteer, and donor information.',
+    subtitle_ta: 'இளங்கதிர் அறக்கட்டளை (பதிவு எண்: Book - 4/47/2024) பார்வையாளர்கள் மற்றும் நன்கொடையாளர்களின் விவரங்களை எவ்வாறு பாதுகாக்கிறது.',
+    seo_title_en: 'Privacy Policy | Ilangathir Trust (Reg. Book - 4/47/2024)',
+    seo_title_ta: 'தனியுரிமைக் கொள்கை | இளங்கதிர் அறக்கட்டளை',
+    seo_description_en: 'Privacy policy covering donor details, Razorpay checkout, contact enquiries, volunteer applications, and analytics on ilangathirtrust.org.',
+    seo_description_ta: 'நன்கொடை, தன்னார்வலர் பதிவு மற்றும் இணையதளத் தகவல்களுக்கான இளங்கதிர் அறக்கட்டளையின் தனியுரிமைக் கொள்கை.',
+    keywords_en: 'Ilangathir Trust Privacy Policy, Donor Privacy Tamil Nadu NGO',
+    keywords_ta: 'இளங்கதிர் அறக்கட்டளை தனியுரிமைக் கொள்கை'
+  },
+  terms: {
+    eyebrow_en: 'TERMS OF USE',
+    eyebrow_ta: 'விதிமுறைகள்',
+    title_en: 'Terms & Conditions',
+    title_ta: 'விதிமுறைகள் மற்றும் நிபந்தனைகள் (Terms & Conditions)',
+    subtitle_en: 'Terms governing use of www.ilangathirtrust.org, online donations, volunteer participation, and trust materials.',
+    subtitle_ta: 'www.ilangathirtrust.org இணையதளப் பயன்பாடு, நன்கொடை மற்றும் தன்னார்வப் பணிகளுக்கான விதிமுறைகள்.',
+    seo_title_en: 'Terms & Conditions | Ilangathir Trust',
+    seo_title_ta: 'விதிமுறைகள் மற்றும் நிபந்தனைகள் | இளங்கதிர் அறக்கட்டளை',
+    seo_description_en: 'Terms and conditions for using Ilangathir Trust website, contributing online via Razorpay, and participating in trust initiatives.',
+    seo_description_ta: 'இளங்கதிர் அறக்கட்டளை இணையதளம் மற்றும் ஆன்லைன் நன்கொடை சேவைக்கான விதிமுறைகள்.',
+    keywords_en: 'Ilangathir Trust Terms and Conditions, Charitable Trust Terms Dindigul',
+    keywords_ta: 'இளங்கதிர் அறக்கட்டளை விதிமுறைகள்'
+  },
+  refund: {
+    eyebrow_en: 'DONATION POLICY',
+    eyebrow_ta: 'நன்கொடைத் திரும்பப் பெறுதல் கொள்கை',
+    title_en: 'Refund & Cancellation Policy',
+    title_ta: 'நன்கொடை ரத்து & திரும்பப் பெறுதல் கொள்கை',
+    subtitle_en: 'Clear guidelines on charitable contribution finality, duplicate charges, and technical error resolution.',
+    subtitle_ta: 'தவறான அல்லது இரட்டைப் பணப் பரிவர்த்தனை ஏற்பட்டால் நன்கொடையைத் திரும்பப் பெறுவதற்கான விதிமுறைகள்.',
+    seo_title_en: 'Refund & Cancellation Policy | Ilangathir Trust Donations',
+    seo_title_ta: 'நன்கொடை ரத்து & திரும்பப் பெறுதல் கொள்கை | இளங்கதிர் அறக்கட்டளை',
+    seo_description_en: 'Donation cancellation and refund policy for Ilangathir Trust online contributions via Razorpay (duplicate charges or technical errors).',
+    seo_description_ta: 'இளங்கதிர் அறக்கட்டளை ஆன்லைன் நன்கொடை ரத்து மற்றும் திரும்பப் பெறுதல் கொள்கை.',
+    keywords_en: 'Ilangathir Trust Refund Policy, NGO Donation Cancellation Policy India',
+    keywords_ta: 'இளங்கதிர் அறக்கட்டளை நன்கொடை ரத்து கொள்கை'
   }
 } as const;
 

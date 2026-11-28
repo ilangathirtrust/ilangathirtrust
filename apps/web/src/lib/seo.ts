@@ -1,5 +1,15 @@
 import type { Metadata } from 'next';
-import { pickLocalized, type BilingualFaq, type BlogPost, type EventItem, type GalleryFolder, type Language } from '@ilangathir/shared';
+import {
+  DEFAULT_SOCIAL_LINKS,
+  pickLocalized,
+  TRUST_INFO,
+  type BilingualFaq,
+  type BlogPost,
+  type EventItem,
+  type GalleryFolder,
+  type Language,
+  type SocialLinkItem
+} from '@ilangathir/shared';
 import { SITE_URL } from './api';
 import { SITE_SETTINGS, STATIC_ASSETS } from './site-content';
 
@@ -72,14 +82,17 @@ export function buildPageMetadata(params: {
   };
 }
 
-export function buildOrganizationGraphJsonLd() {
+export function buildOrganizationGraphJsonLd(socialLinks?: SocialLinkItem[]) {
   const name = SITE_SETTINGS.trust_name.value_en;
   const nameTa = SITE_SETTINGS.trust_name.value_ta;
   const email = SITE_SETTINGS.email.value_en;
   const phone = SITE_SETTINGS.phone.value_en;
   const address = SITE_SETTINGS.address.value_en;
   const logo = STATIC_ASSETS.logo;
-  const sameAs: string[] = [];
+  const linksToUse = socialLinks?.length ? socialLinks : DEFAULT_SOCIAL_LINKS;
+  const sameAs = linksToUse
+    .filter((item) => item.enabled && /^https?:\/\//i.test(item.url) && !item.url.includes('wa.me'))
+    .map((item) => item.url);
 
   return {
     '@context': 'https://schema.org',
@@ -90,6 +103,12 @@ export function buildOrganizationGraphJsonLd() {
         name,
         legalName: SITE_SETTINGS.trust_legal_name.value_en,
         alternateName: [nameTa, 'Ilangathir Arakattalai', 'இளங்கதிர் அறக்கட்டளை திண்டுக்கல்'],
+        identifier: TRUST_INFO.registrationNumber,
+        taxID: TRUST_INFO.panNumber,
+        founder: {
+          '@type': 'Person',
+          name: TRUST_INFO.founderNameEn
+        },
         url: SITE_URL,
         logo: {
           '@type': 'ImageObject',

@@ -18,7 +18,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [bootstrap, data] = await Promise.all([getBootstrap(), getSitemapData()]);
   const donationsEnabled = isDonationsEnabled(bootstrap.settings);
 
-  const staticRoutes = ['', '/about', '/activities', '/events', '/gallery', '/blog', '/contact'];
+  const staticRoutes = [
+    '',
+    '/about',
+    '/activities',
+    '/events',
+    '/gallery',
+    '/blog',
+    '/contact',
+    '/privacy-policy',
+    '/terms',
+    '/refund-policy'
+  ];
   if (donationsEnabled) {
     staticRoutes.push('/donate');
   }
@@ -28,8 +39,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = staticRoutes.map((route) => ({
     url: `${SITE_URL}${route || '/'}`,
     lastModified: now,
-    changeFrequency: route === '' ? 'daily' : 'weekly',
-    priority: route === '' ? 1.0 : 0.85,
+    changeFrequency:
+      route === '' ? 'daily' : ['/privacy-policy', '/terms', '/refund-policy'].includes(route) ? 'monthly' : 'weekly',
+    priority:
+      route === '' ? 1.0 : ['/privacy-policy', '/terms', '/refund-policy'].includes(route) ? 0.5 : 0.85,
     alternates: bilingualAlternates(route || '/')
   }));
 

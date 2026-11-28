@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Mail, MapPin, Phone } from 'lucide-react';
+import { Heart, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
+import { TRUST_INFO, type SocialLinkItem } from '@ilangathir/shared';
 import { useLanguage } from './LanguageProvider';
+import { SocialLinksRow } from './SocialLinksRow';
 import { getUi } from '@/lib/i18n';
 import { STATIC_ASSETS } from '@/lib/site-content';
 
@@ -16,6 +18,7 @@ interface SiteFooterProps {
   addressEn: string;
   addressTa: string;
   donationsEnabled: boolean;
+  socialLinks: SocialLinkItem[];
 }
 
 export function SiteFooter(props: SiteFooterProps) {
@@ -25,10 +28,10 @@ export function SiteFooter(props: SiteFooterProps) {
   const mobileWhiteLogo = lang === 'ta' ? STATIC_ASSETS.logoWhiteTam : STATIC_ASSETS.logoWhiteEng;
 
   return (
-    <footer className="border-t border-brand-800 bg-brand-950 pb-24 pt-14 text-sand-200 lg:pb-10">
+    <footer className="print:hidden border-t border-brand-800 bg-brand-950 pb-24 pt-14 text-sand-200 lg:pb-10">
       <div className="container-max">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12">
-          <div className="space-y-4 lg:col-span-5">
+          <div className="space-y-4 lg:col-span-4">
             <Link
               href="/"
               className="inline-flex items-center"
@@ -48,6 +51,20 @@ export function SiteFooter(props: SiteFooterProps) {
             <p className="max-w-md text-sm leading-relaxed text-sand-200/85">
               {lang === 'ta' ? props.footerDescTa : props.footerDescEn}
             </p>
+            <div className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold text-sand-200">
+              <span>Reg: <strong className="text-saffron-400">{TRUST_INFO.registrationNumber}</strong></span>
+              <span className="text-white/25">|</span>
+              <span>PAN: <strong className="text-saffron-400">{TRUST_INFO.panNumber}</strong></span>
+            </div>
+
+            {props.socialLinks.length > 0 && (
+              <div className="pt-1">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-saffron-400">
+                  {ui.followUs}
+                </p>
+                <SocialLinksRow links={props.socialLinks} variant="dark" />
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-2">
@@ -63,7 +80,7 @@ export function SiteFooter(props: SiteFooterProps) {
             </ul>
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <h3 className="font-heading text-xs font-bold uppercase tracking-widest text-saffron-400">
               {ui.footerSupport}
             </h3>
@@ -78,6 +95,12 @@ export function SiteFooter(props: SiteFooterProps) {
               )}
               <li><Link href="/contact#volunteer" className="text-sand-200/90 transition hover:text-white">{ui.volunteer}</Link></li>
               <li><Link href="/contact" className="text-sand-200/90 transition hover:text-white">{ui.contact}</Link></li>
+              <li className="pt-2 text-[11px] font-bold uppercase tracking-widest text-saffron-400/90">
+                {ui.footerLegal}
+              </li>
+              <li><Link href="/privacy-policy" className="text-sand-200/90 transition hover:text-white">{ui.privacyPolicy}</Link></li>
+              <li><Link href="/terms" className="text-sand-200/90 transition hover:text-white">{ui.termsConditions}</Link></li>
+              <li><Link href="/refund-policy" className="text-sand-200/90 transition hover:text-white">{ui.refundPolicy}</Link></li>
             </ul>
           </div>
 
@@ -93,6 +116,17 @@ export function SiteFooter(props: SiteFooterProps) {
                 >
                   <Phone className="mt-0.5 h-4 w-4 shrink-0 text-saffron-400" />
                   <span>{props.phone}</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://wa.me/919363015050"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-2.5 text-emerald-300 transition hover:text-emerald-200"
+                >
+                  <MessageCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{ui.chatWhatsapp}</span>
                 </a>
               </li>
               <li>

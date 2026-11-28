@@ -11,7 +11,7 @@ import {
   Target,
   Users
 } from 'lucide-react';
-import { isDonationsEnabled } from '@ilangathir/shared';
+import { isDonationsEnabled, TRUST_INFO } from '@ilangathir/shared';
 import { getBootstrap } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
@@ -116,8 +116,8 @@ export default async function HomePage({
             decoding="async"
             className="h-full w-full object-cover object-center sm:object-[center_35%]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-950/90 via-brand-950/80 to-brand-950/94 lg:bg-gradient-to-r lg:from-brand-950/95 lg:via-brand-950/82 lg:to-brand-950/45" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.16),transparent_52%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-950/90 via-brand-950/78 to-brand-950/92 lg:bg-gradient-to-r lg:from-brand-950/95 lg:via-brand-950/78 lg:to-brand-950/35" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.18),transparent_55%)]" />
         </div>
 
         <div className="container-max py-10 min-[360px]:py-12 sm:py-16 lg:py-20 xl:py-24">
@@ -190,7 +190,7 @@ export default async function HomePage({
                   {lang === 'ta' ? 'பதிவு பெற்ற அறக்கட்டளை' : 'Registered Trust'}
                 </p>
                 <p className="mt-0.5 text-xs font-medium text-sand-200/90">
-                  {lang === 'ta' ? 'V. கல்லுப்பட்டி, திண்டுக்கல்' : 'V. Kallupatti, Dindigul'}
+                  Reg: {TRUST_INFO.registrationNumber} • PAN: {TRUST_INFO.panNumber}
                 </p>
               </div>
               <div className="min-w-0">

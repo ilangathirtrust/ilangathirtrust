@@ -302,6 +302,211 @@ export function isDonationsEnabled(
   return parseDonationConfig(settings).enabled;
 }
 
+export const TRUST_INFO = {
+  legalNameEn: 'Ilangathir Arakattalai',
+  legalNameTa: 'இளங்கதிர் அறக்கட்டளை',
+  displayNameEn: 'Ilangathir Trust',
+  displayNameTa: 'இளங்கதிர் அறக்கட்டளை',
+  registrationNumber: 'Book - 4/47/2024',
+  panNumber: 'AACT13541A',
+  founderNameEn: 'Prejeval Prince',
+  founderNameTa: 'பிரெஜெவல் பிரின்ஸ்',
+  email: 'ilangathirtrust@gmail.com',
+  phone: '+91 93630 15050',
+  whatsappNumber: '919363015050',
+  addressEn: 'V. Kallupatti, Dindigul - 624307, Tamil Nadu, India.',
+  addressTa: 'V. கல்லுப்பட்டி, திண்டுக்கல் - 624307, தமிழ்நாடு, இந்தியா.',
+  hoursEn: 'Monday - Saturday: 9:30 AM - 6:00 PM',
+  hoursTa: 'திங்கள் - சனி: காலை 9:30 - மாலை 6:00',
+  handle: '@ilangathirtrust'
+} as const;
+
+export interface SocialLinkItem {
+  id: string;
+  platform: string;
+  name_en: string;
+  name_ta: string;
+  handle: string;
+  url: string;
+  icon_url: string;
+  enabled: boolean;
+  sort_order: number;
+  is_custom?: boolean;
+}
+
+export const LUCIDE_ICON_CDN = 'https://cdn.jsdelivr.net/npm/lucide-static@latest/icons';
+
+export const DEFAULT_SOCIAL_LINKS: SocialLinkItem[] = [
+  {
+    id: 'social-instagram',
+    platform: 'instagram',
+    name_en: 'Instagram',
+    name_ta: 'இன்ஸ்டாகிராம்',
+    handle: '@ilangathirtrust',
+    url: 'https://instagram.com/ilangathirtrust',
+    icon_url: `${LUCIDE_ICON_CDN}/instagram.svg`,
+    enabled: true,
+    sort_order: 1,
+    is_custom: false
+  },
+  {
+    id: 'social-whatsapp',
+    platform: 'whatsapp',
+    name_en: 'WhatsApp',
+    name_ta: 'வாட்ஸ்அப்',
+    handle: '+91 93630 15050',
+    url: 'https://wa.me/919363015050',
+    icon_url: `${LUCIDE_ICON_CDN}/message-circle.svg`,
+    enabled: true,
+    sort_order: 2,
+    is_custom: false
+  },
+  {
+    id: 'social-youtube',
+    platform: 'youtube',
+    name_en: 'YouTube',
+    name_ta: 'யூடியூப்',
+    handle: '@ilangathirtrust',
+    url: 'https://youtube.com/@ilangathirtrust',
+    icon_url: `${LUCIDE_ICON_CDN}/youtube.svg`,
+    enabled: true,
+    sort_order: 3,
+    is_custom: false
+  },
+  {
+    id: 'social-facebook',
+    platform: 'facebook',
+    name_en: 'Facebook',
+    name_ta: 'ஃபேஸ்புக்',
+    handle: '@ilangathirtrust',
+    url: 'https://facebook.com/ilangathirtrust',
+    icon_url: `${LUCIDE_ICON_CDN}/facebook.svg`,
+    enabled: true,
+    sort_order: 4,
+    is_custom: false
+  },
+  {
+    id: 'social-x',
+    platform: 'x',
+    name_en: 'X (Twitter)',
+    name_ta: 'எக்ஸ் (ட்விட்டர்)',
+    handle: '@ilangathirtrust',
+    url: 'https://x.com/ilangathirtrust',
+    icon_url: `${LUCIDE_ICON_CDN}/twitter.svg`,
+    enabled: true,
+    sort_order: 5,
+    is_custom: false
+  },
+  {
+    id: 'social-threads',
+    platform: 'threads',
+    name_en: 'Threads',
+    name_ta: 'த்ரெட்ஸ்',
+    handle: '@ilangathirtrust',
+    url: 'https://threads.net/@ilangathirtrust',
+    icon_url: `${LUCIDE_ICON_CDN}/at-sign.svg`,
+    enabled: true,
+    sort_order: 6,
+    is_custom: false
+  },
+  {
+    id: 'social-linkedin',
+    platform: 'linkedin',
+    name_en: 'LinkedIn',
+    name_ta: 'லிங்க்ட்இன்',
+    handle: '@ilangathirtrust',
+    url: 'https://linkedin.com/company/ilangathirtrust',
+    icon_url: `${LUCIDE_ICON_CDN}/linkedin.svg`,
+    enabled: true,
+    sort_order: 7,
+    is_custom: false
+  },
+  {
+    id: 'social-telegram',
+    platform: 'telegram',
+    name_en: 'Telegram',
+    name_ta: 'டெலிகிராம்',
+    handle: '@ilangathirtrust',
+    url: 'https://t.me/ilangathirtrust',
+    icon_url: `${LUCIDE_ICON_CDN}/send.svg`,
+    enabled: false,
+    sort_order: 8,
+    is_custom: false
+  }
+];
+
+function isSafeLinkUrl(raw: string): boolean {
+  const v = raw.trim().toLowerCase();
+  return v.startsWith('https://') || v.startsWith('http://') || v.startsWith('mailto:') || v.startsWith('tel:');
+}
+
+export const socialLinkItemSchema = z.object({
+  id: z.string().trim().min(1).max(80),
+  platform: z.string().trim().min(1).max(60),
+  name_en: z.string().trim().min(1).max(80),
+  name_ta: z.string().trim().max(80).optional().default(''),
+  handle: z.string().trim().max(120).optional().default(''),
+  url: z
+    .string()
+    .trim()
+    .min(1)
+    .max(500)
+    .refine(isSafeLinkUrl, 'Link URL must start with https://, http://, mailto:, or tel:'),
+  icon_url: z
+    .string()
+    .trim()
+    .max(600)
+    .optional()
+    .default(`${LUCIDE_ICON_CDN}/globe.svg`)
+    .refine((v) => !v || v.startsWith('https://') || v.startsWith('http://') || v.startsWith('/'), 'Icon URL must be an https://, http://, or relative / path'),
+  enabled: z.boolean().default(true),
+  sort_order: z.number().int().min(0).max(500).default(0),
+  is_custom: z.boolean().optional().default(false)
+});
+
+export const socialLinksUpdateSchema = z.object({
+  items: z.array(socialLinkItemSchema).max(40)
+});
+
+export const receiptLookupSchema = z.object({
+  receipt_number: z.string().trim().min(4).max(60),
+  donor_email: z.string().trim().email().max(190)
+});
+
+export function parseSocialLinks(
+  settings: Record<string, { json_value?: Record<string, unknown> | null }> | null | undefined
+): SocialLinkItem[] {
+  const rawJson = settings?.social_links?.json_value as Record<string, unknown> | null | undefined;
+  const rawItems = rawJson && Array.isArray(rawJson.items) ? rawJson.items : null;
+  if (!rawItems || rawItems.length === 0) {
+    return DEFAULT_SOCIAL_LINKS.map((item) => ({ ...item }));
+  }
+
+  const normalized: SocialLinkItem[] = [];
+  for (let i = 0; i < rawItems.length; i++) {
+    const parsed = socialLinkItemSchema.safeParse(rawItems[i]);
+    if (parsed.success) {
+      normalized.push({
+        ...parsed.data,
+        name_ta: parsed.data.name_ta || parsed.data.name_en,
+        sort_order: Number.isFinite(parsed.data.sort_order) ? parsed.data.sort_order : i + 1
+      });
+    }
+  }
+
+  if (normalized.length === 0) {
+    return DEFAULT_SOCIAL_LINKS.map((item) => ({ ...item }));
+  }
+
+  return normalized.sort((a, b) => a.sort_order - b.sort_order);
+}
+
+export function getEnabledSocialLinks(
+  settings: Record<string, { json_value?: Record<string, unknown> | null }> | null | undefined
+): SocialLinkItem[] {
+  return parseSocialLinks(settings).filter((item) => item.enabled && isSafeLinkUrl(item.url));
+}
+
 export function pickLocalized<T extends Record<string, unknown>>(
   record: T | null | undefined,
   baseField: string,

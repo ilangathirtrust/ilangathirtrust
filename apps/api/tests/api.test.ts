@@ -5,10 +5,16 @@ import http from 'node:http';
 import {
   contactEnquirySchema,
   createDonationOrderSchema,
+  DEFAULT_SOCIAL_LINKS,
+  getEnabledSocialLinks,
   isDonationsEnabled,
   parseDonationConfig,
+  parseSocialLinks,
   pickLocalized,
+  receiptLookupSchema,
   sanitizePlainText,
+  socialLinksUpdateSchema,
+  TRUST_INFO,
   volunteerApplicationSchema
 } from '@ilangathir/shared';
 import { createApp } from '../src/index.js';
@@ -293,4 +299,53 @@ test('GA4 Service Account RS256 JWT assertion verifies with corresponding public
   const verifier = crypto.createVerify('RSA-SHA256');
   verifier.update(`${parts[0]}.${parts[1]}`);
   assert.equal(verifier.verify(publicKey, Buffer.from(parts[2], 'base64url')), true);
+});
+
+test('Social links parser, validation, receipt lookup, and trust metadata work cleanly', () => {
+  assert.equal(TRUST_INFO.registrationNumber, 'Book - 4/47/2024');
+  assert.equal(TRUST_INFO.panNumber, 'AACT13541A');
+  assert.equal(TRUST_INFO.founderNameEn, 'Prejeval Prince');
+
+  const defaults = parseSocialLinks(undefined);
+  assert.equal(defaults.length, DEFAULT_SOCIAL_LINKS.length);
+  assert.equal(defaults[0]?.url, 'https://instagram.com/ilangathirtrust');
+
+  const enabled = getEnabledSocialLinks({
+    social_links: {
+      json_value: {
+        items: [
+          { ...DEFAULT_SOCIAL_LINKS[1], sort_order: 2, enabled: true },
+          { ...DEFAULT_SOCIAL_LINKS[0], sort_order: 1, enabled: false },
+          { ...DEFAULT_SOCIAL_LINKS[2], sort_order: 3, enabled: true }
+        ]
+      }
+    }
+  });
+  assert.deepEqual(
+    enabled.map((i) => i.platform),
+    ['whatsapp', 'youtube']
+  );
+
+  // Reject unsafe javascript: protocol URLs
+  assert.equal(
+    socialLinksUpdateSchema.safeParse({
+      items: [{ ...DEFAULT_SOCIAL_LINKS[0], url: 'javascript:alert(1)' }]
+    }).success,
+    false
+  );
+
+  assert.equal(
+    receiptLookupSchema.safeParse({
+      receipt_number: 'ILG-20261128-AB12CD',
+      donor_email: 'donor@example.com'
+    }).success,
+    true
+  );
+  assert.equal(
+    receiptLookupSchema.safeParse({
+      receipt_number: '12',
+      donor_email: 'bad-email'
+    }).success,
+    false
+  );
 });
