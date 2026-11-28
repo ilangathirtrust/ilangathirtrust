@@ -163,7 +163,7 @@ function buildGa4DimensionFilter(filters: AnalyticsQueryFilters) {
   return { andGroup: { expressions } };
 }
 
-async function callGa4Json<T>(url: string, accessToken: string, payload: Record<string, unknown>): Promise<T> {
+async function callGa4Json<T>(url: string, accessToken: string, payload: Record<string, unknown>, attempt = 0): Promise<T> {
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
@@ -184,7 +184,11 @@ async function callGa4Json<T>(url: string, accessToken: string, payload: Record<
       throw new Ga4EdgeError('Google OAuth access expired or revoked. Reconnect Google Analytics.', 401, 'GA4_REAUTH_REQUIRED');
     }
     if (resp.status === 429 || errStatus === 'RESOURCE_EXHAUSTED') {
-      throw new Ga4EdgeError('Google Analytics Data API quota limit reached. Please wait briefly and refresh.', 429, 'GA4_QUOTA_EXCEEDED');
+      if (attempt < 1) {
+        await new Promise((r) => setTimeout(r, 1200));
+        return await callGa4Json<T>(url, accessToken, payload, attempt + 1);
+      }
+      throw new Ga4EdgeError(`Google Analytics Data API quota limit reached (${errMsg}). Please wait 60 seconds and refresh.`, 429, 'GA4_QUOTA_EXCEEDED');
     }
     if (resp.status === 403 || errStatus === 'PERMISSION_DENIED') {
       throw new Ga4EdgeError(
@@ -231,8 +235,8 @@ export async function queryGa4CoreReports(
   const currOnlyRange = [{ startDate: filters.startDate, endDate: filters.endDate }];
   const withFilter = (req: Record<string, unknown>) => (dimensionFilter ? { ...req, dimensionFilter } : req);
 
-  const [b1, b2, b3] = await Promise.all([
-    callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
+  // Run batches sequentially (max 5 sub-reports per call) to stay strictly under GA4's 10-concurrent-request quota
+  const b1 = await callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
       requests: [
         withFilter({
           dateRanges,
@@ -281,8 +285,9 @@ export async function queryGa4CoreReports(
           limit: 60
         })
       ]
-    }),
-    callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
+    });
+
+  const b2 = await callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
       requests: [
         withFilter({
           dateRanges: currOnlyRange,
@@ -344,8 +349,9 @@ export async function queryGa4CoreReports(
           limit: 20
         })
       ]
-    }),
-    callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
+    });
+
+  const b3 = await callGa4Json<{ reports?: Ga4ReportResponse[] }>(endpoint, accessToken, {
       requests: [
         withFilter({
           dateRanges: currOnlyRange,
@@ -382,8 +388,7 @@ export async function queryGa4CoreReports(
           limit: 15
         })
       ]
-    })
-  ]);
+    });
 
   const r1 = b1.reports || [];
   const r2 = b2.reports || [];
@@ -728,7 +733,7 @@ export async function queryGa4CoreReports(
 export async function queryGa4RealtimeReport(propertyId: string, accessToken: string) {
   const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runRealtimeReport`;
 
-  const [minutesRes, geoRes, pagesDevRes, eventsRes] = await Promise.all([
+  const [minutesRes, geoRes] = await Promise.all([
     callGa4Json<Ga4ReportResponse>(endpoint, accessToken, {
       dimensions: [{ name: 'minutesAgo' }],
       metrics: [{ name: 'activeUsers' }, { name: 'screenPageViews' }, { name: 'eventCount' }, { name: 'keyEvents' }]
@@ -738,7 +743,9 @@ export async function queryGa4RealtimeReport(propertyId: string, accessToken: st
       metrics: [{ name: 'activeUsers' }],
       orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
       limit: 25
-    }),
+    })
+  ]);
+  const [pagesDevRes, eventsRes] = await Promise.all([
     callGa4Json<Ga4ReportResponse>(endpoint, accessToken, {
       dimensions: [{ name: 'unifiedScreenName' }, { name: 'deviceCategory' }],
       metrics: [{ name: 'activeUsers' }, { name: 'screenPageViews' }],

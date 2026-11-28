@@ -18,6 +18,7 @@ const ALLOWED_ADMIN_ORIGINS = new Set([
 ]);
 
 const reportCache = new Map<string, { value: unknown; expiresAt: number }>();
+const inFlightRequests = new Map<string, Promise<unknown>>();
 
 function getEnvConfig() {
   const supabaseUrl = (Deno.env.get('SUPABASE_URL') || '').trim().replace(/\/+$/, '');
@@ -515,10 +516,20 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      const { propertyId, accessToken } = await getValidGoogleAccessToken(admin.supabase);
-      const data = await queryGa4CoreReports(propertyId, accessToken, filters);
+      let pending = inFlightRequests.get(cacheKey);
+      if (!pending) {
+        pending = (async () => {
+          const { propertyId, accessToken } = await getValidGoogleAccessToken(admin.supabase);
+          const result = await queryGa4CoreReports(propertyId, accessToken, filters);
+          reportCache.set(cacheKey, { value: result, expiresAt: Date.now() + 600_000 });
+          return result;
+        })().finally(() => {
+          inFlightRequests.delete(cacheKey);
+        });
+        inFlightRequests.set(cacheKey, pending);
+      }
 
-      reportCache.set(cacheKey, { value: data, expiresAt: Date.now() + 300_000 });
+      const data = await pending;
       return jsonResponse(req, data);
     }
 
@@ -534,10 +545,20 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      const { propertyId, accessToken } = await getValidGoogleAccessToken(admin.supabase);
-      const data = await queryGa4RealtimeReport(propertyId, accessToken);
+      let pending = inFlightRequests.get(cacheKey);
+      if (!pending) {
+        pending = (async () => {
+          const { propertyId, accessToken } = await getValidGoogleAccessToken(admin.supabase);
+          const result = await queryGa4RealtimeReport(propertyId, accessToken);
+          reportCache.set(cacheKey, { value: result, expiresAt: Date.now() + 30_000 });
+          return result;
+        })().finally(() => {
+          inFlightRequests.delete(cacheKey);
+        });
+        inFlightRequests.set(cacheKey, pending);
+      }
 
-      reportCache.set(cacheKey, { value: data, expiresAt: Date.now() + 15_000 });
+      const data = await pending;
       return jsonResponse(req, data);
     }
 
