@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
+  ChevronDown,
+  ChevronUp,
   ExternalLink,
   Globe,
   GripVertical,
@@ -22,21 +24,6 @@ import {
 import { adminApi } from '../lib/api';
 import { useAdminUi } from '../lib/admin-ui';
 import { MediaPickerModal } from '../components/MediaPickerModal';
-
-const LUCIDE_PRESETS: Array<{ label: string; icon: string }> = [
-  { label: 'Instagram', icon: `${LUCIDE_ICON_CDN}/instagram.svg` },
-  { label: 'WhatsApp', icon: `${LUCIDE_ICON_CDN}/message-circle.svg` },
-  { label: 'YouTube', icon: `${LUCIDE_ICON_CDN}/youtube.svg` },
-  { label: 'Facebook', icon: `${LUCIDE_ICON_CDN}/facebook.svg` },
-  { label: 'X / Twitter', icon: `${LUCIDE_ICON_CDN}/twitter.svg` },
-  { label: 'Threads', icon: `${LUCIDE_ICON_CDN}/at-sign.svg` },
-  { label: 'LinkedIn', icon: `${LUCIDE_ICON_CDN}/linkedin.svg` },
-  { label: 'Telegram', icon: `${LUCIDE_ICON_CDN}/send.svg` },
-  { label: 'Website', icon: `${LUCIDE_ICON_CDN}/globe.svg` },
-  { label: 'Share', icon: `${LUCIDE_ICON_CDN}/share-2.svg` },
-  { label: 'Phone', icon: `${LUCIDE_ICON_CDN}/phone.svg` },
-  { label: 'Email', icon: `${LUCIDE_ICON_CDN}/mail.svg` }
-];
 
 const ADMIN_BRAND_COLORS: Record<string, { bg: string; glyph: React.ReactNode }> = {
   instagram: {
@@ -124,7 +111,7 @@ function IconPreview({ url, alt, platform }: { url: string; alt: string; platfor
 
   if (brand && isDefaultUrl) {
     return (
-      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border shadow-xs ${brand.bg}`}>
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border shadow-xs ${brand.bg}`}>
         {brand.glyph}
       </div>
     );
@@ -132,19 +119,19 @@ function IconPreview({ url, alt, platform }: { url: string; alt: string; platfor
 
   if (!url || failed) {
     return (
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 dark:border-[#262A34] dark:bg-[#1C2029]">
-        <Globe className="h-4 w-4 text-slate-500" />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 dark:border-[#262A34] dark:bg-[#1C2029]">
+        <Globe className="h-5 w-5 text-slate-500" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white dark:border-[#262A34] dark:bg-white">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white dark:border-[#262A34] dark:bg-white">
       <img
         src={url}
         alt={alt}
         onError={() => setFailed(true)}
-        className="h-5 w-5 object-contain"
+        className="h-6 w-6 object-contain"
       />
     </div>
   );
@@ -154,29 +141,41 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
   const { lang, tr } = useAdminUi();
   const [items, setItems] = useState<SocialLinkItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const [overIndex, setOverIndex] = useState<number | null>(null);
+  const [pendingCount, setPendingCount] = useState(0);
 
+  // Pointer drag state (works smoothly on desktop mouse, trackpad & mobile touch)
+  const [dragFromIdx, setDragFromIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // Ref-based atomic FIFO queue so rapid multi-toggles & reorders never overwrite each other
+  const itemsRef = useRef<SocialLinkItem[]>([]);
+  const queueChainRef = useRef<Promise<void>>(Promise.resolve());
+  const mutationSeqRef = useRef(0);
+
+  // Minimal Add / Edit modal state
   const [editing, setEditing] = useState<SocialLinkItem | null>(null);
   const [isNewModal, setIsNewModal] = useState(false);
+  const [showMoreFields, setShowMoreFields] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   async function load(force = false) {
     setLoading(true);
     try {
       const res = await adminApi<{ items: SocialLinkItem[] }>('/social-links', { forceRefresh: force });
-      setItems(
-        (res.items?.length ? res.items : DEFAULT_SOCIAL_LINKS)
-          .slice()
-          .sort((a, b) => a.sort_order - b.sort_order)
-      );
+      const sorted = (res.items?.length ? res.items : DEFAULT_SOCIAL_LINKS)
+        .slice()
+        .sort((a, b) => a.sort_order - b.sort_order);
+      itemsRef.current = sorted;
+      setItems(sorted);
     } catch (err) {
       onNotify(
         err instanceof Error ? err.message : tr('Could not load social links.', 'சமூக வலைதள விவரம் லோடு ஆகலைங்க.'),
         true
       );
-      setItems(DEFAULT_SOCIAL_LINKS.map((item) => ({ ...item })));
+      const fallback = DEFAULT_SOCIAL_LINKS.map((item) => ({ ...item }));
+      itemsRef.current = fallback;
+      setItems(fallback);
     } finally {
       setLoading(false);
     }
@@ -186,56 +185,130 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
     void load(false);
   }, []);
 
-  async function persistItems(nextList: SocialLinkItem[], toastMsg?: string) {
-    const previous = items;
-    const ordered = nextList.map((item, idx) => ({ ...item, sort_order: idx + 1 }));
-    setItems(ordered);
-    setSaving(true);
-    try {
-      const res = await adminApi<{ items: SocialLinkItem[] }>('/social-links', {
-        method: 'PUT',
-        body: JSON.stringify({ items: ordered })
+  /**
+   * Atomically applies a state transform against `itemsRef.current` and queues the PUT request
+   * strictly in FIFO order so rapid clicks never revert earlier toggles.
+   */
+  function enqueueMutation(
+    transform: (current: SocialLinkItem[]) => SocialLinkItem[],
+    successMsg?: string
+  ) {
+    const previous = itemsRef.current;
+    const nextOrdered = transform(previous).map((item, idx) => ({ ...item, sort_order: idx + 1 }));
+    itemsRef.current = nextOrdered;
+    setItems(nextOrdered);
+
+    const seq = ++mutationSeqRef.current;
+    setPendingCount((c) => c + 1);
+
+    queueChainRef.current = queueChainRef.current
+      .then(async () => {
+        try {
+          const res = await adminApi<{ items: SocialLinkItem[] }>('/social-links', {
+            method: 'PUT',
+            body: JSON.stringify({ items: nextOrdered })
+          });
+          // Only sync UI from server response once the entire queue catches up to the latest mutation
+          if (seq === mutationSeqRef.current) {
+            const sorted = res.items.slice().sort((a, b) => a.sort_order - b.sort_order);
+            itemsRef.current = sorted;
+            setItems(sorted);
+          }
+          if (successMsg) onNotify(successMsg);
+        } catch (err) {
+          onNotify(
+            err instanceof Error ? err.message : tr('Could not save social links.', 'சேவ் பண்ண முடியலைங்க.'),
+            true
+          );
+          // Re-sync cleanly with server if the latest queued mutation failed
+          if (seq === mutationSeqRef.current) {
+            void load(true);
+          }
+        } finally {
+          setPendingCount((c) => Math.max(0, c - 1));
+        }
       });
-      setItems(res.items);
-      if (toastMsg) onNotify(toastMsg);
-    } catch (err) {
-      setItems(previous);
-      onNotify(
-        err instanceof Error ? err.message : tr('Could not save social links.', 'சேவ் பண்ண முடியலைங்க.'),
-        true
-      );
-    } finally {
-      setSaving(false);
-    }
   }
 
   function handleToggle(id: string) {
-    const target = items.find((i) => i.id === id);
-    if (!target) return;
-    const nextEnabled = !target.enabled;
-    const updated = items.map((item) => (item.id === id ? { ...item, enabled: nextEnabled } : item));
-    void persistItems(
-      updated,
+    const currentTarget = itemsRef.current.find((i) => i.id === id);
+    if (!currentTarget) return;
+    const nextEnabled = !currentTarget.enabled;
+    enqueueMutation(
+      (curr) => curr.map((item) => (item.id === id ? { ...item, enabled: nextEnabled } : item)),
       tr(
-        `${target.name_en} ${nextEnabled ? 'enabled' : 'disabled'}.`,
-        `${target.name_ta || target.name_en} ${nextEnabled ? 'ஆன் செய்யப்பட்டது' : 'ஆஃப் செய்யப்பட்டது'}.`
+        `${currentTarget.name_en} ${nextEnabled ? 'enabled' : 'disabled'}.`,
+        `${currentTarget.name_ta || currentTarget.name_en} ${nextEnabled ? 'ஆன் ஆச்சுங்க' : 'ஆஃப் ஆச்சுங்க'}.`
       )
     );
   }
 
   function reorderList(fromIdx: number, toIdx: number) {
-    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0 || fromIdx >= items.length || toIdx >= items.length) {
-      return;
-    }
-    const copy = [...items];
-    const [moved] = copy.splice(fromIdx, 1);
-    if (!moved) return;
-    copy.splice(toIdx, 0, moved);
-    void persistItems(copy, tr('Social link order saved.', 'வரிசை சேவ் ஆச்சுங்க.'));
+    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0) return;
+    enqueueMutation(
+      (curr) => {
+        if (fromIdx >= curr.length || toIdx >= curr.length) return curr;
+        const copy = [...curr];
+        const [moved] = copy.splice(fromIdx, 1);
+        if (!moved) return curr;
+        copy.splice(toIdx, 0, moved);
+        return copy;
+      },
+      tr('Order updated.', 'வரிசை சேவ் ஆச்சுங்க.')
+    );
+  }
+
+  function startPointerDrag(e: React.PointerEvent, fromIdx: number) {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    e.preventDefault();
+
+    setDragFromIdx(fromIdx);
+    setDragOverIdx(fromIdx);
+    let latestOver = fromIdx;
+
+    const findHoverIndex = (clientY: number): number => {
+      const currentList = itemsRef.current;
+      for (let i = 0; i < currentList.length; i++) {
+        const el = rowRefs.current.get(currentList[i].id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (clientY >= rect.top && clientY <= rect.bottom) {
+          return i;
+        }
+      }
+      // Above first or below last row
+      const firstEl = currentList[0] ? rowRefs.current.get(currentList[0].id) : null;
+      if (firstEl && clientY < firstEl.getBoundingClientRect().top) return 0;
+      return currentList.length - 1;
+    };
+
+    const onPointerMove = (ev: PointerEvent) => {
+      const nextOver = findHoverIndex(ev.clientY);
+      if (nextOver !== latestOver) {
+        latestOver = nextOver;
+        setDragOverIdx(nextOver);
+      }
+    };
+
+    const finishDrag = () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', finishDrag);
+      window.removeEventListener('pointercancel', finishDrag);
+      setDragFromIdx(null);
+      setDragOverIdx(null);
+      if (latestOver !== fromIdx) {
+        reorderList(fromIdx, latestOver);
+      }
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerup', finishDrag);
+    window.addEventListener('pointercancel', finishDrag);
   }
 
   function openAddCustomModal() {
     setIsNewModal(true);
+    setShowMoreFields(false);
     setEditing({
       id: `custom-${Date.now()}`,
       platform: 'custom',
@@ -245,13 +318,14 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
       url: 'https://',
       icon_url: `${LUCIDE_ICON_CDN}/globe.svg`,
       enabled: true,
-      sort_order: items.length + 1,
+      sort_order: itemsRef.current.length + 1,
       is_custom: true
     });
   }
 
   function openEditModal(item: SocialLinkItem) {
     setIsNewModal(false);
+    setShowMoreFields(false);
     setEditing({ ...item });
   }
 
@@ -275,13 +349,12 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
       icon_url: editing.icon_url.trim() || `${LUCIDE_ICON_CDN}/globe.svg`
     };
 
-    const nextList = isNewModal
-      ? [...items, cleanItem]
-      : items.map((item) => (item.id === cleanItem.id ? cleanItem : item));
-
     setEditing(null);
-    void persistItems(
-      nextList,
+    enqueueMutation(
+      (curr) =>
+        isNewModal
+          ? [...curr, cleanItem]
+          : curr.map((item) => (item.id === cleanItem.id ? cleanItem : item)),
       isNewModal
         ? tr(`Added ${cleanItem.name_en}.`, `${cleanItem.name_en} சேர்த்தாச்சுங்க.`)
         : tr(`Updated ${cleanItem.name_en}.`, `${cleanItem.name_en} அப்டேட் ஆச்சுங்க.`)
@@ -289,20 +362,29 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
   }
 
   function handleDeleteItem(id: string) {
-    const target = items.find((i) => i.id === id);
+    const target = itemsRef.current.find((i) => i.id === id);
     if (!target) return;
     if (!confirm(tr(`Remove ${target.name_en}?`, `${target.name_en} நீக்கலாமா?`))) return;
-    const nextList = items.filter((item) => item.id !== id);
     setEditing(null);
-    void persistItems(nextList, tr(`Removed ${target.name_en}.`, `${target.name_en} நீக்கப்பட்டது.`));
+    enqueueMutation(
+      (curr) => curr.filter((item) => item.id !== id),
+      tr(`Removed ${target.name_en}.`, `${target.name_en} நீக்கப்பட்டது.`)
+    );
   }
 
   function handleResetDefaults() {
-    if (!confirm(tr('Restore all default @ilangathirtrust social platforms and order?', 'எல்லா @ilangathirtrust இயல்புநிலை சமூக வலைதளங்களையும் மீட்டமைக்கலாமா?'))) {
+    if (
+      !confirm(
+        tr(
+          'Restore all default @ilangathirtrust social platforms and order?',
+          'எல்லா @ilangathirtrust இயல்புநிலை சமூக வலைதளங்களையும் மீட்டமைக்கலாமா?'
+        )
+      )
+    ) {
       return;
     }
-    void persistItems(
-      DEFAULT_SOCIAL_LINKS.map((item) => ({ ...item })),
+    enqueueMutation(
+      () => DEFAULT_SOCIAL_LINKS.map((item) => ({ ...item })),
       tr('Restored default social media links.', 'இயல்புநிலை சமூக வலைதள லிங்க்குகள் மீட்டமைக்கப்பட்டது.')
     );
   }
@@ -313,7 +395,7 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="admin-card flex items-center justify-between gap-3 p-3.5">
             <div className="flex items-center gap-3">
-              <div className="admin-skeleton h-9 w-9 rounded-xl" />
+              <div className="admin-skeleton h-10 w-10 rounded-full" />
               <div className="space-y-1.5">
                 <div className="admin-skeleton h-4 w-28 rounded" />
                 <div className="admin-skeleton h-3 w-40 rounded" />
@@ -330,17 +412,26 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
     <div className="space-y-4">
       <div className="admin-card flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Share2 className="h-4 w-4 shrink-0 text-blue-600" />
             <h2 className="text-base font-bold text-slate-900 sm:text-lg">
               {tr('Social Media & Platform Links', 'சமூக வலைதள & பிளாட்ஃபார்ம் லிங்க்குகள்')}
             </h2>
-            {saving && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+            {pendingCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span>
+                  {pendingCount > 1
+                    ? tr(`Saving queue (${pendingCount})…`, `சேவ் ஆகுது (${pendingCount})…`)
+                    : tr('Saving…', 'சேவ் ஆகுது…')}
+                </span>
+              </span>
+            )}
           </div>
           <p className="mt-1 text-xs text-slate-500">
             {tr(
-              'Drag and drop rows to change display order. Edit links or upload/paste custom icons (Lucide SVG links pre-configured).',
-              'வரிசையை மாத்த இழுத்து விடுங்க. லிங்க் மாத்தவும், ஐகான் அப்லோட் செய்யவும் அல்லது Lucide லிங்க் போடவும் முடியும்.'
+              'Hold and drag the 6-dot handle to reorder links, toggle switches rapidly, or edit/upload icons.',
+              '6-புள்ளி ஐகானை அழுத்தி இழுத்து வரிசையை மாத்துங்க. எத்தனை லிங்க் வேணாலும் தொடர்ந்து ஆன்/ஆஃப் பண்ணலாம்.'
             )}
           </p>
         </div>
@@ -357,59 +448,47 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
         </div>
       </div>
 
-      {/* Ordered Social List: Drag Handle -> Icon -> Platform Name -> Edit -> Enable/Disable Toggle */}
+      {/* Ordered Social List */}
       <div className="space-y-2.5">
         {items.map((item, idx) => {
-          const isOver = overIndex === idx && dragIndex !== idx;
+          const isDragging = dragFromIdx === idx;
+          const isDropTarget = dragFromIdx !== null && dragOverIdx === idx && dragFromIdx !== idx;
+          const dropAfter = isDropTarget && dragFromIdx! < idx;
+          const dropBefore = isDropTarget && dragFromIdx! > idx;
           const displayName = lang === 'ta' && item.name_ta ? item.name_ta : item.name_en;
 
           return (
             <div
               key={item.id}
-              draggable
-              onDragStart={(e) => {
-                setDragIndex(idx);
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', String(idx));
+              ref={(el) => {
+                if (el) rowRefs.current.set(item.id, el);
+                else rowRefs.current.delete(item.id);
               }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                if (overIndex !== idx) setOverIndex(idx);
-              }}
-              onDragLeave={() => {
-                if (overIndex === idx) setOverIndex(null);
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                const from = dragIndex !== null ? dragIndex : Number(e.dataTransfer.getData('text/plain'));
-                setDragIndex(null);
-                setOverIndex(null);
-                if (Number.isFinite(from)) reorderList(from, idx);
-              }}
-              onDragEnd={() => {
-                setDragIndex(null);
-                setOverIndex(null);
-              }}
-              className={`admin-card flex flex-wrap items-center justify-between gap-2.5 p-3 transition min-[360px]:p-3.5 sm:flex-nowrap ${
-                isOver ? 'border-blue-500 ring-2 ring-blue-500/20' : ''
-              } ${dragIndex === idx ? 'opacity-60' : ''} ${!item.enabled ? 'bg-slate-50/80 opacity-80' : ''}`}
+              className={`admin-card flex flex-wrap items-center justify-between gap-2.5 p-3 transition-all duration-150 min-[360px]:p-3.5 sm:flex-nowrap ${
+                isDragging ? 'z-10 scale-[1.01] border-blue-500 bg-blue-50/30 shadow-lg ring-2 ring-blue-500/25' : ''
+              } ${dropBefore ? 'border-t-[3px] border-t-blue-600' : ''} ${
+                dropAfter ? 'border-b-[3px] border-b-blue-600' : ''
+              } ${!item.enabled && !isDragging ? 'bg-slate-50/80 opacity-80' : ''}`}
             >
               <div className="flex min-w-0 flex-1 items-center gap-2.5 min-[360px]:gap-3">
-                {/* Drag Handle + Mobile Up/Down */}
+                {/* Pointer Drag Handle + Up/Down Nudge Buttons */}
                 <div className="flex shrink-0 items-center gap-1">
-                  <span
-                    title={tr('Drag to reorder', 'வரிசை மாத்த இழுங்க')}
-                    className="inline-flex h-8 w-6 cursor-grab items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 active:cursor-grabbing dark:hover:bg-[#1C2029]"
+                  <button
+                    type="button"
+                    onPointerDown={(e) => startPointerDrag(e, idx)}
+                    title={tr('Drag to reorder', 'இழுத்து வரிசை மாற்று')}
+                    aria-label={tr(`Reorder ${item.name_en}`, `${item.name_en} வரிசை மாற்று`)}
+                    className="inline-flex h-9 w-7 touch-none cursor-grab select-none items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 active:cursor-grabbing dark:hover:bg-[#1C2029]"
                   >
                     <GripVertical className="h-4 w-4" />
-                  </span>
-                  <div className="flex flex-col sm:hidden">
+                  </button>
+                  <div className="flex flex-col">
                     <button
                       type="button"
                       disabled={idx === 0}
                       onClick={() => reorderList(idx, idx - 1)}
                       aria-label={tr('Move up', 'மேலே நகர்த்து')}
-                      className="rounded p-0.5 text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                      className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-25 dark:hover:bg-[#1C2029]"
                     >
                       <ArrowUp className="h-3 w-3" />
                     </button>
@@ -418,7 +497,7 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                       disabled={idx === items.length - 1}
                       onClick={() => reorderList(idx, idx + 1)}
                       aria-label={tr('Move down', 'கீழே நகர்த்து')}
-                      className="rounded p-0.5 text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                      className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-25 dark:hover:bg-[#1C2029]"
                     >
                       <ArrowDown className="h-3 w-3" />
                     </button>
@@ -446,6 +525,7 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      draggable={false}
                       className="inline-flex min-w-0 items-center gap-1 truncate text-blue-600 hover:underline"
                     >
                       <span className="truncate">{item.url}</span>
@@ -455,7 +535,7 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                 </div>
               </div>
 
-              {/* Edit Button + Enable/Disable Toggle */}
+              {/* Edit Button + Enable/Disable Switch */}
               <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
                 <button
                   type="button"
@@ -493,7 +573,7 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                       }`}
                     />
                   </span>
-                  <span>{item.enabled ? tr('Enabled', 'ஆன்') : tr('Disabled', 'ஆஃப்')}</span>
+                  <span>{item.enabled ? tr('On', 'ஆன்') : tr('Off', 'ஆஃப்')}</span>
                 </button>
               </div>
             </div>
@@ -501,73 +581,57 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
         })}
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Minimal, Clean Add / Edit Modal Widget */}
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-xs">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl min-[360px]:p-5 dark:border-[#262A34] dark:bg-[#161920]">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-[#262A34]">
-              <h3 className="text-base font-bold text-slate-900">
-                {isNewModal
-                  ? tr('Add Custom Platform Link', 'புது சமூக வலைதள லிங்க் சேர்')
-                  : tr(`Edit ${editing.name_en}`, `${editing.name_en} — விவரம் மாற்று`)}
-              </h3>
+        <div
+          onClick={() => setEditing(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-xs"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl min-[360px]:p-5 dark:border-[#262A34] dark:bg-[#161920]"
+          >
+            {/* Compact Header with Live Icon Preview */}
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-3.5 dark:border-[#262A34]">
+              <div className="flex min-w-0 items-center gap-3">
+                <IconPreview url={editing.icon_url} alt={editing.name_en || 'Icon'} platform={editing.platform} />
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-bold text-slate-900 sm:text-base">
+                    {isNewModal
+                      ? tr('Add Platform Link', 'புது லிங்க் சேர்')
+                      : editing.name_en || tr('Edit Platform', 'விவரம் மாற்று')}
+                  </h3>
+                  <p className="truncate text-[11px] text-slate-500">
+                    {tr('Change name, URL, or upload/paste a custom icon.', 'பெயர், லிங்க் மற்றும் ஐகானை எளிதா மாத்தலாம்.')}
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setEditing(null)}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"
+                aria-label={tr('Close', 'மூடு')}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleSaveModal} className="mt-4 space-y-3.5">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="admin-label">
-                  <span>{tr('Platform Name (EN) *', 'பெயர் (ஆங்கிலம்) *')}</span>
-                  <input
-                    required
-                    value={editing.name_en}
-                    onChange={(e) => setEditing({ ...editing, name_en: e.target.value })}
-                    placeholder="e.g., WhatsApp Channel"
-                    className="admin-input"
-                  />
-                </label>
-
-                <label className="admin-label">
-                  <span>{tr('Platform Name (TA)', 'பெயர் (தமிழ்)')}</span>
-                  <input
-                    value={editing.name_ta}
-                    onChange={(e) => setEditing({ ...editing, name_ta: e.target.value })}
-                    placeholder="எ.கா., வாட்ஸ்அப் சேனல்"
-                    className="admin-input"
-                  />
-                </label>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="admin-label">
-                  <span>{tr('Handle / Subtitle', 'ஹேண்டில் / குறிப்பு')}</span>
-                  <input
-                    value={editing.handle}
-                    onChange={(e) => setEditing({ ...editing, handle: e.target.value })}
-                    placeholder="@ilangathirtrust"
-                    className="admin-input"
-                  />
-                </label>
-
-                <label className="admin-label">
-                  <span>{tr('Platform Key', 'பிளாட்ஃபார்ம் குறியீடு')}</span>
-                  <input
-                    value={editing.platform}
-                    onChange={(e) => setEditing({ ...editing, platform: e.target.value })}
-                    placeholder="instagram / whatsapp / custom"
-                    className="admin-input"
-                  />
-                </label>
-              </div>
-
+              {/* 1. Platform Name */}
               <label className="admin-label">
-                <span>{tr('Destination Link URL *', 'செல்ல வேண்டிய லிங்க் *')}</span>
+                <span>{tr('Platform Name *', 'பிளாட்ஃபார்ம் பெயர் *')}</span>
+                <input
+                  required
+                  value={editing.name_en}
+                  onChange={(e) => setEditing({ ...editing, name_en: e.target.value })}
+                  placeholder="e.g., Instagram, WhatsApp Channel"
+                  className="admin-input"
+                />
+              </label>
+
+              {/* 2. Profile Link URL */}
+              <label className="admin-label">
+                <span>{tr('Link URL *', 'லிங்க் URL *')}</span>
                 <input
                   required
                   type="url"
@@ -578,15 +642,11 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                 />
               </label>
 
-              {/* Icon URL + Upload + Lucide Quick Picker */}
-              <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-[#262A34] dark:bg-[#1C2029]">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                    {tr('Platform Icon (URL or Upload)', 'ஐகான் (லிங்க் அல்லது அப்லோட்)')}
-                  </span>
-                  <IconPreview url={editing.icon_url} alt={editing.name_en || 'Icon'} platform={editing.platform} />
-                </div>
-
+              {/* 3. Compact Icon Picker (URL or Upload) */}
+              <div className="space-y-2">
+                <span className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                  {tr('Icon (Paste URL or Upload)', 'ஐகான் (லிங்க் அல்லது அப்லோட்)')}
+                </span>
                 <div className="flex flex-wrap gap-2">
                   <input
                     value={editing.icon_url}
@@ -600,63 +660,56 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                     className="admin-btn-secondary w-full justify-center sm:w-auto"
                   >
                     <ImageIcon className="h-4 w-4 text-blue-600" />
-                    <span>{tr('Upload / Pick Icon', 'ஐகான் அப்லோட்')}</span>
+                    <span>{tr('Upload', 'அப்லோட்')}</span>
                   </button>
-                </div>
-
-                <div>
-                  <div className="mb-1.5 flex items-center justify-between text-[11px] text-slate-500">
-                    <span>{tr('Quick Lucide Icons:', 'சட்டென எடுக்க Lucide ஐகான்கள்:')}</span>
-                    <a
-                      href="https://lucide.dev/icons"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:underline"
-                    >
-                      <span>lucide.dev</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {LUCIDE_PRESETS.map((preset) => (
-                      <button
-                        key={preset.label}
-                        type="button"
-                        title={preset.label}
-                        onClick={() => setEditing({ ...editing, icon_url: preset.icon })}
-                        className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-semibold transition ${
-                          editing.icon_url === preset.icon
-                            ? 'border-blue-600 bg-blue-50 text-blue-700'
-                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                        }`}
-                      >
-                        <img src={preset.icon} alt={preset.label} className="h-3.5 w-3.5 object-contain" />
-                        <span>{preset.label}</span>
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={editing.enabled}
-                  onChange={(e) => setEditing({ ...editing, enabled: e.target.checked })}
-                  className="h-4 w-4 rounded accent-blue-600"
-                />
-                <span>{tr('Show this link publicly on the website', 'இந்த லிங்க்கை வெப்சைட்டில் காட்டு')}</span>
-              </label>
+              {/* Optional Collapsible Advanced Fields */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 dark:border-[#262A34] dark:bg-[#1C2029]/60">
+                <button
+                  type="button"
+                  onClick={() => setShowMoreFields((v) => !v)}
+                  className="flex w-full items-center justify-between px-3 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-300"
+                >
+                  <span>{tr('More options (Tamil name & handle)', 'கூடுதல் விவரம் (தமிழ் பெயர் & ஹேண்டில்)')}</span>
+                  {showMoreFields ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                </button>
+                {showMoreFields && (
+                  <div className="grid gap-2.5 border-t border-slate-200/80 p-3 dark:border-[#262A34] sm:grid-cols-2">
+                    <label className="admin-label">
+                      <span>{tr('Tamil Name', 'தமிழ் பெயர்')}</span>
+                      <input
+                        value={editing.name_ta}
+                        onChange={(e) => setEditing({ ...editing, name_ta: e.target.value })}
+                        placeholder="எ.கா., இன்ஸ்டாகிராம்"
+                        className="admin-input"
+                      />
+                    </label>
+                    <label className="admin-label">
+                      <span>{tr('Handle', 'ஹேண்டில்')}</span>
+                      <input
+                        value={editing.handle}
+                        onChange={(e) => setEditing({ ...editing, handle: e.target.value })}
+                        placeholder="@ilangathirtrust"
+                        className="admin-input"
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-[#262A34]">
+              {/* Clean Footer Actions */}
+              <div className="flex items-center justify-between gap-2 border-t border-slate-200 pt-3.5 dark:border-[#262A34]">
                 {!isNewModal ? (
                   <button
                     type="button"
                     onClick={() => handleDeleteItem(editing.id)}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-100"
+                    aria-label={tr('Remove', 'நீக்கு')}
+                    className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-100"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    <span>{tr('Remove', 'நீக்கு')}</span>
+                    <span>{tr('Delete', 'நீக்கு')}</span>
                   </button>
                 ) : (
                   <span />
@@ -667,7 +720,7 @@ export function SocialLinksPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                     {tr('Cancel', 'ரத்து')}
                   </button>
                   <button type="submit" className="admin-btn-primary">
-                    <span>{isNewModal ? tr('Add Platform', 'சேர்') : tr('Save Changes', 'சேமி')}</span>
+                    <span>{isNewModal ? tr('Add', 'சேர்') : tr('Save', 'சேமி')}</span>
                   </button>
                 </div>
               </div>
