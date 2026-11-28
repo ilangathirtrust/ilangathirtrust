@@ -13,7 +13,12 @@ import {
 } from '@ilangathir/shared';
 import { createApp } from '../src/index.js';
 import { apiCache, withCache } from '../src/services/cache.js';
-import { extractJwtSessionHash, parseDeviceMetadata } from '../src/services/device.js';
+import {
+  extractJwtSessionHash,
+  parseDeviceMetadata,
+  signSessionPayload,
+  verifySessionSignature
+} from '../src/services/device.js';
 import {
   verifyRazorpayPaymentSignature,
   verifyRazorpayWebhookSignature
@@ -211,4 +216,20 @@ test('Donation config helper parses enabled flag, amounts, and purposes cleanly'
   assert.equal(parsed.enabled, false);
   assert.deepEqual(parsed.suggested_amounts, [200, 500]);
   assert.deepEqual(parsed.purposes, ['Education Support']);
+});
+
+test('Digital session signature verification accepts valid HMAC-SHA256 signatures and rejects tampering', () => {
+  const userId = 'user-111-owner';
+  const deviceId = 'dev-abc1234567';
+  const tokenHash = crypto.createHash('sha256').update('session-abc:dev-abc1234567').digest('hex');
+
+  const signature = signSessionPayload({ userId, deviceId, tokenHash });
+  assert.equal(signature.length, 64);
+
+  assert.equal(verifySessionSignature({ userId, deviceId, tokenHash, signature }), true);
+  assert.equal(verifySessionSignature({ userId: 'user-other', deviceId, tokenHash, signature }), false);
+  assert.equal(verifySessionSignature({ userId, deviceId: 'dev-tampered', tokenHash, signature }), false);
+  assert.equal(verifySessionSignature({ userId, deviceId, tokenHash: 'tampered', signature }), false);
+  assert.equal(verifySessionSignature({ userId, deviceId, tokenHash, signature: '0'.repeat(64) }), false);
+  assert.equal(verifySessionSignature({ userId, deviceId, tokenHash, signature: null }), false);
 });

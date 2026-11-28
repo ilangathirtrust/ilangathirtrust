@@ -79,13 +79,25 @@ async function getAccessToken(): Promise<string> {
   return token;
 }
 
-const ADMIN_GET_TTL_MS = 20_000;
+const ADMIN_GET_TTL_MS = 60_000;
 const getCache = new Map<string, { expiresAt: number; data: unknown }>();
 const inflightGets = new Map<string, Promise<unknown>>();
 
 export function clearAdminApiCache(): void {
   getCache.clear();
   inflightGets.clear();
+}
+
+export function prefetchAdminRoutes(role: string): void {
+  const routes = ['/dashboard', '/events', '/gallery/folders', '/blogs', '/enquiries', '/activities'];
+  if (role === 'super_admin' || role === 'admin') {
+    routes.push('/donations?page=1&pageSize=20');
+  }
+  for (const r of routes) {
+    if (!getCache.has(r) && !inflightGets.has(r)) {
+      void adminApi(r).catch(() => {});
+    }
+  }
 }
 
 export async function adminApi<T = unknown>(

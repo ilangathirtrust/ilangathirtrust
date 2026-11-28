@@ -31,6 +31,8 @@ interface DeviceSession {
   revoked_reason: string;
   last_active_at: string;
   created_at: string;
+  signature_verified?: boolean;
+  signature_fingerprint?: string;
 }
 
 interface SecurityEventItem {
@@ -347,8 +349,8 @@ export function SecurityDevicesPage({
         </div>
       </div>
 
-      {/* Where You're Signed In (Google / Instagram style) */}
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs">
+      {/* Where You're Signed In + Digital Signature Verification */}
+      <section className="admin-card">
         <div className="flex flex-col justify-between gap-4 border-b border-stone-100 pb-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="text-lg font-extrabold text-slate-900">Your Devices & Active Sessions</h2>
@@ -389,6 +391,15 @@ export function SecurityDevicesPage({
                       {session.is_trusted && (
                         <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-bold text-brand-700">
                           Trusted
+                        </span>
+                      )}
+                      {session.signature_verified && (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-bold text-slate-700"
+                          title="Cryptographically signed HMAC-SHA256 device session"
+                        >
+                          <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                          SIG:{session.signature_fingerprint || 'VERIFIED'}
                         </span>
                       )}
                     </div>
@@ -444,8 +455,8 @@ export function SecurityDevicesPage({
       </section>
 
       {/* Two-Factor Authentication + Password Management */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs">
+      <div className="grid gap-3 lg:grid-cols-2 lg:gap-6">
+        <section className="admin-card">
           <h2 className="text-lg font-extrabold text-slate-900">Two-Factor Authentication (2FA)</h2>
           <p className="mt-1 text-xs text-slate-500">
             Protect your account with a 6-digit authenticator app code (Google Authenticator, Authy, 1Password).
@@ -528,7 +539,7 @@ export function SecurityDevicesPage({
           ) : null}
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs">
+        <section className="admin-card">
           <h2 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
             <KeyRound className="h-5 w-5 text-brand-700" />
             Change Password
@@ -571,8 +582,8 @@ export function SecurityDevicesPage({
             </label>
             <button
               type="submit"
-              disabled={savingPwd}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800 disabled:opacity-60"
+              disabled={savingPwd || newPassword.length < 10 || newPassword !== confirmPassword}
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45"
             >
               {savingPwd ? 'Updating…' : 'Update Password'}
             </button>
@@ -581,7 +592,7 @@ export function SecurityDevicesPage({
       </div>
 
       {/* Security Event Activity Timeline */}
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs">
+      <section className="admin-card">
         <h2 className="text-lg font-extrabold text-slate-900">Recent Security Activity</h2>
         <div className="mt-4 divide-y divide-stone-100">
           {(overview?.events || []).length === 0 ? (

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Clock, Mail, MapPin, Phone } from 'lucide-react';
-import { getBootstrap } from '@/lib/api';
 import { getUi } from '@/lib/i18n';
 import { getServerLang } from '@/lib/lang-server';
 import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from '@/lib/seo';
@@ -21,15 +20,14 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 }
 
 export default async function ContactPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
-  const [lang, bootstrap] = await Promise.all([getServerLang((await searchParams).lang), getBootstrap()]);
+  const lang = await getServerLang((await searchParams).lang);
   const ui = getUi(lang);
   const p = PERMANENT_PAGES.contact;
-  const settings = bootstrap.settings;
 
-  const phone = settings.phone?.value_en || SITE_SETTINGS.phone.value_en;
-  const email = settings.email?.value_en || SITE_SETTINGS.email.value_en;
-  const address = pickText(settings.address || SITE_SETTINGS.address, lang);
-  const hours = pickText(settings.office_hours || SITE_SETTINGS.office_hours, lang);
+  const phone = SITE_SETTINGS.phone.value_en;
+  const email = SITE_SETTINGS.email.value_en;
+  const address = pickText(SITE_SETTINGS.address, lang);
+  const hours = pickText(SITE_SETTINGS.office_hours, lang);
 
   const webPageJsonLd = buildWebPageJsonLd({
     title: lang === 'ta' ? p.seo_title_ta : p.seo_title_en,

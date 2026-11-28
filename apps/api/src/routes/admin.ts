@@ -4,15 +4,20 @@ import path from 'node:path';
 import { DEFAULT_DONATION_CONFIG } from '@ilangathir/shared';
 import { env } from '../config/env.js';
 import { getPublicStorageUrl, getSupabaseAdmin } from '../config/supabase.js';
-import { requireAdminAuth, requireRole } from '../middleware/auth.js';
+import { PROTECTED_OWNER_EMAIL, requireAdminAuth, requireRole, requireWriteAccess } from '../middleware/auth.js';
 import { adminApiLimiter } from '../middleware/rateLimit.js';
 import { recordAuditLog, saveContentVersion } from '../services/audit.js';
 import { apiCache } from '../services/cache.js';
-import { parseDeviceMetadata, recordSecurityEvent } from '../services/device.js';
+import { parseDeviceMetadata, recordSecurityEvent, signSessionPayload } from '../services/device.js';
 
 export const adminRouter = Router();
 
-adminRouter.use(adminApiLimiter, requireAdminAuth);
+adminRouter.use(adminApiLimiter, requireAdminAuth, (req, res, next) => {
+  if (req.method !== 'GET' && !req.path.startsWith('/security')) {
+    return requireWriteAccess(req, res, next);
+  }
+  next();
+});
 
 const ALLOWED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml']);
 const ALLOWED_VIDEO_MIME = new Set(['video/mp4', 'video/webm']);
@@ -158,71 +163,8 @@ adminRouter.get('/dashboard', async (_req, res, next) => {
   }
 });
 
-// ======================== SITE SETTINGS & NAVIGATION ========================
-adminRouter.get('/settings', async (_req, res, next) => {
-  try {
-    const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase
-      .from('site_settings')
-      .select('*')
-      .order('category', { ascending: true })
-      .order('key', { ascending: true });
-    if (error) throw error;
-    res.json(data || []);
-  } catch (err) {
-    next(err);
-  }
-});
-
-adminRouter.put('/settings', async (req, res, next) => {
-  try {
-    const items = Array.isArray(req.body?.items) ? req.body.items : [];
-    if (!items.length) {
-      res.status(400).json({ error: 'Provide settings items array.' });
-      return;
-    }
-
-    const supabase = getSupabaseAdmin();
-    const { data: before } = await supabase.from('site_settings').select('key, value_en, value_ta, json_value');
-
-    await saveContentVersion({
-      entityType: 'site_settings',
-      entityId: 'global',
-      snapshot: { settings: before || [] },
-      changeNote: req.body.change_note || 'Site settings updated',
-      changedBy: req.admin?.id,
-      changedByEmail: req.admin?.email
-    });
-
-    const rows = items.map((item: Record<string, unknown>) => ({
-      key: String(item.key),
-      category: String(item.category || 'general'),
-      value_en: String(item.value_en ?? ''),
-      value_ta: String(item.value_ta ?? ''),
-      json_value: item.json_value ?? null,
-      is_public: item.is_public !== false,
-      updated_by: req.admin?.id ?? null
-    }));
-
-    const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'key' });
-    if (error) throw error;
-
-    await recordAuditLog({
-      actorId: req.admin?.id,
-      actorEmail: req.admin?.email,
-      action: 'update',
-      entityType: 'site_settings',
-      entityId: 'global',
-      details: { keys: rows.map((r: { key: string }) => r.key) },
-      req
-    });
-
-    invalidatePublic();
-    res.json({ message: 'Site settings saved successfully.' });
-  } catch (err) {
-    next(err);
-  }
-});
+// ======================== NAVIGATION ========================
+// (Permanent trust branding, contact, founder, vision & mission live strictly in frontend.)
 
 adminRouter.get('/navigation', async (_req, res, next) => {
   try {
@@ -1265,13 +1207,18 @@ adminRouter.get('/donations', requireRole(['super_admin', 'admin']), async (req,
     if (listRes.error) throw listRes.error;
     const total = listRes.count || 0;
     const cfgJson = cfgRes.data?.json_value as Record<string, unknown> | null | undefined;
+    const summaryData = summaryRes.error
+      ? summaryRes.error.code === '42501'
+        ? await computeDashboardSummaryFallback(supabase)
+        : {}
+      : summaryRes.data || {};
     res.json({
       items: listRes.data || [],
       total,
       page,
       pageSize,
       totalPages: Math.max(1, Math.ceil(total / pageSize)),
-      summary: summaryRes.data || {},
+      summary: summaryData,
       donationsEnabled: cfgJson?.enabled !== false
     });
   } catch (err) {
@@ -1397,8 +1344,10 @@ adminRouter.post('/versions/:versionId/restore', async (req, res, next) => {
   }
 });
 
-// ======================== AUDIT LOGS & ADMIN USERS ========================
-adminRouter.get('/audit-logs', async (_req, res, next) => {
+// ======================== AUDIT LOGS & ADMIN RBAC USERS ========================
+const VALID_ROLES = new Set(['super_admin', 'admin', 'editor', 'visitor']);
+
+adminRouter.get('/audit-logs', requireRole(['super_admin', 'admin']), async (_req, res, next) => {
   try {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
@@ -1413,7 +1362,7 @@ adminRouter.get('/audit-logs', async (_req, res, next) => {
   }
 });
 
-adminRouter.get('/users', requireRole(['super_admin', 'admin']), async (_req, res, next) => {
+adminRouter.get('/users', requireRole(['super_admin']), async (_req, res, next) => {
   try {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase.from('admin_users').select('*').order('created_at', { ascending: true });
@@ -1424,26 +1373,156 @@ adminRouter.get('/users', requireRole(['super_admin', 'admin']), async (_req, re
   }
 });
 
+adminRouter.post('/users', requireRole(['super_admin']), async (req, res, next) => {
+  try {
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    const fullName = String(req.body?.full_name || '').trim() || 'Trust Member';
+    const password = String(req.body?.password || '');
+    const role = String(req.body?.role || 'editor').trim();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      res.status(400).json({ error: 'Provide a valid email address.' });
+      return;
+    }
+    if (!VALID_ROLES.has(role)) {
+      res.status(400).json({ error: 'Invalid role selected.' });
+      return;
+    }
+    if (email === PROTECTED_OWNER_EMAIL && role !== 'super_admin') {
+      res.status(403).json({ error: 'Primary owner account must always be super_admin.' });
+      return;
+    }
+
+    const supabase = getSupabaseAdmin();
+
+    // Check if an admin_users row already exists with this email
+    const { data: existingAdmin } = await supabase
+      .from('admin_users')
+      .select('id, email')
+      .ilike('email', email)
+      .maybeSingle();
+
+    if (existingAdmin) {
+      res.status(409).json({ error: `User "${email}" is already registered in Admin Roles.` });
+      return;
+    }
+
+    if (password.length < 8) {
+      res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+      return;
+    }
+
+    let userId: string | null = null;
+    const { data: createdAuth, error: createErr } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: fullName }
+    });
+
+    if (createErr) {
+      // If user already exists in auth.users, link that user cleanly
+      const { data: listRes } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
+      const matched = (listRes?.users || []).find((u) => (u.email || '').toLowerCase() === email);
+      if (!matched) {
+        res.status(400).json({ error: createErr.message || 'Could not create auth account.' });
+        return;
+      }
+      userId = matched.id;
+    } else {
+      userId = createdAuth.user?.id || null;
+    }
+
+    if (!userId) {
+      res.status(500).json({ error: 'Unable to resolve created user ID.' });
+      return;
+    }
+
+    const finalRole = email === PROTECTED_OWNER_EMAIL ? 'super_admin' : role;
+    const { data: inserted, error: insertErr } = await supabase
+      .from('admin_users')
+      .upsert(
+        {
+          id: userId,
+          email,
+          full_name: fullName,
+          role: finalRole,
+          is_active: true
+        },
+        { onConflict: 'id' }
+      )
+      .select()
+      .single();
+
+    if (insertErr) throw insertErr;
+
+    await recordAuditLog({
+      actorId: req.admin?.id,
+      actorEmail: req.admin?.email,
+      action: 'create_admin_user',
+      entityType: 'admin_users',
+      entityId: userId,
+      details: { email, role: finalRole },
+      req
+    });
+    apiCache.invalidatePrefix('auth:');
+    res.status(201).json(inserted);
+  } catch (err) {
+    next(err);
+  }
+});
+
 adminRouter.patch('/users/:id', requireRole(['super_admin']), async (req, res, next) => {
   try {
+    const targetId = String(req.params.id);
+    if (targetId === req.admin?.id) {
+      res.status(403).json({ error: 'You cannot modify your own role or account status.' });
+      return;
+    }
+
+    const nextRole = String(req.body?.role || '');
+    const nextActive = Boolean(req.body?.is_active);
+    if (!VALID_ROLES.has(nextRole)) {
+      res.status(400).json({ error: 'Invalid role selected.' });
+      return;
+    }
+
     const supabase = getSupabaseAdmin();
+    const { data: targetUser, error: fetchErr } = await supabase
+      .from('admin_users')
+      .select('id, email, role, is_active')
+      .eq('id', targetId)
+      .maybeSingle();
+
+    if (fetchErr) throw fetchErr;
+    if (!targetUser) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    if (String(targetUser.email || '').toLowerCase() === PROTECTED_OWNER_EMAIL) {
+      res.status(403).json({ error: 'Primary owner account (ilangathirtrust@gmail.com) cannot be modified or deactivated.' });
+      return;
+    }
+
     const { data, error } = await supabase
       .from('admin_users')
       .update({
-        role: req.body.role,
-        is_active: req.body.is_active
+        role: nextRole,
+        is_active: nextActive
       })
-      .eq('id', req.params.id)
+      .eq('id', targetId)
       .select()
       .single();
     if (error) throw error;
+
     await recordAuditLog({
       actorId: req.admin?.id,
       actorEmail: req.admin?.email,
       action: 'update_admin_role',
       entityType: 'admin_users',
-      entityId: String(req.params.id),
-      details: { role: req.body.role, is_active: req.body.is_active },
+      entityId: targetId,
+      details: { role: nextRole, is_active: nextActive },
       req
     });
     apiCache.invalidatePrefix('auth:');
@@ -1453,7 +1532,61 @@ adminRouter.patch('/users/:id', requireRole(['super_admin']), async (req, res, n
   }
 });
 
-// ======================== SECURITY, SESSIONS & DEVICES ========================
+adminRouter.delete('/users/:id', requireRole(['super_admin']), async (req, res, next) => {
+  try {
+    const targetId = String(req.params.id);
+    if (targetId === req.admin?.id) {
+      res.status(403).json({ error: 'You cannot remove your own account.' });
+      return;
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { data: targetUser, error: fetchErr } = await supabase
+      .from('admin_users')
+      .select('id, email')
+      .eq('id', targetId)
+      .maybeSingle();
+
+    if (fetchErr) throw fetchErr;
+    if (!targetUser) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    if (String(targetUser.email || '').toLowerCase() === PROTECTED_OWNER_EMAIL) {
+      res.status(403).json({ error: 'Primary owner account (ilangathirtrust@gmail.com) is protected and cannot be deleted.' });
+      return;
+    }
+
+    const { error: delErr } = await supabase.from('admin_users').delete().eq('id', targetId);
+    if (delErr) throw delErr;
+
+    await supabase
+      .from('admin_sessions')
+      .update({
+        is_revoked: true,
+        revoked_at: new Date().toISOString(),
+        revoked_reason: 'Admin access removed by Super Admin.'
+      })
+      .eq('user_id', targetId);
+
+    await recordAuditLog({
+      actorId: req.admin?.id,
+      actorEmail: req.admin?.email,
+      action: 'delete_admin_user',
+      entityType: 'admin_users',
+      entityId: targetId,
+      details: { email: targetUser.email },
+      req
+    });
+    apiCache.invalidatePrefix('auth:');
+    res.json({ deleted: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ======================== SECURITY, DIGITAL SIGNATURES & SESSIONS ========================
 adminRouter.get('/security/overview', async (req, res, next) => {
   try {
     const supabase = getSupabaseAdmin();
@@ -1463,7 +1596,7 @@ adminRouter.get('/security/overview', async (req, res, next) => {
     const [sessionsRes, eventsRes] = await Promise.all([
       supabase
         .from('admin_sessions')
-        .select('id, device_id, device_name, device_type, browser, os, ip_address, geo_label, is_trusted, is_revoked, revoked_at, revoked_reason, last_active_at, created_at, expires_at')
+        .select('id, device_id, session_token_hash, device_name, device_type, browser, os, ip_address, geo_label, is_trusted, is_revoked, revoked_at, revoked_reason, last_active_at, created_at, expires_at')
         .eq('user_id', userId)
         .order('last_active_at', { ascending: false })
         .limit(25),
@@ -1481,11 +1614,22 @@ adminRouter.get('/security/overview', async (req, res, next) => {
       eventsRes.error?.code === '42P01' ||
       eventsRes.error?.code === 'PGRST205';
 
+    const signedSessions = (sessionsRes.error ? [] : sessionsRes.data || []).map((s) => {
+      const tokenHash = String((s as { session_token_hash?: string }).session_token_hash || '');
+      const sig = signSessionPayload({ userId, deviceId: s.device_id, tokenHash });
+      const { session_token_hash: _drop, ...safeSession } = s as Record<string, unknown>;
+      return {
+        ...safeSession,
+        signature_verified: Boolean(tokenHash),
+        signature_fingerprint: sig.slice(0, 16).toUpperCase()
+      };
+    });
+
     res.json({
       migrationRequired: Boolean(migrationRequired),
       currentSessionId: req.admin?.sessionId || null,
       currentDevice,
-      sessions: sessionsRes.error ? [] : sessionsRes.data || [],
+      sessions: signedSessions,
       events: eventsRes.error ? [] : eventsRes.data || []
     });
   } catch (err) {

@@ -12,25 +12,24 @@ import {
   Image as ImageIcon,
   Inbox,
   IndianRupee,
+  Layers,
   LayoutDashboard,
   LogOut,
   Menu,
   Moon,
   Navigation,
-  Settings,
   Shield,
   ShieldCheck,
-  Sparkles,
   Sun,
   Users,
   X
 } from 'lucide-react';
-import { adminApi, clearAdminApiCache } from './lib/api';
+import type { AdminRole } from '@ilangathir/shared';
+import { adminApi, clearAdminApiCache, prefetchAdminRoutes } from './lib/api';
 import { useAdminUi } from './lib/admin-ui';
 import { getSupabaseClient, isSupabaseConfigured, PUBLIC_SITE_URL } from './lib/supabase';
 import { LoginPage } from './pages/LoginPage';
 import { OverviewPage } from './pages/OverviewPage';
-import { SiteSettingsPage } from './pages/SiteSettingsPage';
 import { PagesSeoPage } from './pages/PagesSeoPage';
 import { NavigationMarqueePage } from './pages/NavigationMarqueePage';
 import { MediaLibraryPage } from './pages/MediaLibraryPage';
@@ -44,7 +43,8 @@ interface AdminUser {
   id: string;
   email: string;
   full_name: string;
-  role: string;
+  role: AdminRole;
+  signatureVerified?: boolean;
 }
 
 interface BeforeInstallPromptEvent extends Event {
@@ -52,23 +52,26 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+const ALL_ROLES: AdminRole[] = ['super_admin', 'admin', 'editor', 'visitor'];
+const OPS_ROLES: AdminRole[] = ['super_admin', 'admin'];
+const OWNER_ROLES: AdminRole[] = ['super_admin'];
+
 const NAV_ITEMS = [
-  { id: 'overview', label: 'Dashboard', labelTa: 'Dashboard', shortLabel: 'Home', shortLabelTa: 'முகப்பு', icon: LayoutDashboard, group: 'Workspace', groupTa: 'பணிப்பகுதி' },
-  { id: 'enquiries', label: 'Contact Enquiries', labelTa: 'Enquiries & மெசேஜ்', shortLabel: 'Enquiries', shortLabelTa: 'Enquiries', icon: Inbox, group: 'Operations', groupTa: 'நிர்வாகம்' },
-  { id: 'events', label: 'Events Management', labelTa: 'Events மேலாண்மை', shortLabel: 'Events', shortLabelTa: 'Events', icon: CalendarDays, group: 'Content CMS', groupTa: 'Content மேலாண்மை' },
-  { id: 'gallery', label: 'Gallery Folders', labelTa: 'Gallery ஃபோல்டர்', shortLabel: 'Gallery', shortLabelTa: 'Gallery', icon: FolderOpen, group: 'Media & Blog', groupTa: 'Media & Blog' },
-  { id: 'donations', label: 'Donations & Payments', labelTa: 'நன்கொடை & Payment', shortLabel: 'Donate', shortLabelTa: 'நன்கொடை', icon: IndianRupee, group: 'Operations', groupTa: 'நிர்வாகம்' },
-  { id: 'pages', label: 'Pages & Hero', labelTa: 'Pages & Banner', shortLabel: 'Pages', shortLabelTa: 'Pages', icon: FileCode2, group: 'Content CMS', groupTa: 'Content மேலாண்மை' },
-  { id: 'settings', label: 'Site Settings & Brand', labelTa: 'Site Settings', shortLabel: 'Settings', shortLabelTa: 'Settings', icon: Settings, group: 'Content CMS', groupTa: 'Content மேலாண்மை' },
-  { id: 'navigation', label: 'Menus & Marquee', labelTa: 'Menu & Marquee', shortLabel: 'Menus', shortLabelTa: 'Menus', icon: Navigation, group: 'Content CMS', groupTa: 'Content மேலாண்மை' },
-  { id: 'activities', label: 'Activities & Services', labelTa: 'நலப்பணிகள் & Activities', shortLabel: 'Activities', shortLabelTa: 'பணிகள்', icon: Sparkles, group: 'Content CMS', groupTa: 'Content மேலாண்மை' },
-  { id: 'media', label: 'Media Library', labelTa: 'Media ஃபைல்கள்', shortLabel: 'Media', shortLabelTa: 'Media', icon: ImageIcon, group: 'Media & Blog', groupTa: 'Media & Blog' },
-  { id: 'blogs', label: 'Blog & Articles', labelTa: 'Blog கட்டுரைகள்', shortLabel: 'Blog', shortLabelTa: 'Blog', icon: BookOpen, group: 'Media & Blog', groupTa: 'Media & Blog' },
-  { id: 'team', label: 'Team & Trustees', labelTa: 'Team & அறங்காவலர்கள்', shortLabel: 'Team', shortLabelTa: 'Team', icon: Users, group: 'Media & Blog', groupTa: 'Media & Blog' },
-  { id: 'volunteers', label: 'Volunteers', labelTa: 'Volunteers விண்ணப்பம்', shortLabel: 'Volunteers', shortLabelTa: 'தன்னார்வலர்', icon: Heart, group: 'Operations', groupTa: 'நிர்வாகம்' },
-  { id: 'security', label: 'Security & Devices', labelTa: 'Security & Device', shortLabel: 'Security', shortLabelTa: 'Security', icon: ShieldCheck, group: 'Security', groupTa: 'பாதுகாப்பு' },
-  { id: 'audit', label: 'Audit Logs', labelTa: 'Audit Log', shortLabel: 'Audit', shortLabelTa: 'Audit', icon: Activity, group: 'Security', groupTa: 'பாதுகாப்பு' },
-  { id: 'users', label: 'Admin Roles', labelTa: 'Admin Roles', shortLabel: 'Roles', shortLabelTa: 'Roles', icon: Shield, group: 'Security', groupTa: 'பாதுகாப்பு' }
+  { id: 'overview', label: 'Dashboard', labelTa: 'Dashboard', shortLabel: 'Home', shortLabelTa: 'முகப்பு', icon: LayoutDashboard, group: 'Workspace', groupTa: 'பணிப்பகுதி', roles: ALL_ROLES },
+  { id: 'enquiries', label: 'Contact Enquiries', labelTa: 'Enquiries & மெசேஜ்', shortLabel: 'Enquiries', shortLabelTa: 'Enquiries', icon: Inbox, group: 'Operations', groupTa: 'நிர்வாகம்', roles: ALL_ROLES },
+  { id: 'events', label: 'Events Management', labelTa: 'Events மேலாண்மை', shortLabel: 'Events', shortLabelTa: 'Events', icon: CalendarDays, group: 'Content CMS', groupTa: 'Content மேலாண்மை', roles: ALL_ROLES },
+  { id: 'gallery', label: 'Gallery Folders', labelTa: 'Gallery ஃபோல்டர்', shortLabel: 'Gallery', shortLabelTa: 'Gallery', icon: FolderOpen, group: 'Media & Blog', groupTa: 'Media & Blog', roles: ALL_ROLES },
+  { id: 'donations', label: 'Donations & Payments', labelTa: 'நன்கொடை & Payment', shortLabel: 'Donate', shortLabelTa: 'நன்கொடை', icon: IndianRupee, group: 'Operations', groupTa: 'நிர்வாகம்', roles: OPS_ROLES },
+  { id: 'pages', label: 'Pages & Hero', labelTa: 'Pages & Banner', shortLabel: 'Pages', shortLabelTa: 'Pages', icon: FileCode2, group: 'Content CMS', groupTa: 'Content மேலாண்மை', roles: ALL_ROLES },
+  { id: 'navigation', label: 'Menus & Marquee', labelTa: 'Menu & Marquee', shortLabel: 'Menus', shortLabelTa: 'Menus', icon: Navigation, group: 'Content CMS', groupTa: 'Content மேலாண்மை', roles: ALL_ROLES },
+  { id: 'activities', label: 'Activities & Services', labelTa: 'நலப்பணிகள் & Activities', shortLabel: 'Activities', shortLabelTa: 'பணிகள்', icon: Layers, group: 'Content CMS', groupTa: 'Content மேலாண்மை', roles: ALL_ROLES },
+  { id: 'media', label: 'Media Library', labelTa: 'Media ஃபைல்கள்', shortLabel: 'Media', shortLabelTa: 'Media', icon: ImageIcon, group: 'Media & Blog', groupTa: 'Media & Blog', roles: ALL_ROLES },
+  { id: 'blogs', label: 'Blog & Articles', labelTa: 'Blog கட்டுரைகள்', shortLabel: 'Blog', shortLabelTa: 'Blog', icon: BookOpen, group: 'Media & Blog', groupTa: 'Media & Blog', roles: ALL_ROLES },
+  { id: 'team', label: 'Team & Trustees', labelTa: 'Team & அறங்காவலர்கள்', shortLabel: 'Team', shortLabelTa: 'Team', icon: Users, group: 'Media & Blog', groupTa: 'Media & Blog', roles: ALL_ROLES },
+  { id: 'volunteers', label: 'Volunteers', labelTa: 'Volunteers விண்ணப்பம்', shortLabel: 'Volunteers', shortLabelTa: 'தன்னார்வலர்', icon: Heart, group: 'Operations', groupTa: 'நிர்வாகம்', roles: ALL_ROLES },
+  { id: 'security', label: 'Security & Devices', labelTa: 'Security & Device', shortLabel: 'Security', shortLabelTa: 'Security', icon: ShieldCheck, group: 'Security', groupTa: 'பாதுகாப்பு', roles: ALL_ROLES },
+  { id: 'audit', label: 'Audit Logs', labelTa: 'Audit Log', shortLabel: 'Audit', shortLabelTa: 'Audit', icon: Activity, group: 'Security', groupTa: 'பாதுகாப்பு', roles: OPS_ROLES },
+  { id: 'users', label: 'Admin Roles & Users', labelTa: 'Users & Roles', shortLabel: 'Users', shortLabelTa: 'Users', icon: Shield, group: 'Security', groupTa: 'பாதுகாப்பு', roles: OWNER_ROLES }
 ];
 
 const VALID_TAB_IDS = new Set(NAV_ITEMS.map((item) => item.id));
@@ -128,6 +131,7 @@ export default function App() {
       const res = await adminApi<{ admin: AdminUser }>('/me');
       setAuthError('');
       setAdminUser(res.admin);
+      prefetchAdminRoutes(res.admin.role);
     } catch (err) {
       setAdminUser(null);
       setAuthError(err instanceof Error ? err.message : 'Unable to verify admin access.');
@@ -251,11 +255,18 @@ export default function App() {
     return <LoginPage onSuccess={verifySession} onSignOut={handleSignOut} externalError={authError} />;
   }
 
-  const currentNav = NAV_ITEMS.find((n) => n.id === activeTab) || NAV_ITEMS[0];
+  const allowedNavItems = NAV_ITEMS.filter((n) => n.roles.includes(adminUser.role));
+  const resolvedActive = allowedNavItems.some((n) => n.id === activeTab) ? activeTab! : 'overview';
+  const currentNav = allowedNavItems.find((n) => n.id === resolvedActive) || allowedNavItems[0];
   const primaryBottomItems = MOBILE_BOTTOM_IDS
-    .map((id) => NAV_ITEMS.find((n) => n.id === id))
+    .map((id) => allowedNavItems.find((n) => n.id === id))
     .filter((item): item is (typeof NAV_ITEMS)[number] => Boolean(item));
+  const fallbackExtra = allowedNavItems.find((n) => n.id === 'activities');
+  if (primaryBottomItems.length < 5 && fallbackExtra && !primaryBottomItems.some((i) => i.id === fallbackExtra.id)) {
+    primaryBottomItems.push(fallbackExtra);
+  }
   const groups = ['Workspace', 'Content CMS', 'Media & Blog', 'Operations', 'Security'];
+  const isVisitor = adminUser.role === 'visitor';
 
   return (
     <div className="flex min-h-screen bg-sand-50 dark:bg-[#18191B]">
@@ -294,7 +305,8 @@ export default function App() {
 
         <nav className="admin-sidebar-scroll min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-4">
           {groups.map((grp) => {
-            const grpItems = NAV_ITEMS.filter((i) => i.group === grp);
+            const grpItems = allowedNavItems.filter((i) => i.group === grp);
+            if (!grpItems.length) return null;
             const grpLabel = grpItems[0]?.groupTa || grp;
             return (
               <div key={grp}>
@@ -304,7 +316,7 @@ export default function App() {
                 <div className="space-y-1">
                   {grpItems.map((item) => {
                     const Icon = item.icon;
-                    const active = activeTab === item.id;
+                    const active = resolvedActive === item.id;
                     return (
                       <button
                         key={item.id}
@@ -554,22 +566,29 @@ export default function App() {
             </div>
           )}
 
-          {activeTab === 'overview' && <OverviewPage onNavigate={navigateTab} onNotify={notify} />}
-          {activeTab === 'settings' && <SiteSettingsPage onNotify={notify} />}
-          {activeTab === 'pages' && <PagesSeoPage onNotify={notify} />}
-          {activeTab === 'navigation' && <NavigationMarqueePage onNotify={notify} />}
-          {activeTab === 'media' && <MediaLibraryPage onNotify={notify} />}
-          {activeTab === 'gallery' && <GalleryManagerPage onNotify={notify} />}
-          {activeTab === 'events' && <EventsActivitiesPage mode="events" onNotify={notify} />}
-          {activeTab === 'activities' && <EventsActivitiesPage mode="activities" onNotify={notify} />}
-          {activeTab === 'team' && <EventsActivitiesPage mode="team" onNotify={notify} />}
-          {activeTab === 'blogs' && <BlogManagerPage onNotify={notify} />}
-          {activeTab === 'donations' && <DonationsPage onNotify={notify} />}
-          {activeTab === 'enquiries' && <InboxAndAuditPage mode="enquiries" onNotify={notify} />}
-          {activeTab === 'volunteers' && <InboxAndAuditPage mode="volunteers" onNotify={notify} />}
-          {activeTab === 'security' && <SecurityDevicesPage onNotify={notify} />}
-          {activeTab === 'audit' && <InboxAndAuditPage mode="audit" onNotify={notify} />}
-          {activeTab === 'users' && <InboxAndAuditPage mode="users" onNotify={notify} />}
+          {isVisitor && (
+            <div className="mx-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800 lg:mx-0">
+              {tr('Read-Only Visitor Access — Editing and write actions are disabled for your role.', 'Read-Only Visitor Mode — இந்த Account-ல விவரம் பாக்க மட்டும் தான் முடியும்.')}
+            </div>
+          )}
+
+          {resolvedActive === 'overview' && <OverviewPage onNavigate={navigateTab} onNotify={notify} userRole={adminUser.role} />}
+          {resolvedActive === 'pages' && <PagesSeoPage onNotify={notify} />}
+          {resolvedActive === 'navigation' && <NavigationMarqueePage onNotify={notify} />}
+          {resolvedActive === 'media' && <MediaLibraryPage onNotify={notify} />}
+          {resolvedActive === 'gallery' && <GalleryManagerPage onNotify={notify} />}
+          {resolvedActive === 'events' && <EventsActivitiesPage mode="events" onNotify={notify} />}
+          {resolvedActive === 'activities' && <EventsActivitiesPage mode="activities" onNotify={notify} />}
+          {resolvedActive === 'team' && <EventsActivitiesPage mode="team" onNotify={notify} />}
+          {resolvedActive === 'blogs' && <BlogManagerPage onNotify={notify} />}
+          {resolvedActive === 'donations' && <DonationsPage onNotify={notify} />}
+          {resolvedActive === 'enquiries' && <InboxAndAuditPage mode="enquiries" onNotify={notify} />}
+          {resolvedActive === 'volunteers' && <InboxAndAuditPage mode="volunteers" onNotify={notify} />}
+          {resolvedActive === 'security' && <SecurityDevicesPage onNotify={notify} />}
+          {resolvedActive === 'audit' && <InboxAndAuditPage mode="audit" onNotify={notify} />}
+          {resolvedActive === 'users' && (
+            <InboxAndAuditPage mode="users" onNotify={notify} currentUser={adminUser} />
+          )}
         </main>
       </div>
 
@@ -578,10 +597,13 @@ export default function App() {
         aria-label="Mobile admin bottom navigation"
         className="fixed inset-x-0 bottom-0 z-40 transform-gpu border-t border-sand-200 bg-white shadow-[0_-4px_20px_rgba(11,24,46,0.08)] pb-[env(safe-area-inset-bottom)] dark:border-[#31343B] dark:bg-[#212225] lg:hidden"
       >
-        <ul className="grid grid-cols-5 items-stretch">
+        <ul
+          className="grid items-stretch"
+          style={{ gridTemplateColumns: `repeat(${primaryBottomItems.length}, minmax(0, 1fr))` }}
+        >
           {primaryBottomItems.map((item) => {
             const Icon = item.icon;
-            const active = activeTab === item.id;
+            const active = resolvedActive === item.id;
             return (
               <li key={item.id} className="min-w-0">
                 <button

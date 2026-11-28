@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export type Language = 'en' | 'ta';
-export type AdminRole = 'super_admin' | 'admin' | 'editor';
+export type AdminRole = 'super_admin' | 'admin' | 'editor' | 'visitor';
 export type PublishStatus = 'draft' | 'published' | 'archived';
 
 export interface BilingualFaq {

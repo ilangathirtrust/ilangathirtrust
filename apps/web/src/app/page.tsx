@@ -75,16 +75,12 @@ export default async function HomePage({
   const primaryCtaLabel = lang === 'ta' ? p.primary_cta_ta : p.primary_cta_en;
   const secondaryCtaLabel = lang === 'ta' ? p.secondary_cta_ta : p.secondary_cta_en;
 
-  const founderName = pickText(settings.founder_name || SITE_SETTINGS.founder_name, lang);
-  const founderRole = pickText(settings.founder_role || SITE_SETTINGS.founder_role, lang);
-  const rawBio = pickText(settings.founder_bio || SITE_SETTINGS.founder_bio, lang);
-  const founderBio =
-    !rawBio || rawBio.includes('admin portal') || rawBio.includes('நிர்வாகப் பக்கத்தில்')
-      ? pickText(SITE_SETTINGS.founder_bio, lang)
-      : rawBio;
-  const founderImg = settings.founder_image_url?.value_en || STATIC_ASSETS.founder;
-  const mission = pickText(settings.mission_statement || SITE_SETTINGS.mission_statement, lang);
-  const vision = pickText(settings.vision_statement || SITE_SETTINGS.vision_statement, lang);
+  const founderName = pickText(SITE_SETTINGS.founder_name, lang);
+  const founderRole = pickText(SITE_SETTINGS.founder_role, lang);
+  const founderBio = pickText(SITE_SETTINGS.founder_bio, lang);
+  const founderImg = STATIC_ASSETS.founder;
+  const mission = pickText(SITE_SETTINGS.mission_statement, lang);
+  const vision = pickText(SITE_SETTINGS.vision_statement, lang);
 
   const faqs = getHomeFaqs(donationsEnabled);
   const faqJsonLd = buildFaqJsonLd(faqs, lang);

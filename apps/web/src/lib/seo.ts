@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { pickLocalized, type BilingualFaq, type BlogPost, type EventItem, type GalleryFolder, type Language } from '@ilangathir/shared';
 import { SITE_URL } from './api';
-import { normalizeBrandAssetUrl, STATIC_ASSETS } from './site-content';
+import { SITE_SETTINGS, STATIC_ASSETS } from './site-content';
 
 export function buildPageMetadata(params: {
   title: string;
@@ -72,17 +72,14 @@ export function buildPageMetadata(params: {
   };
 }
 
-export function buildOrganizationGraphJsonLd(
-  settings: Record<string, { value_en: string; value_ta: string; json_value: Record<string, unknown> | null }>
-) {
-  const name = settings.trust_name?.value_en || 'Ilangathir Trust';
-  const nameTa = settings.trust_name?.value_ta || 'இளங்கதிர் அறக்கட்டளை';
-  const email = settings.email?.value_en || 'ilangathirtrust@gmail.com';
-  const phone = settings.phone?.value_en || '+91 93630 15050';
-  const address = settings.address?.value_en || 'V. Kallupatti, Dindigul - 624307, Tamil Nadu, India.';
-  const logo = normalizeBrandAssetUrl(settings.logo_url?.value_en, STATIC_ASSETS.logo);
-  const socials = (settings.social_links?.json_value || {}) as Record<string, string>;
-  const sameAs = Object.values(socials).filter((v) => typeof v === 'string' && v.startsWith('http'));
+export function buildOrganizationGraphJsonLd() {
+  const name = SITE_SETTINGS.trust_name.value_en;
+  const nameTa = SITE_SETTINGS.trust_name.value_ta;
+  const email = SITE_SETTINGS.email.value_en;
+  const phone = SITE_SETTINGS.phone.value_en;
+  const address = SITE_SETTINGS.address.value_en;
+  const logo = STATIC_ASSETS.logo;
+  const sameAs: string[] = [];
 
   return {
     '@context': 'https://schema.org',
@@ -91,16 +88,14 @@ export function buildOrganizationGraphJsonLd(
         '@type': ['NGO', 'Organization'],
         '@id': `${SITE_URL}/#organization`,
         name,
-        legalName: settings.trust_legal_name?.value_en || 'Ilangathir Arakattalai',
+        legalName: SITE_SETTINGS.trust_legal_name.value_en,
         alternateName: [nameTa, 'Ilangathir Arakattalai', 'இளங்கதிர் அறக்கட்டளை திண்டுக்கல்'],
         url: SITE_URL,
         logo: {
           '@type': 'ImageObject',
           url: logo.startsWith('http') ? logo : `${SITE_URL}${logo}`
         },
-        description:
-          settings.footer_description?.value_en ||
-          'Registered charitable trust in V. Kallupatti, Dindigul, Tamil Nadu supporting student education, rural medical camps, tree planting, and community welfare.',
+        description: SITE_SETTINGS.footer_description.value_en,
         email,
         telephone: phone,
         knowsLanguage: ['en', 'ta'],

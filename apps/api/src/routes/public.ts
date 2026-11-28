@@ -29,6 +29,7 @@ publicRouter.get('/bootstrap', async (_req, res, next) => {
         supabase
           .from('site_settings')
           .select('key, value_en, value_ta, json_value')
+          .eq('key', 'donation_config')
           .eq('is_public', true),
         supabase
           .from('navigation_items')

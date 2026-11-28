@@ -17,7 +17,7 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
   const [historyId, setHistoryId] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({
+  const EMPTY_BLOG_FORM = {
     title_en: '',
     title_ta: '',
     slug: '',
@@ -33,7 +33,12 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
     author_name: 'Ilangathir Trust Editorial',
     reading_time_minutes: 3,
     status: 'draft'
-  });
+  };
+  const [form, setForm] = useState(EMPTY_BLOG_FORM);
+  const [savedSnapshot, setSavedSnapshot] = useState('');
+  const isDirty = editingId
+    ? JSON.stringify(form) !== savedSnapshot
+    : Boolean(form.title_en.trim() && form.content_en.trim());
 
   const load = (force = false) => {
     setLoading(true);
@@ -181,7 +186,11 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
             <ImageIcon className="h-4 w-4 text-brand-600" />
             <span>{tr('Select Featured Image', 'போட்டோ எடு')}</span>
           </button>
-          <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-6 py-2.5 text-xs font-bold text-white hover:bg-brand-700">
+          <button
+            type="submit"
+            disabled={!isDirty}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-6 py-2.5 text-xs font-bold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-45"
+          >
             <Plus className="h-4 w-4" />
             <span>{editingId ? tr('Save Article', 'Save பண்ணு') : tr('Create Article', 'Article போடு')}</span>
           </button>
@@ -223,8 +232,7 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                 <button
                   type="button"
                   onClick={() => {
-                    setEditingId(p.id);
-                    setForm({
+                    const nextForm = {
                       title_en: p.title_en, title_ta: p.title_ta, slug: p.slug,
                       category_id: p.category_id || '', excerpt_en: p.excerpt_en, excerpt_ta: p.excerpt_ta,
                       content_en: p.content_en, content_ta: p.content_ta,
@@ -234,7 +242,10 @@ export function BlogManagerPage({ onNotify }: { onNotify: (msg: string, isErr?: 
                       tags: (p.tags || []).join(', '), author_name: p.author_name,
                       reading_time_minutes: p.reading_time_minutes,
                       status: p.status || 'draft'
-                    });
+                    };
+                    setEditingId(p.id);
+                    setForm(nextForm);
+                    setSavedSnapshot(JSON.stringify(nextForm));
                   }}
                   className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700"
                 >

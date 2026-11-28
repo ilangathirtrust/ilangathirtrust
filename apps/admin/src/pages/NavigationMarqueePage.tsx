@@ -124,7 +124,11 @@ export function NavigationMarqueePage({ onNotify }: { onNotify: (msg: string, is
             <input placeholder="/gallery" value={newMarquee.link_url} onChange={(e) => setNewMarquee({ ...newMarquee, link_url: e.target.value })} className="admin-input bg-white" />
           </label>
           <div className="flex items-end">
-            <button type="submit" className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-brand-800">
+            <button
+              type="submit"
+              disabled={!newMarquee.title_en.trim() || !newMarquee.title_ta.trim() || !newMarquee.image_url.trim()}
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-45"
+            >
               <Plus className="h-4 w-4" />
               <span>Add Marquee Slide</span>
             </button>
@@ -160,7 +164,11 @@ export function NavigationMarqueePage({ onNotify }: { onNotify: (msg: string, is
           <input required placeholder="Label (TA)" value={newNav.label_ta} onChange={(e) => setNewNav({ ...newNav, label_ta: e.target.value })} className="admin-input" />
           <input required placeholder="Href (/about)" value={newNav.href} onChange={(e) => setNewNav({ ...newNav, href: e.target.value })} className="admin-input" />
           <input type="number" placeholder="Order" value={newNav.sort_order} onChange={(e) => setNewNav({ ...newNav, sort_order: Number(e.target.value) })} className="admin-input" />
-          <button type="submit" className="inline-flex items-center justify-center gap-1 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white">
+          <button
+            type="submit"
+            disabled={!newNav.label_en.trim() || !newNav.label_ta.trim() || !newNav.href.trim()}
+            className="inline-flex items-center justify-center gap-1 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-45"
+          >
             <Plus className="h-4 w-4" />
             <span>Add</span>
           </button>

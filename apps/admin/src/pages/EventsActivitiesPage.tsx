@@ -24,7 +24,13 @@ export function EventsActivitiesPage({
   const [historyTarget, setHistoryTarget] = useState<{ type: string; id: string } | null>(null);
 
   const [form, setForm] = useState<Record<string, unknown>>({ status: 'published' });
+  const [savedSnapshot, setSavedSnapshot] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const isDirty = editingId
+    ? JSON.stringify(form) !== savedSnapshot
+    : mode === 'team'
+    ? Boolean(String(form.name_en || '').trim())
+    : Boolean(String(form.title_en || '').trim());
 
   const load = (force = false) => {
     setLoading(true);
@@ -235,7 +241,11 @@ export function EventsActivitiesPage({
             <ImageIcon className="h-4 w-4 text-brand-600" />
             <span>{tr('Select / Upload Banner', 'Banner போட்டோ எடு')}</span>
           </button>
-          <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-700">
+          <button
+            type="submit"
+            disabled={!isDirty}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-45"
+          >
             <Plus className="h-4 w-4" />
             <span>{editingId ? tr('Save Changes', 'Save பண்ணு') : tr('Create', 'Add பண்ணு')}</span>
           </button>
@@ -302,6 +312,7 @@ export function EventsActivitiesPage({
                     onClick={() => {
                       setEditingId(id);
                       setForm(rec);
+                      setSavedSnapshot(JSON.stringify(rec));
                     }}
                     className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
                   >

@@ -39,12 +39,15 @@ interface DashboardData {
 
 export function OverviewPage({
   onNavigate,
-  onNotify
+  onNotify,
+  userRole
 }: {
   onNavigate: (tab: string) => void;
   onNotify?: (msg: string, isErr?: boolean) => void;
+  userRole?: string;
 }) {
   const { tr } = useAdminUi();
+  const canToggleDonations = userRole === 'super_admin' || userRole === 'admin';
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -152,21 +155,23 @@ export function OverviewPage({
           </p>
         </div>
 
-        <button
-          type="button"
-          role="switch"
-          aria-checked={donationsEnabled}
-          disabled={toggling}
-          onClick={() => toggleDonations(!donationsEnabled)}
-          className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition disabled:opacity-60 ${
-            donationsEnabled
-              ? 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
-              : 'bg-emerald-600 text-white hover:bg-emerald-700'
-          }`}
-        >
-          {toggling && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          <span>{donationsEnabled ? tr('Disable Donations', 'Donate Off பண்ணு') : tr('Enable Donations', 'Donate On பண்ணு')}</span>
-        </button>
+        {canToggleDonations && (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={donationsEnabled}
+            disabled={toggling}
+            onClick={() => toggleDonations(!donationsEnabled)}
+            className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition disabled:opacity-60 ${
+              donationsEnabled
+                ? 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
+                : 'bg-emerald-600 text-white hover:bg-emerald-700'
+            }`}
+          >
+            {toggling && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            <span>{donationsEnabled ? tr('Disable Donations', 'Donate Off பண்ணு') : tr('Enable Donations', 'Donate On பண்ணு')}</span>
+          </button>
+        )}
       </div>
 
       <div className="grid gap-3 px-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4 lg:px-0">

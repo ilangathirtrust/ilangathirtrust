@@ -5,7 +5,7 @@ import { isDonationsEnabled } from '@ilangathir/shared';
 import { getBootstrap, SITE_URL } from '@/lib/api';
 import { getServerLang } from '@/lib/lang-server';
 import { buildOrganizationGraphJsonLd } from '@/lib/seo';
-import { normalizeBrandAssetUrl, SITE_SETTINGS, STATIC_ASSETS } from '@/lib/site-content';
+import { SITE_SETTINGS, STATIC_ASSETS } from '@/lib/site-content';
 import { LanguageProvider } from '@/components/LanguageProvider';
 import { Preloader } from '@/components/Preloader';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
@@ -86,20 +86,19 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const [lang, bootstrap] = await Promise.all([getServerLang(), getBootstrap()]);
-  const settings = bootstrap.settings;
-  const donationsEnabled = isDonationsEnabled(settings);
+  const donationsEnabled = isDonationsEnabled(bootstrap.settings);
 
-  const trustNameEn = settings.trust_name?.value_en || SITE_SETTINGS.trust_name.value_en;
-  const trustNameTa = settings.trust_name?.value_ta || SITE_SETTINGS.trust_name.value_ta;
-  const logoUrl = normalizeBrandAssetUrl(settings.logo_url?.value_en, STATIC_ASSETS.logo);
-  const phone = settings.phone?.value_en || SITE_SETTINGS.phone.value_en;
-  const email = settings.email?.value_en || SITE_SETTINGS.email.value_en;
-  const addressEn = settings.address?.value_en || SITE_SETTINGS.address.value_en;
-  const addressTa = settings.address?.value_ta || SITE_SETTINGS.address.value_ta;
-  const footerDescEn = settings.footer_description?.value_en || SITE_SETTINGS.footer_description.value_en;
-  const footerDescTa = settings.footer_description?.value_ta || SITE_SETTINGS.footer_description.value_ta;
+  const trustNameEn = SITE_SETTINGS.trust_name.value_en;
+  const trustNameTa = SITE_SETTINGS.trust_name.value_ta;
+  const logoUrl = STATIC_ASSETS.logo;
+  const phone = SITE_SETTINGS.phone.value_en;
+  const email = SITE_SETTINGS.email.value_en;
+  const addressEn = SITE_SETTINGS.address.value_en;
+  const addressTa = SITE_SETTINGS.address.value_ta;
+  const footerDescEn = SITE_SETTINGS.footer_description.value_en;
+  const footerDescTa = SITE_SETTINGS.footer_description.value_ta;
 
-  const orgJsonLd = buildOrganizationGraphJsonLd(settings);
+  const orgJsonLd = buildOrganizationGraphJsonLd();
 
   return (
     <html

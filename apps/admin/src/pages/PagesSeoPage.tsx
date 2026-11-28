@@ -11,11 +11,27 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
   const [pages, setPages] = useState<PageContent[]>([]);
   const [selectedSlug, setSelectedSlug] = useState('home');
   const [form, setForm] = useState<PageContent | null>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+
+  const pageSnapshot = (p: PageContent | null) =>
+    p
+      ? JSON.stringify({
+          hero_eyebrow_en: p.hero_eyebrow_en,
+          hero_eyebrow_ta: p.hero_eyebrow_ta,
+          hero_title_en: p.hero_title_en,
+          hero_title_ta: p.hero_title_ta,
+          hero_subtitle_en: p.hero_subtitle_en,
+          hero_subtitle_ta: p.hero_subtitle_ta,
+          hero_image_url: p.hero_image_url || ''
+        })
+      : '';
+
+  const isDirty = Boolean(form && pageSnapshot(form) !== savedSnapshot);
 
   const load = (force = false) => {
     setLoading(true);
@@ -25,6 +41,7 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
         setPages(list);
         const found = list.find((p) => p.slug === selectedSlug) || list[0] || null;
         setForm(found);
+        setSavedSnapshot(pageSnapshot(found));
         if (found) setSelectedSlug(found.slug);
       })
       .catch((e) => {
@@ -43,11 +60,12 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
     setSelectedSlug(slug);
     const found = pages.find((p) => p.slug === slug) || null;
     setForm(found);
+    setSavedSnapshot(pageSnapshot(found));
   }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!form) return;
+    if (!form || !isDirty) return;
     setSaving(true);
     try {
       const updated = await adminApi<PageContent>(`/pages/${form.slug}`, {
@@ -72,6 +90,7 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
       });
       setPages((prev) => prev.map((p) => (p.slug === updated.slug ? updated : p)));
       setForm(updated);
+      setSavedSnapshot(pageSnapshot(updated));
       onNotify(
         tr(
           `Saved "${updated.page_name}" hero content.`,
@@ -205,8 +224,8 @@ export function PagesSeoPage({ onNotify }: { onNotify: (msg: string, isErr?: boo
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={saving}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow hover:bg-brand-700 disabled:opacity-60 sm:w-auto"
+            disabled={!isDirty || saving}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-45 sm:w-auto"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             <span>{tr('Save Page Content', 'Page-ஐ Save பண்ணு')}</span>

@@ -6,6 +6,8 @@ import { getSupabaseAdmin } from '../config/supabase.js';
 import { apiCache } from '../services/cache.js';
 import { parseDeviceMetadata, verifyAndSyncAdminSession } from '../services/device.js';
 
+export const PROTECTED_OWNER_EMAIL = 'ilangathirtrust@gmail.com';
+
 export interface AuthenticatedAdmin {
   id: string;
   email: string;
@@ -13,6 +15,7 @@ export interface AuthenticatedAdmin {
   role: AdminRole;
   sessionId?: string;
   deviceId?: string;
+  signatureVerified?: boolean;
 }
 
 declare global {
@@ -82,7 +85,15 @@ export async function requireAdminAuth(req: Request, res: Response, next: NextFu
       return;
     }
 
-    if (!adminRecord.is_active) {
+    const isOwner = adminRecord.email.toLowerCase() === PROTECTED_OWNER_EMAIL;
+    const effectiveRole: AdminRole = isOwner ? 'super_admin' : (adminRecord.role as AdminRole);
+
+    if (isOwner && (adminRecord.role !== 'super_admin' || !adminRecord.is_active)) {
+      void supabase
+        .from('admin_users')
+        .update({ role: 'super_admin', is_active: true })
+        .eq('id', adminRecord.id);
+    } else if (!adminRecord.is_active) {
       res.status(403).json({ error: 'Admin account is deactivated.' });
       return;
     }
@@ -107,16 +118,29 @@ export async function requireAdminAuth(req: Request, res: Response, next: NextFu
       id: adminRecord.id,
       email: adminRecord.email,
       full_name: adminRecord.full_name,
-      role: adminRecord.role as AdminRole,
+      role: effectiveRole,
       sessionId: sessionCheck.sessionId,
-      deviceId: sessionCheck.device.deviceId
+      deviceId: sessionCheck.device.deviceId,
+      signatureVerified: sessionCheck.signatureVerified
     };
-    apiCache.set(authCacheKey, req.admin, 20);
+    apiCache.set(authCacheKey, req.admin, 60);
 
     next();
   } catch (err) {
     next(err);
   }
+}
+
+export function requireWriteAccess(req: Request, res: Response, next: NextFunction): void {
+  if (!req.admin) {
+    res.status(401).json({ error: 'Authentication required.' });
+    return;
+  }
+  if (req.admin.role === 'visitor') {
+    res.status(403).json({ error: 'Visitor accounts have read-only access and cannot modify data.' });
+    return;
+  }
+  next();
 }
 
 export function requireRole(allowedRoles: AdminRole[]) {

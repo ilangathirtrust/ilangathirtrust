@@ -197,7 +197,11 @@ export function GalleryManagerPage({ onNotify }: { onNotify: (msg: string, isErr
             <textarea placeholder="Description (EN)" rows={2} value={newFolder.description_en} onChange={(e) => setNewFolder({ ...newFolder, description_en: e.target.value })} className="admin-input" />
           </label>
           <div className="flex items-end">
-            <button type="submit" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-800">
+            <button
+              type="submit"
+              disabled={!newFolder.title_en.trim() || !newFolder.title_ta.trim()}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-45"
+            >
               <Plus className="h-4 w-4" />
               <span>Create Folder</span>
             </button>

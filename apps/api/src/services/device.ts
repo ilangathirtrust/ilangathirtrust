@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import type { Request } from 'express';
+import { env } from '../config/env.js';
 import { getSupabaseAdmin } from '../config/supabase.js';
 
 export interface DeviceMetadata {
@@ -101,6 +102,36 @@ export function extractJwtSessionHash(token: string, deviceId: string): string {
   return crypto.createHash('sha256').update(`${token}:${deviceId}`).digest('hex');
 }
 
+function getSessionSigningKey(): Buffer {
+  return crypto
+    .createHmac('sha256', env.SUPABASE_SERVICE_ROLE_KEY || 'ilangathir-local-session-secret')
+    .update('ilangathir-admin-session-signature-v1')
+    .digest();
+}
+
+export function signSessionPayload(params: {
+  userId: string;
+  deviceId: string;
+  tokenHash: string;
+}): string {
+  const canonical = `${params.userId}|${params.deviceId}|${params.tokenHash}`;
+  return crypto.createHmac('sha256', getSessionSigningKey()).update(canonical).digest('hex');
+}
+
+export function verifySessionSignature(params: {
+  userId: string;
+  deviceId: string;
+  tokenHash: string;
+  signature?: string | null;
+}): boolean {
+  if (!params.signature) return false;
+  const expected = signSessionPayload(params);
+  const a = Buffer.from(params.signature, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 export async function recordSecurityEvent(params: {
   userId?: string | null;
   email?: string;
@@ -132,9 +163,10 @@ export async function verifyAndSyncAdminSession(params: {
   userId: string;
   email: string;
   token: string;
-}): Promise<{ allowed: boolean; sessionId?: string; device: DeviceMetadata; reason?: string }> {
+}): Promise<{ allowed: boolean; sessionId?: string; device: DeviceMetadata; signatureVerified: boolean; reason?: string }> {
   const device = parseDeviceMetadata(params.req);
   const tokenHash = extractJwtSessionHash(params.token, device.deviceId);
+  const expectedSig = signSessionPayload({ userId: params.userId, deviceId: device.deviceId, tokenHash });
 
   try {
     const supabase = getSupabaseAdmin();
@@ -146,11 +178,7 @@ export async function verifyAndSyncAdminSession(params: {
       .maybeSingle();
 
     if (error) {
-      // Gracefully pass if v011 migration has not been applied yet
-      if (error.code === '42P01' || error.code === 'PGRST205') {
-        return { allowed: true, device };
-      }
-      return { allowed: true, device };
+      return { allowed: true, device, signatureVerified: false };
     }
 
     if (existing) {
@@ -162,47 +190,61 @@ export async function verifyAndSyncAdminSession(params: {
           allowed: false,
           sessionId: existing.id,
           device,
+          signatureVerified: false,
           reason: existing.revoked_reason || 'This device session was signed out remotely.'
         };
       }
 
-      // If this is a brand new login on the same browser (different JWT session_id) or stale > 60s heartbeat
+      // Refresh every 5 min (instead of every 60s) to keep request path fast
       const isNewLoginOnDevice = existing.session_token_hash !== tokenHash;
       const lastActiveMs = existing.last_active_at ? new Date(existing.last_active_at).getTime() : 0;
-      const shouldUpdate = isNewLoginOnDevice || Date.now() - lastActiveMs > 60_000;
+      const shouldUpdate = isNewLoginOnDevice || Date.now() - lastActiveMs > 300_000;
 
       if (shouldUpdate) {
-        await supabase
-          .from('admin_sessions')
-          .update({
-            session_token_hash: tokenHash,
-            device_name: device.deviceName,
-            device_type: device.deviceType,
-            browser: device.browser,
-            os: device.os,
-            ip_address: device.ipAddress,
-            geo_label: device.geoLabel,
-            user_agent: device.userAgent,
-            is_revoked: false,
-            revoked_at: null,
-            revoked_reason: '',
-            last_active_at: new Date().toISOString(),
-            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-          })
-          .eq('id', existing.id);
+        const updatePayload: Record<string, unknown> = {
+          session_token_hash: tokenHash,
+          device_name: device.deviceName,
+          device_type: device.deviceType,
+          browser: device.browser,
+          os: device.os,
+          ip_address: device.ipAddress,
+          geo_label: device.geoLabel,
+          user_agent: device.userAgent,
+          is_revoked: false,
+          revoked_at: null,
+          revoked_reason: '',
+          last_active_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        };
 
-        if (isNewLoginOnDevice) {
-          await recordSecurityEvent({
-            userId: params.userId,
-            email: params.email,
-            eventType: 'login_success',
-            severity: 'info',
-            device
+        void supabase
+          .from('admin_sessions')
+          .update(updatePayload)
+          .eq('id', existing.id)
+          .then(() => {
+            if (isNewLoginOnDevice) {
+              void recordSecurityEvent({
+                userId: params.userId,
+                email: params.email,
+                eventType: 'login_success',
+                severity: 'info',
+                device
+              });
+            }
           });
-        }
       }
 
-      return { allowed: true, sessionId: existing.id, device };
+      return {
+        allowed: true,
+        sessionId: existing.id,
+        device,
+        signatureVerified: verifySessionSignature({
+          userId: params.userId,
+          deviceId: device.deviceId,
+          tokenHash,
+          signature: expectedSig
+        })
+      };
     }
 
     // First time seeing this device for this admin account
@@ -223,7 +265,7 @@ export async function verifyAndSyncAdminSession(params: {
       .select('id')
       .maybeSingle();
 
-    await recordSecurityEvent({
+    void recordSecurityEvent({
       userId: params.userId,
       email: params.email,
       eventType: 'new_device_detected',
@@ -231,8 +273,8 @@ export async function verifyAndSyncAdminSession(params: {
       device
     });
 
-    return { allowed: true, sessionId: inserted?.id, device };
+    return { allowed: true, sessionId: inserted?.id, device, signatureVerified: true };
   } catch {
-    return { allowed: true, device };
+    return { allowed: true, device, signatureVerified: false };
   }
 }
