@@ -54,7 +54,6 @@ interface BeforeInstallPromptEvent extends Event {
 
 const ALL_ROLES: AdminRole[] = ['super_admin', 'admin', 'editor', 'visitor'];
 const OPS_ROLES: AdminRole[] = ['super_admin', 'admin'];
-const OWNER_ROLES: AdminRole[] = ['super_admin'];
 
 const ROLE_LABELS_TA: Record<AdminRole, string> = {
   super_admin: 'சூப்பர் அட்மின்',
@@ -78,7 +77,7 @@ const NAV_ITEMS = [
   { id: 'volunteers', label: 'Volunteers', labelTa: 'தன்னார்வலர்கள்', shortLabel: 'Volunteers', shortLabelTa: 'தன்னார்வலர்', icon: Heart, group: 'Operations', groupTa: 'அன்றாட நிர்வாகம்', roles: ALL_ROLES },
   { id: 'security', label: 'Security & Devices', labelTa: 'செக்யூரிட்டி & டிவைஸ்', shortLabel: 'Security', shortLabelTa: 'செக்யூரிட்டி', icon: ShieldCheck, group: 'Security', groupTa: 'பாதுகாப்பு', roles: ALL_ROLES },
   { id: 'audit', label: 'Audit Logs', labelTa: 'ஆடிட் லாக்', shortLabel: 'Audit', shortLabelTa: 'ஆடிட்', icon: Activity, group: 'Security', groupTa: 'பாதுகாப்பு', roles: OPS_ROLES },
-  { id: 'users', label: 'Admin Roles & Users', labelTa: 'யூசர்ஸ் & ரோல்கள்', shortLabel: 'Users', shortLabelTa: 'யூசர்ஸ்', icon: Shield, group: 'Security', groupTa: 'பாதுகாப்பு', roles: OWNER_ROLES }
+  { id: 'users', label: 'Admin Roles & Users', labelTa: 'யூசர்ஸ் & ரோல்கள்', shortLabel: 'Users', shortLabelTa: 'யூசர்ஸ்', icon: Shield, group: 'Security', groupTa: 'பாதுகாப்பு', roles: OPS_ROLES }
 ];
 
 const VALID_TAB_IDS = new Set(NAV_ITEMS.map((item) => item.id));

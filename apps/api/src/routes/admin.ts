@@ -1362,7 +1362,7 @@ adminRouter.get('/audit-logs', requireRole(['super_admin', 'admin']), async (_re
   }
 });
 
-adminRouter.get('/users', requireRole(['super_admin']), async (_req, res, next) => {
+adminRouter.get('/users', requireRole(['super_admin', 'admin']), async (_req, res, next) => {
   try {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase.from('admin_users').select('*').order('created_at', { ascending: true });
@@ -1373,12 +1373,13 @@ adminRouter.get('/users', requireRole(['super_admin']), async (_req, res, next) 
   }
 });
 
-adminRouter.post('/users', requireRole(['super_admin']), async (req, res, next) => {
+adminRouter.post('/users', requireRole(['super_admin', 'admin']), async (req, res, next) => {
   try {
     const email = String(req.body?.email || '').trim().toLowerCase();
     const fullName = String(req.body?.full_name || '').trim() || 'Trust Member';
     const password = String(req.body?.password || '');
     const role = String(req.body?.role || 'editor').trim();
+    const callerIsSuperAdmin = req.admin?.role === 'super_admin';
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       res.status(400).json({ error: 'Provide a valid email address.' });
@@ -1386,6 +1387,10 @@ adminRouter.post('/users', requireRole(['super_admin']), async (req, res, next) 
     }
     if (!VALID_ROLES.has(role)) {
       res.status(400).json({ error: 'Invalid role selected.' });
+      return;
+    }
+    if (!callerIsSuperAdmin && role === 'super_admin') {
+      res.status(403).json({ error: 'Only a Super Admin can create Super Admin accounts.' });
       return;
     }
     if (email === PROTECTED_OWNER_EMAIL && role !== 'super_admin') {
@@ -1421,13 +1426,18 @@ adminRouter.post('/users', requireRole(['super_admin']), async (req, res, next) 
     });
 
     if (createErr) {
-      // If user already exists in auth.users, link that user cleanly
+      // If user already exists in auth.users, link that user cleanly and apply the entered password
       const { data: listRes } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
       const matched = (listRes?.users || []).find((u) => (u.email || '').toLowerCase() === email);
       if (!matched) {
         res.status(400).json({ error: createErr.message || 'Could not create auth account.' });
         return;
       }
+      await supabase.auth.admin.updateUserById(matched.id, {
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: fullName }
+      });
       userId = matched.id;
     } else {
       userId = createdAuth.user?.id || null;
@@ -1472,7 +1482,7 @@ adminRouter.post('/users', requireRole(['super_admin']), async (req, res, next) 
   }
 });
 
-adminRouter.patch('/users/:id', requireRole(['super_admin']), async (req, res, next) => {
+adminRouter.patch('/users/:id', requireRole(['super_admin', 'admin']), async (req, res, next) => {
   try {
     const targetId = String(req.params.id);
     if (targetId === req.admin?.id) {
@@ -1482,8 +1492,14 @@ adminRouter.patch('/users/:id', requireRole(['super_admin']), async (req, res, n
 
     const nextRole = String(req.body?.role || '');
     const nextActive = Boolean(req.body?.is_active);
+    const callerIsSuperAdmin = req.admin?.role === 'super_admin';
+
     if (!VALID_ROLES.has(nextRole)) {
       res.status(400).json({ error: 'Invalid role selected.' });
+      return;
+    }
+    if (!callerIsSuperAdmin && nextRole === 'super_admin') {
+      res.status(403).json({ error: 'Only a Super Admin can assign the super_admin role.' });
       return;
     }
 
@@ -1502,6 +1518,10 @@ adminRouter.patch('/users/:id', requireRole(['super_admin']), async (req, res, n
 
     if (String(targetUser.email || '').toLowerCase() === PROTECTED_OWNER_EMAIL) {
       res.status(403).json({ error: 'Primary owner account (ilangathirtrust@gmail.com) cannot be modified or deactivated.' });
+      return;
+    }
+    if (!callerIsSuperAdmin && String(targetUser.role) === 'super_admin') {
+      res.status(403).json({ error: 'Only a Super Admin can modify another Super Admin account.' });
       return;
     }
 
@@ -1532,7 +1552,7 @@ adminRouter.patch('/users/:id', requireRole(['super_admin']), async (req, res, n
   }
 });
 
-adminRouter.delete('/users/:id', requireRole(['super_admin']), async (req, res, next) => {
+adminRouter.delete('/users/:id', requireRole(['super_admin', 'admin']), async (req, res, next) => {
   try {
     const targetId = String(req.params.id);
     if (targetId === req.admin?.id) {
@@ -1540,10 +1560,11 @@ adminRouter.delete('/users/:id', requireRole(['super_admin']), async (req, res, 
       return;
     }
 
+    const callerIsSuperAdmin = req.admin?.role === 'super_admin';
     const supabase = getSupabaseAdmin();
     const { data: targetUser, error: fetchErr } = await supabase
       .from('admin_users')
-      .select('id, email')
+      .select('id, email, role')
       .eq('id', targetId)
       .maybeSingle();
 
@@ -1555,6 +1576,10 @@ adminRouter.delete('/users/:id', requireRole(['super_admin']), async (req, res, 
 
     if (String(targetUser.email || '').toLowerCase() === PROTECTED_OWNER_EMAIL) {
       res.status(403).json({ error: 'Primary owner account (ilangathirtrust@gmail.com) is protected and cannot be deleted.' });
+      return;
+    }
+    if (!callerIsSuperAdmin && String(targetUser.role) === 'super_admin') {
+      res.status(403).json({ error: 'Only a Super Admin can remove another Super Admin account.' });
       return;
     }
 

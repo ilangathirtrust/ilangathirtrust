@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download, Loader2, Lock, Search, Shield, ShieldAlert, ShieldCheck, Trash2, UserPlus, X } from 'lucide-react';
+import { Download, Eye, EyeOff, Loader2, Lock, Search, Shield, ShieldAlert, ShieldCheck, Trash2, UserPlus, X } from 'lucide-react';
 import type { AdminRole } from '@ilangathir/shared';
 import { adminApi } from '../lib/api';
 import { useAdminUi } from '../lib/admin-ui';
@@ -364,6 +364,8 @@ export function InboxAndAuditPage({
   const [rows, setRows] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const callerIsSuperAdmin = currentUser?.role === 'super_admin';
   const [newUser, setNewUser] = useState({
     full_name: '',
     email: '',
@@ -488,15 +490,25 @@ export function InboxAndAuditPage({
             </label>
             <label className="admin-label">
               <span>{tr('Password (min 8 chars) *', 'பாஸ்வேர்டு (8+ எழுத்து) *')}</span>
-              <input
-                type="password"
-                required
-                minLength={8}
-                placeholder="••••••••"
-                value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                className="admin-input"
-              />
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  required
+                  minLength={8}
+                  placeholder="••••••••"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  className="admin-input pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword((v) => !v)}
+                  aria-label={tr('Toggle password visibility', 'பாஸ்வேர்டு காட்டு')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </label>
             <label className="admin-label">
               <span>{tr('Access Role *', 'ரோல் தேர்வு *')}</span>
@@ -505,8 +517,10 @@ export function InboxAndAuditPage({
                 onChange={(e) => setNewUser({ ...newUser, role: e.target.value as AdminRole })}
                 className="admin-input"
               >
-                <option value="super_admin">{tr('super_admin (Full RBAC Control)', 'சூப்பர் அட்மின் (முழு கண்ட்ரோல்)')}</option>
-                <option value="admin">{tr('admin (Operations + Donations)', 'அட்மின் (நிர்வாகம் + நன்கொடை)')}</option>
+                {callerIsSuperAdmin && (
+                  <option value="super_admin">{tr('super_admin (Full RBAC Control)', 'சூப்பர் அட்மின் (முழு கண்ட்ரோல்)')}</option>
+                )}
+                <option value="admin">{tr('admin (Operations + Users + Donations)', 'அட்மின் (நிர்வாகம் + யூசர் + நன்கொடை)')}</option>
                 <option value="editor">{tr('editor (Content CMS Only)', 'எடிட்டர் (கன்டென்ட் மட்டும்)')}</option>
                 <option value="visitor">{tr('visitor (Read-Only Viewer)', 'விசிட்டர் (பார்க்க மட்டும்)')}</option>
               </select>
@@ -554,9 +568,9 @@ export function InboxAndAuditPage({
                 const email = String(r.email || '').toLowerCase();
                 const isProtectedOwner = email === PROTECTED_OWNER_EMAIL;
                 const isSelf = currentUser?.id === String(r.id);
-                const roleLocked = isProtectedOwner || isSelf;
-                const isActive = Boolean(r.is_active);
                 const roleStr = String(r.role);
+                const roleLocked = isProtectedOwner || isSelf || (!callerIsSuperAdmin && roleStr === 'super_admin');
+                const isActive = Boolean(r.is_active);
                 const roleDisplay = lang === 'ta' ? (ROLE_LABELS_TA[roleStr] || roleStr) : roleStr;
 
                 return (
@@ -597,7 +611,9 @@ export function InboxAndAuditPage({
                             onChange={(e) => updateUserRole(String(r.id), e.target.value, isActive)}
                             className="admin-input w-36 py-1.5 text-xs font-bold"
                           >
-                            <option value="super_admin">{tr('super_admin', 'சூப்பர் அட்மின்')}</option>
+                            {callerIsSuperAdmin && (
+                              <option value="super_admin">{tr('super_admin', 'சூப்பர் அட்மின்')}</option>
+                            )}
                             <option value="admin">{tr('admin', 'அட்மின்')}</option>
                             <option value="editor">{tr('editor', 'எடிட்டர்')}</option>
                             <option value="visitor">{tr('visitor', 'விசிட்டர்')}</option>

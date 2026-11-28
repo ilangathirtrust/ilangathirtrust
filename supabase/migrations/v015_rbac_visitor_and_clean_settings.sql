@@ -52,6 +52,7 @@ ALTER TABLE public.admin_sessions
   ADD COLUMN IF NOT EXISTS session_signature TEXT NOT NULL DEFAULT '';
 
 -- 5. Helper excluding read-only 'visitor' accounts from write policies
+--    Cast role::TEXT so this entire migration runs safely in a single Supabase SQL Editor transaction
 CREATE OR REPLACE FUNCTION public.is_writable_admin()
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -64,7 +65,7 @@ AS $$
     FROM public.admin_users au
     WHERE au.id = auth.uid()
       AND au.is_active = TRUE
-      AND au.role <> 'visitor'
+      AND au.role::TEXT <> 'visitor'
   );
 $$;
 
